@@ -23,3 +23,7 @@ async def on_ready():
     print(f'Guild Members:\n - {members}')
 
 client.run(TOKEN)
+
+
+
+
