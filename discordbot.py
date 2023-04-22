@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from urlextract import URLExtract
 
 load_dotenv()
-TOKEN = os.getenv('TESTBOT_TOKEN')
+TOKEN = os.getenv('DISCORD_TOKEN')
 
 int = discord.Intents.default()
 int.message_content = True
