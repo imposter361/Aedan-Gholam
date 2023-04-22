@@ -34,7 +34,7 @@ async def on_message(message):
         try:
             await message.delete()
             await message.channel.send(f"{message.author.mention}sent a steam link and said: \
-                                       \n{user_message} \n\n<:steam:1099147813381746739> Open in Steam: \nsteam://openurl/{URL}")
+                                       \n{user_message} \n\n<:steam:1099147813381746739> Open in Steam directly: \nsteam://openurl/{URL}")
         except Exception as e:
             print(e)
   
