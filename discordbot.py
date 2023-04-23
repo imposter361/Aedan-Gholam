@@ -27,19 +27,27 @@ async def on_message(message):
 
     extractor = URLExtract()
     UM = extractor.find_urls(f"{user_message}")
-    URL = ''.join(UM)
-    URL = URL.replace("'", "")
+    
+    all_start_with_steam = all(item.startswith('steam://openurl/') for item in UM)
+
+    slink = []
+    if all_start_with_steam:
+        return
+    else:
+        for i in UM :
+            if i.startswith(steam_store):
+                slink.append(f"steam://openurl/{i}\n")
+            elif i.startswith(steam_community):
+                slink.append(f"steam://openurl/{i}\n")
+            else:
+                continue
 
     if steam_store in user_message or steam_community in user_message:
         try:
             await message.delete()
-            await message.channel.send(f"{message.author.mention}sent a steam link and said: \
-                                       \n{user_message} \n\n<:steam:1099147813381746739> Open in Steam directly: \nsteam://openurl/{URL}")
+            URL = ''.join(slink)
+            await message.channel.send(f"{message.author.mention} sent a steam link.\
+                                   \n<:chrome:1099349401501188128> {user_message} \n\n<:steam:1099147813381746739> Open in Steam directly:\n{URL}")
         except Exception as e:
             print(e)
-  
 client.run(TOKEN)
-
-
-
-
