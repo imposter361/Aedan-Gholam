@@ -55,7 +55,7 @@ async def on_message(message):
                 await message.delete()
                 URL = ''.join(slink)
                 await message.channel.send(f"{message.author.mention} sent a steam link.\
-                                       \n<:chrome:1099349401501188128> {user_message} \n\n<:steam:1099147813381746739> Open in Steam directly:\n{URL}")
+                                       \n<:chrome:1099349401501188128> {user_message} \n\n<:steamlogo:1099351469674729553> Open in Steam directly:\n{URL}")
             else:
                 await message.channel.send(f"{message.author.mention}, you must have an active subscription to use this bot. Please purchase a subscription to gain access.")
         except Exception as e:
