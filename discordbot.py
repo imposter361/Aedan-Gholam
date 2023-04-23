@@ -13,7 +13,7 @@ int.message_content = True
 client = discord.Client(intents = int)
 
 # Servers allowed or disallowed
-subscriptions = ast.literal_eval(os.getenv('TESTBOT_GUILD'))
+subscriptions = ast.literal_eval(os.getenv('SERVER_ID'))
 
 @client.event
 async def on_message(message):
