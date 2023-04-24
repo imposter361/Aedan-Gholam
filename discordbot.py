@@ -44,14 +44,15 @@ async def on_message(message):
     else:
         for i in message_urls:
             if i.startswith(steam_store) or i.startswith(steam_community):
-                steam_links.append(f"steam://openurl/<{i}>\n")
+                steam_links.append(f"steam://openurl/{i}\n")
 
     if steam_store in user_message or steam_community in user_message:
         try:
             # Check if the server has an active subscription or not
             if str(message.guild.id) in subscriptions and subscriptions[str(message.guild.id)]:
                 URL = ''.join(steam_links)
-                await message.reply(f"<:steam_icon:1099351469674729553> Open directly in steam: \n{URL}")
+                embed = discord.Embed(description= URL)
+                await message.reply(f" Open directly in  <:steam_icon:1099351469674729553> " , embed = embed)
 
         except Exception as e:
             print(e)
