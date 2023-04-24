@@ -16,6 +16,7 @@ client = discord.Client(intents = intents)
 # Servers allowed or disallowed
 subscriptions = ast.literal_eval(os.getenv('SERVER_ID'))
 
+# add "steam://openurl/" at the beginning of steam links.
 @client.event
 async def on_message(message):
     if message.author == client.user:
@@ -55,13 +56,14 @@ async def on_message(message):
                 await message.delete()
                 URL = ''.join(slink)
                 await message.channel.send(f"{message.author.mention} sent a steam link.\
-                                       \n<:chrome:1099349401501188128> {user_message} \n\n<:steam:1099147813381746739> Open in Steam directly:\n{URL}")
+                                       \n<:chrome_icon:1099536614738378772> {user_message} \n\n<:steam_icon:1099351469674729553> Open in Steam directly:\n{URL}")
             else:
                 return
         
         except Exception as e:
             print(e)
 
+# send welcome message for new members:
 @client.event 
 async def on_member_join(member):
     
