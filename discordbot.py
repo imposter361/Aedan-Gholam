@@ -7,40 +7,44 @@ import ast
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 WELCOME_CH = os.getenv('WELCOME_CH')
+MEMBER_COUNT_CH = os.getenv('MEMBER_COUNT_CH')
 
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
-client = discord.Client(intents = intents)
+client = discord.Client(intents=intents)
 
 # Servers allowed or disallowed
 subscriptions = ast.literal_eval(os.getenv('SERVER_ID'))
 
 # add "steam://openurl/" at the beginning of steam links.
+
+
 @client.event
 async def on_message(message):
     if message.author == client.user:
         return
-    
+
     username = str(message.author)
     user_message = str(message.content)
     channel = str(message.channel)
 
     print(f"{username} said: '{user_message}' in channel: ({channel})")
-    
+
     steam_store = "https://store.steampowered.com"
     steam_community = "https://steamcommunity.com"
 
     extractor = URLExtract()
     UM = extractor.find_urls(f"{user_message}")
 
-    all_start_with_steam = all(item.startswith('steam://openurl/') for item in UM)
+    all_start_with_steam = all(item.startswith(
+        'steam://openurl/') for item in UM)
 
     slink = []
     if all_start_with_steam:
         return
     else:
-        for i in UM :
+        for i in UM:
             if i.startswith(steam_store):
                 slink.append(f"steam://openurl/{i}\n")
             elif i.startswith(steam_community):
@@ -59,19 +63,34 @@ async def on_message(message):
                                        \n<:chrome_icon:1099536614738378772> {user_message} \n\n<:steam_icon:1099351469674729553> Open in Steam directly:\n{URL}")
             else:
                 return
-        
+
         except Exception as e:
             print(e)
 
 # send welcome message for new members:
-@client.event 
+
+@client.event
 async def on_member_join(member):
-    
-    guild = member.guild
-    channel = client.get_channel(int(WELCOME_CH))
-    author_profile_pic = member.avatar
-    embed = discord.Embed() 
-    embed.set_image(url=author_profile_pic)
-    await channel.send(f"Salam {member.mention} be **{guild}** khosh oomadi!\n", embed=embed)
-  
+    if str(member.guild.id) in subscriptions and subscriptions[str(member.guild.id)]:
+        guild = member.guild
+        channel = client.get_channel(int(WELCOME_CH))
+        author_profile_pic = member.avatar
+        embed = discord.Embed()
+        embed.set_image(url=author_profile_pic)
+        await channel.send(f"Salam {member.mention} be **{guild}** khosh oomadi!\n", embed=embed)
+        # Update member count on join
+        members_count_channel = client.get_channel(int(MEMBER_COUNT_CH))
+        name = str(guild.member_count)
+        await members_count_channel.edit(name=name)
+
+# Update member count on leave
+@client.event
+async def on_member_remove(member):
+    if str(member.guild.id) in subscriptions and subscriptions[str(member.guild.id)]:
+        members_count_channel = client.get_channel(int(MEMBER_COUNT_CH))
+        guild = member.guild
+        name = "Total members: " + str(guild.member_count)
+        await members_count_channel.edit(name=name)
+
+
 client.run(TOKEN)
