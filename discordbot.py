@@ -5,13 +5,12 @@ from urlextract import URLExtract
 import ast
 
 load_dotenv()
-TOKEN = os.getenv('TESTBOT_TOKEN')
-WELCOME_CH = os.getenv('WELCOME_CH')
+TOKEN = os.getenv('DISCORD_TOKEN')
 
-intents = discord.Intents.default()
-intents.message_content = True
-intents.members = True
-client = discord.Client(intents = intents)
+int = discord.Intents.default()
+int.message_content = True
+
+client = discord.Client(intents = int)
 
 # Servers allowed or disallowed
 subscriptions = ast.literal_eval(os.getenv('SERVER_ID'))
@@ -32,6 +31,7 @@ async def on_message(message):
 
     extractor = URLExtract()
     UM = extractor.find_urls(f"{user_message}")
+    
 
     all_start_with_steam = all(item.startswith('steam://openurl/') for item in UM)
 
@@ -55,21 +55,10 @@ async def on_message(message):
                 await message.delete()
                 URL = ''.join(slink)
                 await message.channel.send(f"{message.author.mention} sent a steam link.\
-                                       \n<:chrome:1099349401501188128> {user_message} \n\n<:steam:1099147813381746739> Open in Steam directly:\n{URL}")
+                                       \n<:chrome:1099349401501188128> {user_message} \n\n<:steamlogo:1099351469674729553> Open in Steam directly:\n{URL}")
             else:
-                return
-        
+                await message.channel.send(f"{message.author.mention}, you must have an active subscription to use this bot. Please purchase a subscription to gain access.")
         except Exception as e:
             print(e)
-
-@client.event 
-async def on_member_join(member):
-    
-    guild = member.guild
-    channel = client.get_channel(int(WELCOME_CH))
-    author_profile_pic = member.avatar
-    embed = discord.Embed() 
-    embed.set_image(url=author_profile_pic)
-    await channel.send(f"Salam {member.mention} be **{guild}** khosh oomadi!\n", embed=embed)
-    
+  
 client.run(TOKEN)
