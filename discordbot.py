@@ -1,21 +1,31 @@
 import os
 import discord
+import ast
+import requests
 from dotenv import load_dotenv
 from urlextract import URLExtract
-import ast
+from discord.ext import commands, tasks
+from datetime import datetime
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 WELCOME_CH = os.getenv('WELCOME_CH')
 MEMBER_COUNT_CH = os.getenv('MEMBER_COUNT_CH')
+EPIC_CHANNEL = os.getenv('EPIC_CHANNEL')
+GAMES_FILE = os.getenv('GAMES_FILE') #games.txt
 
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 client = discord.Client(intents=intents)
+client = commands.Bot(intents=intents)
 
 # Servers allowed or disallowed
 subscriptions = ast.literal_eval(os.getenv('SERVER_ID'))
+
+@client.event
+async def on_ready():
+    check_discounts.start()
 
 # add "steam://openurl/" at the beginning of steam links.
 @client.event
@@ -81,5 +91,34 @@ async def on_member_remove(member):
         name = "Total members: " + str(guild.member_count)
         await members_count_channel.edit(name=name)
 
+# Run the task every 12 hours
+@tasks.loop(hours=12)  
+async def check_discounts():
+    await client.wait_until_ready()
+    channel = client.get_channel(EPIC_CHANNEL)
+    # Make a request to the Epic Games
+    response = requests.get(f'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=US&allowCountries=US&' \
+                            f'spaceId=1af6c7f8a3624b1788eaf23175fdd16f&' \
+                            f'redirectUrl=https%3A%2F%2Fwww.epicgames.com%2Fstore%2Fen-US%2F&' \
+                            f'key=da1563f4abe7480fb43364b7d30d9a7b&' \
+                            f'promoId=freegames')
+    response_json = response.json()
+
+    # Find all the games that are currently free
+    for game in response_json['data']['Catalog']['searchStore']['elements']:
+        if game['price']['totalPrice']['discountPrice'] == 0:
+            end_date = datetime.strptime(game['promotions']['promotionalOffers'][0]['promotionalOffers'][0]['endDate'], '%Y-%m-%dT%H:%M:%S.%fZ')
+            end_date_str = end_date.strftime('%b %d, %Y')
+            game_name = game['title']
+            game_link = f"https://launcher.store.epicgames.com/en-US/p/{game['productSlug']}"
+            with open(GAMES_FILE, "a+") as file:
+                file.seek(0)
+                sent_games = [line.strip() for line in file.readlines()]
+                file.close()
+            if game_name not in sent_games:
+                message = "The following games are currently available for free on the Epic Games Store:\n"
+                await channel.send(f"<@&1101090907752771595>\n {message}\n* **{game_name}** - (ends {end_date_str})\n{game_link}\n")
+                with open(GAMES_FILE, "a") as file:
+                    file.write(game_name + "\n")
 
 client.run(TOKEN)
