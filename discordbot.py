@@ -25,6 +25,7 @@ subscriptions = ast.literal_eval(os.getenv('SERVER_ID'))
 @client.event
 async def on_ready():
     check_discounts.start()
+    print(f"Logged in as {client.user}")
 
 # add "steam://openurl/" at the beginning of steam links.
 @client.event
