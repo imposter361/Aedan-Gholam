@@ -18,7 +18,6 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 client = discord.Client(intents=intents)
-client = commands.Bot(intents=intents)
 
 # Servers allowed or disallowed
 subscriptions = ast.literal_eval(os.getenv('SERVER_ID'))
