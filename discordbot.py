@@ -13,7 +13,7 @@ WELCOME_CH = os.getenv('WELCOME_CH')
 MEMBER_COUNT_CH = os.getenv('MEMBER_COUNT_CH')
 EPIC_CHANNEL = os.getenv('EPIC_CHANNEL')
 GAMES_FILE = os.getenv('GAMES_FILE') #games.txt
-SET_ROLE_MESSAGE = os.getenv('ROLE_MESSAGE')
+SET_ROLE_MESSAGE = os.getenv('SET_ROLE_MESSAGE')
 
 intents = discord.Intents.all()
 intents.message_content = True
@@ -127,6 +127,7 @@ async def check_discounts():
                 print(e)
 
 #add or remove roles by reactions
+#sample: 'emoji_name': 'role_name',
 global reactions
 reactions = {'csgo_icon':'CSGO',
             'minecraft_icon':'Minecraft',
@@ -148,7 +149,7 @@ async def on_raw_reaction_add(role_set):
     guild = discord.utils.find(lambda g: g.id == role_set.guild_id, client.guilds)
     reaction = role_set.emoji.name
 
-    if reaction in reactions.keys() and role_set.message_id == int(ROLE_MESSAGE):
+    if reaction in reactions.keys() and role_set.message_id == int(SET_ROLE_MESSAGE):
         role = discord.utils.get(guild.roles, name= reactions.get(reaction))
         if role is not None:
             member = discord.utils.find(lambda m: m.id == role_set.user_id, guild.members)
@@ -162,7 +163,7 @@ async def on_raw_reaction_remove(role_unset):
     guild = discord.utils.find(lambda g: g.id == role_unset.guild_id, client.guilds)
     reaction = role_unset.emoji.name
     
-    if reaction in reactions.keys() and role_unset.message_id == int(ROLE_MESSAGE):
+    if reaction in reactions.keys() and role_unset.message_id == int(SET_ROLE_MESSAGE):
         role = discord.utils.get(guild.roles, name = reactions.get(reaction))
         if role is not None:
             member = discord.utils.find(lambda m: m.id == role_unset.user_id, guild.members)
