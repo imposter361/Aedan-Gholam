@@ -26,6 +26,7 @@ subscriptions = ast.literal_eval(os.getenv('SERVER_ID'))
 @client.event
 async def on_ready():
     check_discounts.start()
+    member_count.start()
     print(f"Logged in as {client.user}")
 
 # add "steam://openurl/" at the beginning of steam links.
@@ -78,19 +79,14 @@ async def on_member_join(member):
         embed = discord.Embed()
         embed.set_image(url=author_profile_pic)
         await channel.send(f"Salam {member.mention} be **{guild}** khosh oomadi!\n", embed=embed)
-        # Update member count on join
-        members_count_channel = client.get_channel(int(MEMBER_COUNT_CH))
-        name = "Total members: " + str(guild.member_count)
-        await members_count_channel.edit(name=name)
-
-# Update member count on leave
-@client.event
-async def on_member_remove(member):
-    if str(member.guild.id) in subscriptions and subscriptions[str(member.guild.id)]:
-        members_count_channel = client.get_channel(int(MEMBER_COUNT_CH))
-        guild = member.guild
-        name = "Total members: " + str(guild.member_count)
-        await members_count_channel.edit(name=name)
+        
+# Update member count every 11 minutes
+@tasks.loop(minutes=11)
+async def member_count():
+    members_count_channel = client.get_channel(int(MEMBER_COUNT_CH))
+    name = "Total members: " + str(members_count_channel.guild.member_count)
+    await members_count_channel.edit(name=name)
+    print(f'Total members is now {name}')
 
 # Run the task every 12 hours
 @tasks.loop(hours=12)  
