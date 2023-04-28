@@ -27,7 +27,7 @@ subscriptions = ast.literal_eval(os.getenv('SERVER_ID'))
 async def on_ready():
     check_discounts.start()
     member_count.start()
-    print(f"Logged in as {client.user}")
+    print(f"Logged in as {client.user}") # log
 
 # add "steam://openurl/" at the beginning of steam links.
 @client.event
@@ -39,7 +39,7 @@ async def on_message(message):
     user_message = str(message.content)
     channel = str(message.channel)
 
-    print(f"{username} said: '{user_message}' in channel: ({channel})")
+    print(f"{username} said: '{user_message}' in channel: ({channel})") # log
 
     steam_store = "https://store.steampowered.com"
     steam_community = "https://steamcommunity.com"
@@ -67,7 +67,7 @@ async def on_message(message):
                 await message.reply(f" Open directly in  <:steam_icon:1099351469674729553> " , embed = embed)
 
         except Exception as e:
-            print(e)
+            print(e) # log
 
 # send welcome message for new members:
 @client.event
@@ -86,7 +86,7 @@ async def member_count():
     members_count_channel = client.get_channel(int(MEMBER_COUNT_CH))
     name = "Total members: " + str(members_count_channel.guild.member_count)
     await members_count_channel.edit(name=name)
-    print(f'Total members is now {name}')
+    print(f'Total members is now {name}') # log
 
 # Run the task every 12 hours
 @tasks.loop(hours=12)  
@@ -120,7 +120,7 @@ async def check_discounts():
                         with open(GAMES_FILE, "a") as file:
                             file.write(game_name + "\n")
             except Exception as e:
-                print(e)
+                print(e) # log
 
 #add or remove roles by reactions
 #sample: 'emoji_name': 'role_name',
@@ -151,7 +151,7 @@ async def on_raw_reaction_add(role_set):
             member = discord.utils.find(lambda m: m.id == role_set.user_id, guild.members)
             if member is not None:
                 await member.add_roles(role)
-                print(f"Role {role} added to {member}")
+                print(f"Role {role} added to {member}") # log
   
 # Remove roles
 @client.event
@@ -165,6 +165,6 @@ async def on_raw_reaction_remove(role_unset):
             member = discord.utils.find(lambda m: m.id == role_unset.user_id, guild.members)
             if member is not None:
                 await member.remove_roles(role)
-                print(f"Role {role} removed from {member}")
+                print(f"Role {role} removed from {member}") # log
                 
 client.run(TOKEN)
