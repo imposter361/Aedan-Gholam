@@ -13,7 +13,7 @@ WELCOME_CH = os.getenv('WELCOME_CH')
 MEMBER_COUNT_CH = os.getenv('MEMBER_COUNT_CH')
 EPIC_CHANNEL = os.getenv('EPIC_CHANNEL')
 GAMES_FILE = os.getenv('GAMES_FILE') #games.txt
-ROLE_MESSAGE = os.getenv('ROLE_MESSAGE')
+SET_ROLE_MESSAGE = os.getenv('ROLE_MESSAGE')
 
 intents = discord.Intents.all()
 intents.message_content = True
