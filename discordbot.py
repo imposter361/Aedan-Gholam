@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from urlextract import URLExtract
 from discord.ext import commands, tasks
 from datetime import datetime
+from bs4 import BeautifulSoup
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -13,6 +14,7 @@ WELCOME_CH = os.getenv('WELCOME_CH')
 MEMBER_COUNT_CH = os.getenv('MEMBER_COUNT_CH')
 EPIC_CHANNEL = os.getenv('EPIC_CHANNEL')
 GAMES_FILE = os.getenv('GAMES_FILE') #games.txt
+KLEI_LINKS = os.getenv('KLEI_LINKS') #KleiLinks.txt
 SET_ROLE_MESSAGE = os.getenv('SET_ROLE_MESSAGE')
 
 intents = discord.Intents.all()
@@ -26,6 +28,7 @@ subscriptions = ast.literal_eval(os.getenv('SERVER_ID'))
 @client.event
 async def on_ready():
     check_discounts.start()
+    dst.start()
     member_count.start()
     print(f"Logged in as {client.user}") # log
 
@@ -79,7 +82,7 @@ async def on_member_join(member):
         embed = discord.Embed()
         embed.set_image(url=author_profile_pic)
         await channel.send(f"Salam {member.mention} be **{guild}** khosh oomadi!\n", embed=embed)
-        
+
 # Update member count every 11 minutes
 @tasks.loop(minutes=11)
 async def member_count():
@@ -122,6 +125,35 @@ async def check_discounts():
             except Exception as e:
                 print(e) # log
 
+# send Klei point links in a channel.
+@tasks.loop(hours=12)
+async def dst():
+    # specify the URL of the web page
+    url = 'https://steamcommunity.com/sharedfiles/filedetails/?id=2308653652&tscn=1639750749'
+    channel = client.get_channel(int(EPIC_CHANNEL))
+    # send a GET request to the URL
+    response = requests.get(url)
+    # parse the HTML content using BeautifulSoup
+    soup = BeautifulSoup(response.content, 'html.parser')
+    link_selector = 'a.bb_link[href*="https://accounts.klei.com/link/"]'
+    link_elements = soup.select(link_selector)
+    
+    if link_elements:
+        try:
+            for link_element in link_elements:
+                link = link_element['href'].split("=")
+                link = link.pop(1)
+                with open(KLEI_LINKS, "a+") as file:
+                    file.seek(0)
+                    sent_link = [line.strip() for line in file.readlines()]
+                    file.close()
+                if link not in sent_link:
+                    await channel.send(f"<@&1101266966771155015>\nopen this <{link}>")
+                    with open(KLEI_LINKS, "a") as file:
+                        file.write(link + "\n")
+        except Exception as e:
+            print(e) # log
+
 #add or remove roles by reactions
 #sample: 'emoji_name': 'role_name',
 global reactions
@@ -158,7 +190,6 @@ async def on_raw_reaction_add(role_set):
 async def on_raw_reaction_remove(role_unset):
     guild = discord.utils.find(lambda g: g.id == role_unset.guild_id, client.guilds)
     reaction = role_unset.emoji.name
-    
     if reaction in reactions.keys() and role_unset.message_id == int(SET_ROLE_MESSAGE):
         role = discord.utils.get(guild.roles, name = reactions.get(reaction))
         if role is not None:
