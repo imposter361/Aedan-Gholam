@@ -116,7 +116,7 @@ async def check_discounts():
                         file.close()
                     if game_name not in sent_games:
                         message = "The following game is currently available for free on the Epic Games Store:\n"
-                        await channel.send(f"\n {message}\n* **{game_name}** - (ends {end_date_str})\n{game_link}\n")
+                        await channel.send(f"<@&1101090907752771595>\n {message}\n* **{game_name}** - (ends {end_date_str})\n{game_link}\n")
                         with open(GAMES_FILE, "a") as file:
                             file.write(game_name + "\n")
             except Exception as e:
