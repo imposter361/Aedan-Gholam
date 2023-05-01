@@ -2,10 +2,17 @@ import os
 import discord
 import ast
 import requests
+import logging
 from dotenv import load_dotenv
 from urlextract import URLExtract
 from discord.ext import commands, tasks
 from datetime import datetime
+from bs4 import BeautifulSoup
+
+#does logging in debug level up to critical
+logging.basicConfig(filename='DiscordBot.log', filemode='w',format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.DEBUG)
+logging.debug('Admin logged out')
+
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -13,8 +20,10 @@ WELCOME_CH = os.getenv('WELCOME_CH')
 MEMBER_COUNT_CH = os.getenv('MEMBER_COUNT_CH')
 EPIC_CHANNEL = os.getenv('EPIC_CHANNEL')
 GAMES_FILE = os.getenv('GAMES_FILE') #games.txt
+KLEI_LINKS = os.getenv('KLEI_LINKS') #KleiLinks.txt
+SET_ROLE_MESSAGE = os.getenv('SET_ROLE_MESSAGE')
 
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.message_content = True
 intents.members = True
 client = discord.Client(intents=intents)
@@ -25,6 +34,9 @@ subscriptions = ast.literal_eval(os.getenv('SERVER_ID'))
 @client.event
 async def on_ready():
     check_discounts.start()
+    dst.start()
+    member_count.start()
+    print(f"Logged in as {client.user}") # log
 
 # add "steam://openurl/" at the beginning of steam links.
 @client.event
@@ -36,7 +48,7 @@ async def on_message(message):
     user_message = str(message.content)
     channel = str(message.channel)
 
-    print(f"{username} said: '{user_message}' in channel: ({channel})")
+    print(f"{username} said: '{user_message}' in channel: ({channel})") # log
 
     steam_store = "https://store.steampowered.com"
     steam_community = "https://steamcommunity.com"
@@ -64,7 +76,7 @@ async def on_message(message):
                 await message.reply(f" Open directly in  <:steam_icon:1099351469674729553> " , embed = embed)
 
         except Exception as e:
-            print(e)
+            print(e) # log
 
 # send welcome message for new members:
 @client.event
@@ -76,22 +88,17 @@ async def on_member_join(member):
         embed = discord.Embed()
         embed.set_image(url=author_profile_pic)
         await channel.send(f"Salam {member.mention} be **{guild}** khosh oomadi!\n", embed=embed)
-        # Update member count on join
-        members_count_channel = client.get_channel(int(MEMBER_COUNT_CH))
-        name = "Total members: " + str(guild.member_count)
-        await members_count_channel.edit(name=name)
 
-# Update member count on leave
-@client.event
-async def on_member_remove(member):
-    if str(member.guild.id) in subscriptions and subscriptions[str(member.guild.id)]:
-        members_count_channel = client.get_channel(int(MEMBER_COUNT_CH))
-        guild = member.guild
-        name = "Total members: " + str(guild.member_count)
-        await members_count_channel.edit(name=name)
+# Update member count every 11 minutes
+@tasks.loop(minutes=11)
+async def member_count():
+    members_count_channel = client.get_channel(int(MEMBER_COUNT_CH))
+    name = "Total members: " + str(members_count_channel.guild.member_count)
+    await members_count_channel.edit(name=name)
+    print(f'Total members is now {name}') # log
 
 # Run the task every 12 hours
-@tasks.loop(hours=12)  
+@tasks.loop(seconds=12)  
 async def check_discounts():
     await client.wait_until_ready()
     channel = client.get_channel(int(EPIC_CHANNEL))
@@ -118,10 +125,84 @@ async def check_discounts():
                         file.close()
                     if game_name not in sent_games:
                         message = "The following game is currently available for free on the Epic Games Store:\n"
-                        await channel.send(f"\n {message}\n* **{game_name}** - (ends {end_date_str})\n{game_link}\n")
+                        await channel.send(f"<@&1101090907752771595>\n {message}\n<:epic_icon:1101097658153713774> **{game_name}** - (ends {end_date_str})\n{game_link}\n")
                         with open(GAMES_FILE, "a") as file:
                             file.write(game_name + "\n")
             except Exception as e:
-                print(e)
+                print(e) # log
 
+# send Klei point links in a channel.
+@tasks.loop(hours=12)
+async def dst():
+    # specify the URL of the web page
+    url = 'https://steamcommunity.com/sharedfiles/filedetails/?id=2308653652&tscn=1639750749'
+    channel = client.get_channel(int(EPIC_CHANNEL))
+    # send a GET request to the URL
+    response = requests.get(url)
+
+    # parse the HTML content using BeautifulSoup
+    soup = BeautifulSoup(response.content, 'html.parser')
+    link_selector = 'a.bb_link[href*="https://accounts.klei.com/link/"]'
+    link_elements = soup.select(link_selector)
+    
+    if link_elements:
+        try:
+            for link_element in link_elements:
+                link = link_element['href'].split("=")
+                link = link.pop(1)
+                with open(KLEI_LINKS, "a+") as file:
+                    file.seek(0)
+                    sent_link = [line.strip() for line in file.readlines()]
+                    file.close()
+                if link not in sent_link:
+                    await channel.send(f"<@&1101266966771155015>\n<:dst_icon:1101262983788769351> open this link to claim **klei point** for **Don't starve together**:\n<{link}>")
+                    with open(KLEI_LINKS, "a") as file:
+                        file.write(link + "\n")
+        except Exception as e:
+            print(e) # log
+
+#add or remove roles by reactions
+#sample: 'emoji_name': 'role_name',
+global reactions
+reactions = {'csgo_icon':'CSGO',
+            'minecraft_icon':'Minecraft',
+            'valorant_icon':'Valorant',
+            'r6_icon':'R6',
+            'warzon_icon':'Warzone',
+            'dst_icon':'Don\'t starve together' ,
+            'dota2_icon':'Dota 2',
+            'pubg_icon':'Pubg',
+            'epic_icon':'Bounty Hunter',
+            'amongus_icon':'Amongus',
+            'fortnite_icon':'Fortnite',
+            
+            }
+
+# Add roles
+@client.event
+async def on_raw_reaction_add(role_set):
+    guild = discord.utils.find(lambda g: g.id == role_set.guild_id, client.guilds)
+    reaction = role_set.emoji.name
+
+    if reaction in reactions.keys() and role_set.message_id == int(SET_ROLE_MESSAGE):
+        role = discord.utils.get(guild.roles, name= reactions.get(reaction))
+        if role is not None:
+            member = discord.utils.find(lambda m: m.id == role_set.user_id, guild.members)
+            if member is not None:
+                await member.add_roles(role)
+                print(f"Role {role} added to {member}") # log
+  
+# Remove roles
+@client.event
+async def on_raw_reaction_remove(role_unset):
+    guild = discord.utils.find(lambda g: g.id == role_unset.guild_id, client.guilds)
+    reaction = role_unset.emoji.name
+    if reaction in reactions.keys() and role_unset.message_id == int(SET_ROLE_MESSAGE):
+        role = discord.utils.get(guild.roles, name = reactions.get(reaction))
+        if role is not None:
+            member = discord.utils.find(lambda m: m.id == role_unset.user_id, guild.members)
+            if member is not None:
+                await member.remove_roles(role)
+                print(f"Role {role} removed from {member}") # log
+                
 client.run(TOKEN)
