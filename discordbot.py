@@ -126,7 +126,7 @@ async def check_discounts():
                 print(e) # log
 
 # send Klei point links in a channel.
-@tasks.loop(seconds=20)
+@tasks.loop(hours=12)
 async def dst():
     # specify the URL of the web page
     url = 'https://steamcommunity.com/sharedfiles/filedetails/?id=2308653652&tscn=1639750749'
