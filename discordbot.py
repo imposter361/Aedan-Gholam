@@ -97,7 +97,7 @@ async def member_count():
     print(f'Total members is now {name}') # log
 
 # Run the task every 12 hours
-@tasks.loop(seconds=12)  
+@tasks.loop(hours=12)  
 async def check_discounts():
     await client.wait_until_ready()
     channel = client.get_channel(int(EPIC_CHANNEL))
@@ -204,5 +204,4 @@ async def on_raw_reaction_remove(role_unset):
                 await member.remove_roles(role)
                 print(f"Role {role} removed from {member}") # log
                 
-
 client.run(TOKEN)
