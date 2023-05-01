@@ -11,8 +11,7 @@ from bs4 import BeautifulSoup
 
 #does logging in debug level up to critical
 logging.basicConfig(filename='DiscordBot.log', filemode='w',format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.DEBUG)
-logging.debug('Admin logged out')
-
+logging.debug('Logging started ... (Here is after importing all libraries)')
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -205,4 +204,5 @@ async def on_raw_reaction_remove(role_unset):
                 await member.remove_roles(role)
                 print(f"Role {role} removed from {member}") # log
                 
+
 client.run(TOKEN)
