@@ -2,11 +2,16 @@ import os
 import discord
 import ast
 import requests
+import logging
 from dotenv import load_dotenv
 from urlextract import URLExtract
 from discord.ext import commands, tasks
 from datetime import datetime
 from bs4 import BeautifulSoup
+
+#does logging in debug level up to critical
+logging.basicConfig(filename='DiscordBot.log', filemode='w',format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.DEBUG)
+logging.debug('Logging started ... (Here is after importing all libraries)')
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
