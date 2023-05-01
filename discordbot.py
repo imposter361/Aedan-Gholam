@@ -3,6 +3,7 @@ import discord
 import ast
 import requests
 import logging
+import time
 from dotenv import load_dotenv
 from urlextract import URLExtract
 from discord.ext import commands, tasks
@@ -40,6 +41,17 @@ async def on_ready():
 # add "steam://openurl/" at the beginning of steam links.
 @client.event
 async def on_message(message):
+    #!m.message [number] deletes messages in channel
+    if message.content.startswith('!m.delete'):
+        try:
+            num_messages = int(message.content.split(' ')[1])
+            await message.channel.purge(limit=num_messages + 1)
+            await message.channel.send(f'{num_messages} messages have been deleted.')
+            time.sleep(5)
+            await message.channel.purge(limit= 1)
+        except Exception as e:
+            print(e)
+            
     if message.author == client.user:
         return
 
