@@ -3,6 +3,7 @@ import discord
 import ast
 import requests
 import logging
+import asyncio
 from dotenv import load_dotenv
 from urlextract import URLExtract
 from discord.ext import commands, tasks
@@ -24,3 +25,5 @@ EPIC_CHANNEL = os.getenv('EPIC_CHANNEL')
 GAMES_FILE = os.getenv('GAMES_FILE') #games.txt
 KLEI_LINKS = os.getenv('KLEI_LINKS') #KleiLinks.txt
 SET_ROLE_MESSAGE = os.getenv('SET_ROLE_MESSAGE')
+
+Bot_version = "0.2.1"

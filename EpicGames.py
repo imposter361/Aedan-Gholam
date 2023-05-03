@@ -32,7 +32,7 @@ async def check_discounts():
                         with open(GAMES_FILE, "a") as file:
                             file.write(game_name + "\n")
             except Exception as e:
-                print(e) # log
+                print(str(e) + " - There is a broken Epic game link") # log
 
 def setup_check_discounts(bot):
     bot.event(check_discounts)
