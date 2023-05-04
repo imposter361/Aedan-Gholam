@@ -4,10 +4,12 @@ import ast
 import requests
 import logging
 import asyncio
+import random
+import subprocess
 from typing import Optional
 from dotenv import load_dotenv
 from urlextract import URLExtract
-from nextcord import Interaction, SlashOption
+from nextcord import Interaction, SlashOption, FFmpegPCMAudio
 from nextcord.ext import commands, tasks
 from datetime import datetime
 from bs4 import BeautifulSoup
@@ -28,4 +30,4 @@ GAMES_FILE = os.getenv('GAMES_FILE') #games.txt
 KLEI_LINKS = os.getenv('KLEI_LINKS') #KleiLinks.txt
 SET_ROLE_MESSAGE = os.getenv('SET_ROLE_MESSAGE')
 
-Bot_version = "0.3"
+Bot_version = "0.4"
