@@ -1,36 +1,15 @@
 from urlextract import URLExtract
-import discord
+import nextcord
 from bot import *
-
-
-lock = asyncio.Lock()
 
 #on_message
 @client.event
 async def on_message(message):
-    ## !m.delete message added
-    lower_message = str(message.content).lower()
-    if lower_message.startswith('!m.delete'):
-        roles_to_check = ["dev-team"]
-        if any(role.name in roles_to_check for role in message.author.roles):
-            try:
-                num_messages = int(message.content.split(' ')[1])
-                await message.channel.purge(limit=num_messages + 1)
-                if num_messages == 1:
-                    sent_message = await message.channel.send(f'{num_messages} message deleted.')
-                else:
-                    sent_message = await message.channel.send(f'{num_messages} messages have been deleted.')
-                await asyncio.sleep(4)
-                await sent_message.delete()
-                #await message.channel.delete(limit= 1)
-            except Exception as e:
-                print(str(e) + "Exception happend in message delete.")
-
     #gholam command added (auto reply)
+    lower_message = str(message.content).lower()
     if ("gholam") in lower_message:
         if message.author != client.user:
             await message.reply(f"Gholametam v{Bot_version}")
-
 
 #add "steam://openurl/" at the beginning of steam links.
     if message.author == client.user:
@@ -64,11 +43,12 @@ async def on_message(message):
             # Check if the server has an active subscription or not
             if str(message.guild.id) in SUBSCRIPTIONS and SUBSCRIPTIONS[str(message.guild.id)]:
                 URL = ''.join(steam_links)
-                embed = discord.Embed(description= URL)
+                embed = nextcord.Embed(description= URL)
                 await message.reply(f" Open directly in  <:steam_icon:1099351469674729553> " , embed = embed)
 
         except Exception as e:
-            print(str(e) + "Exception happened in Stemlink edition") # log
+            print(str(e) + "Exception happened in Stemlink edition")
+            logging.error(str(e) + "Exception happened in Stemlink edition")
 
 def setup_on_message(bot):
     bot.event(on_message)           

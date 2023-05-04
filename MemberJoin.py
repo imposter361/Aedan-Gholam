@@ -1,4 +1,4 @@
-import discord
+import nextcord
 from bot import *
 
 
@@ -9,10 +9,10 @@ async def on_member_join(member):
         guild = member.guild
         channel = client.get_channel(int(WELCOME_CH))
         author_profile_pic = member.avatar
-        embed = discord.Embed()
+        embed = nextcord.Embed()
         embed.set_image(url=author_profile_pic)
         await channel.send(f"Salam {member.mention} be **{guild}** khosh oomadi!\n", embed=embed)
-
+        logging.info(f"{member.mention} joined {guild}.")
 
 def setup_on_member_join(bot):
     bot.event(on_member_join)

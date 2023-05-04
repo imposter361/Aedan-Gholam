@@ -1,4 +1,4 @@
-import discord
+import nextcord
 from bot import *
 
 
@@ -22,29 +22,31 @@ reactions = {'csgo_icon':'CSGO',
 # Add roles
 @client.event
 async def on_raw_reaction_add(role_set):
-    guild = discord.utils.find(lambda g: g.id == role_set.guild_id, client.guilds)
+    guild = nextcord.utils.find(lambda g: g.id == role_set.guild_id, client.guilds)
     reaction = role_set.emoji.name
 
     if reaction in reactions.keys() and role_set.message_id == int(SET_ROLE_MESSAGE):
-        role = discord.utils.get(guild.roles, name= reactions.get(reaction))
+        role = nextcord.utils.get(guild.roles, name= reactions.get(reaction))
         if role is not None:
-            member = discord.utils.find(lambda m: m.id == role_set.user_id, guild.members)
+            member = nextcord.utils.find(lambda m: m.id == role_set.user_id, guild.members)
             if member is not None:
                 await member.add_roles(role)
-                print(f"Role {role} added to {member}") # log
+                print(f"Role {role} added to {member}")
+                logging.info(f"Role {role} added to {member}")
   
 # Remove roles
 @client.event
 async def on_raw_reaction_remove(role_unset):
-    guild = discord.utils.find(lambda g: g.id == role_unset.guild_id, client.guilds)
+    guild = nextcord.utils.find(lambda g: g.id == role_unset.guild_id, client.guilds)
     reaction = role_unset.emoji.name
     if reaction in reactions.keys() and role_unset.message_id == int(SET_ROLE_MESSAGE):
-        role = discord.utils.get(guild.roles, name = reactions.get(reaction))
+        role = nextcord.utils.get(guild.roles, name = reactions.get(reaction))
         if role is not None:
-            member = discord.utils.find(lambda m: m.id == role_unset.user_id, guild.members)
+            member = nextcord.utils.find(lambda m: m.id == role_unset.user_id, guild.members)
             if member is not None:
                 await member.remove_roles(role)
-                print(f"Role {role} removed from {member}") # log
+                print(f"Role {role} removed from {member}")
+                logging.info(f"Role {role} removed from {member}")
 
 
 def setup_set_role(bot):

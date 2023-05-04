@@ -26,7 +26,8 @@ async def dst():
                     with open(KLEI_LINKS, "a") as file:
                         file.write(link + "\n")
         except Exception as e:
-            print(str(e) + "Exception happened in Keli") # log
+            print(str(e) + "Exception happened in Keli")
+            logging.error(str(e) + "Exception happened in Keli")
 
 def setup_dst(bot):
     bot.event(dst)

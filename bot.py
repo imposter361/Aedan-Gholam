@@ -1,20 +1,22 @@
 import os
-import discord
+import nextcord
 import ast
 import requests
 import logging
 import asyncio
+from typing import Optional
 from dotenv import load_dotenv
 from urlextract import URLExtract
-from discord.ext import commands, tasks
+from nextcord import Interaction, SlashOption
+from nextcord.ext import commands, tasks
 from datetime import datetime
 from bs4 import BeautifulSoup
 
 
-intents = discord.Intents.all()
+intents = nextcord.Intents.all()
 intents.message_content = True
 intents.members = True
-client = discord.Client(intents=intents)
+client = commands.Bot(command_prefix= '!', intents=intents)
 
 load_dotenv()
 SUBSCRIPTIONS = ast.literal_eval(os.getenv('SERVER_ID'))
@@ -26,4 +28,4 @@ GAMES_FILE = os.getenv('GAMES_FILE') #games.txt
 KLEI_LINKS = os.getenv('KLEI_LINKS') #KleiLinks.txt
 SET_ROLE_MESSAGE = os.getenv('SET_ROLE_MESSAGE')
 
-Bot_version = "0.2.1"
+Bot_version = "0.3"

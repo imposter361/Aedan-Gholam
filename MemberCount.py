@@ -1,4 +1,4 @@
-import discord
+import nextcord
 from bot import *
 
 
@@ -9,6 +9,7 @@ async def member_count():
     name = "Total members: " + str(members_count_channel.guild.member_count)
     await members_count_channel.edit(name=name)
     print(f'Total members is now {name}')
+    logging.info(f'Total members is now {name}')
 
 
 def setup_MemberCount(bot):

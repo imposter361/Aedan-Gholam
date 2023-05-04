@@ -8,8 +8,9 @@ async def on_ready():
     check_discounts.start()
     dst.start()
     member_count.start()
-    print(f"Logged in as {client.user}") # log
-
+    username = str(client.user).split('#')[0]
+    print(f"Logged in as {username} v{Bot_version}")
+    logging.info(f"Logged in as {username} v{Bot_version}")
 
 
 def setup_Ready(bot):
