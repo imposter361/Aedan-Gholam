@@ -25,7 +25,7 @@ async def on_raw_reaction_add(role_set):
     guild = nextcord.utils.find(lambda g: g.id == role_set.guild_id, client.guilds)
     reaction = role_set.emoji.name
 
-    if reaction in reactions.keys() and role_set.message_id == int(SET_ROLE_MESSAGE):
+    if reaction in reactions.keys() and role_set.message_id == int(SET_ROLE_MESSAGE_ID):
         role = nextcord.utils.get(guild.roles, name= reactions.get(reaction))
         if role is not None:
             member = nextcord.utils.find(lambda m: m.id == role_set.user_id, guild.members)
@@ -39,7 +39,7 @@ async def on_raw_reaction_add(role_set):
 async def on_raw_reaction_remove(role_unset):
     guild = nextcord.utils.find(lambda g: g.id == role_unset.guild_id, client.guilds)
     reaction = role_unset.emoji.name
-    if reaction in reactions.keys() and role_unset.message_id == int(SET_ROLE_MESSAGE):
+    if reaction in reactions.keys() and role_unset.message_id == int(SET_ROLE_MESSAGE_ID):
         role = nextcord.utils.get(guild.roles, name = reactions.get(reaction))
         if role is not None:
             member = nextcord.utils.find(lambda m: m.id == role_unset.user_id, guild.members)

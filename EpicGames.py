@@ -4,7 +4,7 @@ from bot import *
 @tasks.loop(hours=12)  
 async def check_discounts():
     await client.wait_until_ready()
-    channel = client.get_channel(int(EPIC_CHANNEL))
+    channel = client.get_channel(int(EPIC_CHANNEL_ID))
     # Make a request to the Epic Games
     response = requests.get(f'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=US&allowCountries=US&' \
                             f'spaceId=1af6c7f8a3624b1788eaf23175fdd16f&' \
@@ -29,7 +29,7 @@ async def check_discounts():
                         file.close()
                     if game_name not in sent_games:
                         message = "The following game is currently available for free on the Epic Games Store:\n"
-                        await channel.send(f"<@&1101090907752771595>\n {message}\n<:epic_icon:1101097658153713774> **{game_name}** - (ends {end_date_str})\n{game_link}\n")
+                        await channel.send(f"<@&1101090907752771595>\n{message}\n<:epic_icon:1101097658153713774> **{game_name}** - (ends {end_date_str})\n{game_link}\n")
                         with open(GAMES_FILE, "a") as file:
                             file.write(game_name + "\n")                       
             except Exception as e:

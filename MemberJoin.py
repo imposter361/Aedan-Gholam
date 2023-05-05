@@ -7,7 +7,7 @@ from bot import *
 async def on_member_join(member):
     if str(member.guild.id) in SUBSCRIPTIONS and SUBSCRIPTIONS[str(member.guild.id)]:
         guild = member.guild
-        channel = client.get_channel(int(WELCOME_CH))
+        channel = client.get_channel(int(WELCOME_CH_ID))
         author_profile_pic = member.avatar
         embed = nextcord.Embed()
         embed.set_image(url=author_profile_pic)
