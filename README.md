@@ -1,5 +1,5 @@
-#Aedan Discord-Bot
-##Discord assistant with the following features:
+# Aedan Discord-Bot  
+## Discord assistant with the following features:  
 
 * Welcome to new members
 * Display the number of server members
@@ -10,17 +10,17 @@
 * Send notifications for free Don't starve together points
 * A line of poetry by Hafez
 
-#Get Started
-
+## Get Started
+...
 
 
 ## Requirements:
 
 ```bash
-# Install Dependencies:
+#Install Dependencies:
 pip install -r requirements.txt
 ```
 
-#To-Do
+# To-Do
 * Add music bot
 * Hekmat from Nahj Al-balagha (working on it ...)
