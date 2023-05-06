@@ -51,7 +51,7 @@ async def team(interaction: Interaction):
         print(str(e) + "Exception happend in team.")
         logging.error(str(e) + "Exception happend in team.")
 
-
+#about Adean Gholam
 @client.slash_command(name= "about", description = "About Gholam")
 async def about(interaction: Interaction):
     try:
@@ -63,18 +63,33 @@ async def about(interaction: Interaction):
         print(str(e) + "Exception happend in about.")
         logging.error(str(e) + "Exception happend in about.")
 
-#nahj al-balaghe command
-#@client.slash_command(name= "hekmat", description = "Yek Hekmat az Nahj al-balagha")
-#async def hekmat(interaction: Interaction):
-#    number = random.randrange(1, 381)
-#    try:
-#        headers = {"Key":"40f441ae-f6aa-4c43-8a79-761f33f8c930"}
-#        data = {"ParentID":100170,
-#                   "TitleID":number}
-#        response = requests.post("https://api.belquran.com/fa-ir/api/v1/NahjolBalaghe/Content", headers= headers,data= data)
-#    except Exception as e:
-#        print(str(e) + "Exception happend in hekmat.")
-#        logging.error(str(e) + "Exception happend in hekmat.")
+
+#Hekmat
+@client.slash_command(name= "hekmat", description = "Yek Hekmat az Nahj al-balagha")
+async def hekmat(interaction: Interaction):
+    number = random.randrange(1,481)
+    try:
+        url = f"https://alimaktab.ir/json/wisdom/?n={number}"
+        response = requests.get(url)
+        response_json = response.json()
+
+        arabic =response_json['main']
+        farsi = response_json['shahidi']
+        hekmat = "حکمت " + str(number) + ": " + arabic + "\n\n" + farsi
+        new_string = hekmat.replace("[", "").replace("]", "")
+
+        def remove_html(text):
+            clean = re.compile('<.*?>')
+            return re.sub(clean, '', text)
+
+        clean_text = remove_html(new_string)
+
+        await interaction.response.send_message(clean_text)
+
+    except Exception as e:
+        print(str(e) + "Exception happend in hekmat.")
+        logging.error(str(e) + "Exception happend in hekmat.")
+
 
 #play command
 voice_clients=[]

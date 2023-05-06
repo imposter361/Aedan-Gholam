@@ -9,6 +9,7 @@
 * Sending notifications for every game that becomes free on Epic
 * Send notifications for free Don't starve together points
 * A line of poetry by Hafez
+* Hekmat from Nahj Al-balagha
 
 ## Get Started
 ...
@@ -23,4 +24,3 @@ pip install -r requirements.txt
 
 # To-Do
 * Add music bot
-* Hekmat from Nahj Al-balagha (working on it ...)
