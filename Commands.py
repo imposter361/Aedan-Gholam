@@ -74,7 +74,7 @@ async def hekmat(interaction: Interaction):
         response_json = response.json()
 
         arabic =response_json['main']
-        farsi = response_json['shahidi']
+        farsi = response_json['ansarian']
         hekmat = "حکمت " + str(number) + ": " + arabic + "\n\n" + farsi
         new_string = hekmat.replace("[", "").replace("]", "")
 
