@@ -15,26 +15,30 @@ async def check_discounts():
 
     # Find all the games that are currently free
     for game in response_json['data']['Catalog']['searchStore']['elements']:
-        if game['price']['totalPrice']['discountPrice'] == 0:
-            try:
-                slug = game['catalogNs']['mappings'][0]['pageSlug']
-                end_date = datetime.strptime(game['promotions']['promotionalOffers'][0]['promotionalOffers'][0]['endDate'], '%Y-%m-%dT%H:%M:%S.%fZ')
-                if slug and game['title']:
-                    end_date_str = end_date.strftime('%b %d, %Y')
-                    game_name = game['title']
-                    game_link = f"https://launcher.store.epicgames.com/en-US/p/{slug}"
-                    with open(GAMES_FILE, "a+") as file:
-                        file.seek(0)
-                        sent_games = [line.strip() for line in file.readlines()]
-                        file.close()
-                    if game_name not in sent_games:
-                        message = "The following game is currently available for free on the Epic Games Store:\n"
-                        await channel.send(f"<@&1101090907752771595>\n{message}\n<:epic_icon:1101097658153713774> **{game_name}** - (ends {end_date_str})\n{game_link}\n")
-                        with open(GAMES_FILE, "a") as file:
-                            file.write(game_name + "\n")                       
-            except Exception as e:
-                print(str(e) + " - There is a broken Epic game link")
-                logging.error(str(e) + " - There is a broken Epic game link")
+        if game['price']['totalPrice']['discountPrice'] != 0:
+            continue
+        try:
+            slug = game['catalogNs']['mappings'][0]['pageSlug']
+            if not game['promotions']['promotionalOffers']:
+                continue
+            end_date = datetime.strptime(game['promotions']['promotionalOffers'][0]['promotionalOffers'][0]['endDate'], '%Y-%m-%dT%H:%M:%S.%fZ')
+            if not (slug and game['title']):
+                continue
+            end_date_str = end_date.strftime('%b %d, %Y')
+            game_name = game['title']
+            game_link = f"https://launcher.store.epicgames.com/en-US/p/{slug}"
+            with open(GAMES_FILE, "a+") as file:
+                file.seek(0)
+                sent_games = [line.strip() for line in file.readlines()]
+                file.close()
+            if game_name not in sent_games:
+                message = "The following game is currently available for free on the Epic Games Store:\n"
+                await channel.send(f"<@&1101090907752771595>\n{message}\n<:epic_icon:1101097658153713774> **{game_name}** - (ends {end_date_str})\n{game_link}\n")
+                with open(GAMES_FILE, "a") as file:
+                    file.write(game_name + "\n")                       
+        except Exception as e:
+            print(str(e) + " - There is a broken Epic game link")
+            logging.error(str(e) + " - There is a broken Epic game link")
 
 def setup_check_discounts(bot):
     bot.event(check_discounts)
