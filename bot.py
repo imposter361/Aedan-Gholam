@@ -31,4 +31,4 @@ GAMES_FILE = os.getenv('GAMES_FILE') #games.txt
 KLEI_LINKS_FILE = os.getenv('KLEI_LINKS_FILE') #KleiLinks.txt
 SET_ROLE_MESSAGE_ID = os.getenv('SET_ROLE_MESSAGE_ID')
 
-Bot_version = "0.4.1"
+Bot_version = "0.5"
