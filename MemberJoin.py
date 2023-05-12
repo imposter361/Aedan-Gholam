@@ -10,18 +10,16 @@ async def on_member_join(member):
         guild = member.guild
         channel = client.get_channel(int(WELCOME_CH_ID))
         author_profile_pic = member.avatar
-        response= requests.get(author_profile_pic)
-
-
-
+        response = requests.get(author_profile_pic)
 
         with open("p.png", "wb") as file:
             file.write(response.content)
 
-
+        # get username and guild member count
         member_name = str(member)
         member_number = f"Now there are ({guild.member_count}) of us"
-        
+
+        # set font
         font = ImageFont.truetype("Bungee-Regular.ttf", 30) # for member name
         font1 = ImageFont.truetype("Bungee-Regular.ttf", 20) # for member counter
         
@@ -71,20 +69,9 @@ async def on_member_join(member):
         x = (709 - text_width) / 2
         draw1.text((x,285), member_name, fill=(250, 208, 92, 255) , font=font)
 
-
-        
-        
-        
         # Save the final image
-        background.save("final_image.png")
-    
-    
-    
-        file = nextcord.File("final_image.png", filename="welcome.png")
-    
-        # embed = nextcord.Embed()
-        # embed.set_image(url=background)
-    
+        background.save("final_image.png")    
+        file = nextcord.File("final_image.png", filename="welcome.png")   
     
         await channel.send(f"Salam {member.mention} be **{guild}** khosh oomadi!\n", file=file)
         logging.info(f"{member_name} joined {guild}.")
