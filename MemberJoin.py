@@ -16,7 +16,7 @@ async def on_member_join(member):
             file.write(response.content)
 
         # get username and guild member count
-        member_name = str(member)
+        member_name = unidecode.unidecode(str(member))
         member_number = f"Now there are ({guild.member_count}) of us"
 
         # set font
