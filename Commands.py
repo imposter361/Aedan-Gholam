@@ -1,4 +1,14 @@
-from bot import *
+import logging
+import requests
+import nextcord
+import asyncio
+import random
+import subprocess
+import re
+from bot import client
+from version import VERSION
+from nextcord import Interaction, SlashOption, FFmpegPCMAudio
+from typing import Optional
 
 
 # Hafez
@@ -68,13 +78,14 @@ async def team(interaction: Interaction):
         logging.error(str(e) + " Exception happend in Team.")
 
 
+
 # About Adean Gholam
 @client.slash_command(name="about", description="About Gholam")
 async def about(interaction: Interaction):
     try:
         Ali = client.get_user(620593942559326265)
         guild_name = client.get_guild(899023632204980324)
-        about = f"Gholamam v{Bot_version} az **{guild_name}**\nSaakhte daste aghamoon {Ali.mention} kheyli chakerim."
+        about = f"Gholamam v{VERSION} az **{guild_name}**\nSaakhte daste aghamoon {Ali.mention} kheyli chakerim."
         await interaction.response.send_message(about)
     except Exception as e:
         print(str(e) + " Exception happend in About.")
@@ -110,6 +121,7 @@ async def hekmat(interaction: Interaction):
         await interaction_response.edit(
             f"Bebakhshid moshkeli pish oomade, dobare test kon!"
         )
+
 
 
 # Play command
@@ -258,12 +270,3 @@ async def stop(interaction: Interaction):
         if voice_client.guild.id == interaction.guild_id:
             await voice_client.disconnect()
             await interaction.send("Stopped")
-
-
-def setup_Commands(bot):
-    bot.event(hafez)
-    bot.event(delete)
-    bot.event(team)
-    bot.event(about)
-    bot.event(play)
-    bot.event(stop)
