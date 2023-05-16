@@ -14,6 +14,7 @@ from typing import Optional
 # Hafez
 @client.slash_command(name="hafez", description="Fall Migholi ?!")
 async def hafez(interaction: Interaction):
+    interaction_response = await interaction.send(f"Please wait ...")
     try:
         url = "https://c.ganjoor.net/beyt-xml.php?n=1&a=1&p=2"
         response = requests.get(url)
@@ -23,13 +24,13 @@ async def hafez(interaction: Interaction):
         poet = xml.split(b"<poet>")[1].split(b"</poet>")[0].decode("utf-8")
         up = "🖊️"
         poem = f"{m1}\n{m2}\n\n{up} {poet}"
-        await interaction.response.send_message(poem)
+        await interaction_response.edit(poem)
 
     except Exception as e:
-        print(str(e) + "Exception happend in Fall giri.")
-        logging.error(str(e) + "Exception happend in Fall giri.")
-        await interaction.response.send_message(
-            f"Bebakhshid saremoon sholooghe dobare test kon!", ephemeral=True
+        print(str(e) + " Exception happend in Hafez.")
+        logging.error(str(e) + " Exception happend in Hafez.")
+        await interaction_response.edit(
+            f"Bebakhshid moshkeli pish oomade, dobare test kon!"
         )
 
 
@@ -62,22 +63,23 @@ async def delete(
             logging.warning(f"{number} messages have been deleted.")
 
     except Exception as e:
-        print(str(e) + "Exception happend in message delete.")
-        logging.error(str(e) + "Exception happend in message delete.")
+        print(str(e) + " Exception happend in Message delete.")
+        logging.error(str(e) + " Exception happend in Message delete.")
 
 
-# about Aedan Team
+# About Aedan Team
 @client.slash_command(name="team", description="About Aedan Team")
 async def team(interaction: Interaction):
     try:
         team = "<:Aedan_logo:1103676392606007356> Bunch of friends gathered together as a team:\n\nEhsan 👨‍💻\nHossein(Moz) 💃\nBagher 🫰\nHossein(Defalcator) 🪡\nAli 🪃\nSina 🧻\n"
         await interaction.response.send_message(team)
     except Exception as e:
-        print(str(e) + "Exception happend in team.")
-        logging.error(str(e) + "Exception happend in team.")
+        print(str(e) + " Exception happend in Team.")
+        logging.error(str(e) + " Exception happend in Team.")
 
 
-# about Adean Gholam
+
+# About Adean Gholam
 @client.slash_command(name="about", description="About Gholam")
 async def about(interaction: Interaction):
     try:
@@ -86,13 +88,14 @@ async def about(interaction: Interaction):
         about = f"Gholamam v{VERSION} az **{guild_name}**\nSaakhte daste aghamoon {Ali.mention} kheyli chakerim."
         await interaction.response.send_message(about)
     except Exception as e:
-        print(str(e) + "Exception happend in about.")
-        logging.error(str(e) + "Exception happend in about.")
+        print(str(e) + " Exception happend in About.")
+        logging.error(str(e) + " Exception happend in About.")
 
 
 # Hekmat
 @client.slash_command(name="hekmat", description="Yek Hekmat az Nahj al-balagha")
 async def hekmat(interaction: Interaction):
+    interaction_response = await interaction.send(f"Please wait ...")
     number = random.randrange(1, 481)
     try:
         url = f"https://alimaktab.ir/json/wisdom/?n={number}"
@@ -110,14 +113,18 @@ async def hekmat(interaction: Interaction):
 
         clean_text = remove_html(new_string)
 
-        await interaction.response.send_message(clean_text)
+        await interaction_response.edit(clean_text)
 
     except Exception as e:
-        print(str(e) + "Exception happend in hekmat.")
-        logging.error(str(e) + "Exception happend in hekmat.")
+        print(str(e) + " Exception happend in Hekmat.")
+        logging.error(str(e) + " Exception happend in Hekmat.")
+        await interaction_response.edit(
+            f"Bebakhshid moshkeli pish oomade, dobare test kon!"
+        )
 
 
-# play command
+
+# Play command
 voice_clients = []
 next_and_previous_requests = []
 
@@ -215,6 +222,7 @@ async def play(
         )
 
 
+# Next
 @client.slash_command()
 async def next(interaction: Interaction):
     if interaction.user.voice is None:
@@ -232,6 +240,7 @@ async def next(interaction: Interaction):
     await interaction.send("You can't skip nothing idiot", ephemeral=True)
 
 
+# Previous
 @client.slash_command()
 async def previous(interaction: Interaction):
     if interaction.user.voice is None:
