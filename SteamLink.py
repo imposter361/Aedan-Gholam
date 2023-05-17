@@ -46,8 +46,8 @@ async def on_message(message):
         try:
             # Check if the server has an active subscription or not
             if (
-                str(message.guild.id) in SUBSCRIPTIONS
-                and SUBSCRIPTIONS[str(message.guild.id)]
+                message.guild.id in SUBSCRIPTIONS
+                and SUBSCRIPTIONS[message.guild.id]
             ):
                 URL = "".join(steam_links)
                 embed = nextcord.Embed(description=URL)

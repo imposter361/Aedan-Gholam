@@ -1,8 +1,11 @@
 import os
 import ast
 import nextcord
+from data import get_subscriptions
 from dotenv import load_dotenv
 from nextcord.ext import commands
+
+
 
 
 intents = nextcord.Intents.all()
@@ -12,9 +15,13 @@ client = commands.Bot(command_prefix="!", intents=intents)
 
 
 load_dotenv()
-SUBSCRIPTIONS = ast.literal_eval(os.getenv("SERVER_ID"))
 TOKEN = os.getenv("DISCORD_TOKEN")
-WELCOME_CH_ID = os.getenv("WELCOME_CH_ID")
+
+# SUBSCRIPTIONS = ast.literal_eval(os.getenv("SERVER_ID"))
+SUBSCRIPTIONS = get_subscriptions()
+
+# WELCOME_CH_ID = os.getenv("WELCOME_CH_ID")
+
 MEMBER_COUNT_CH_ID = os.getenv("MEMBER_COUNT_CH_ID")
 EPIC_CHANNEL_ID = os.getenv("EPIC_CHANNEL_ID")
 GAMES_FILE = os.getenv("GAMES_FILE")  # games.txt

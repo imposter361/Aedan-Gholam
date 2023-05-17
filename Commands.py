@@ -6,9 +6,108 @@ import random
 import subprocess
 import re
 from bot import client
+import data
 from version import VERSION
-from nextcord import Interaction, SlashOption, FFmpegPCMAudio
+from nextcord import Interaction, Permissions, SlashOption, FFmpegPCMAudio
 from typing import Optional
+
+
+@client.slash_command(
+    name="add_server",
+    description="Grant permission to a new discord server.",
+    default_member_permissions=Permissions(administrator=True),
+    guild_ids=[899023632204980324],
+    dm_permission=False,
+)
+async def add_server(interaction: Interaction, id: str = SlashOption(required=True)):
+    if interaction.user.id != 620593942559326265:
+        await interaction.send(
+            "You don't have enough permissions to use this command.", ephemeral=True
+        )
+        return
+
+    interaction_response = await interaction.send("Please wait...", ephemeral=True)
+
+    server_id = int(id)
+    target_guild = client.get_guild(server_id)
+    if target_guild is None:
+        await interaction_response.edit("Server with this id does not exists.")
+        return
+
+    result = data.add_server(str(target_guild), server_id)
+    if result == server_id:
+        await interaction_response.edit(
+            f"Server **{target_guild}** has been registered and activated.",
+        )
+    else:
+        await interaction_response.edit(str(result))
+
+
+@client.slash_command(
+    name="edit_server",
+    description="Edit permissions of a discord server.",
+    default_member_permissions=Permissions(administrator=True),
+    guild_ids=[899023632204980324],
+    dm_permission=False,
+)
+async def edit_server(
+    interaction: Interaction,
+    id: str = SlashOption(required=True),
+    active: bool = SlashOption(required=True),
+):
+    if interaction.user.id != 620593942559326265:
+        await interaction.send(
+            "You don't have enough permissions to use this command.", ephemeral=True
+        )
+        return
+
+    interaction_response = await interaction.send("Please wait...", ephemeral=True)
+
+    server_id = int(id)
+    target_guild = client.get_guild(server_id)
+    if target_guild is None:
+        await interaction_response.edit("Server with this id does not exists.")
+        return
+
+    result = data.edit_server(server_id, active)
+    if result == server_id:
+        active_status = "activated" if active else "deactivated"
+        await interaction_response.edit(
+            f"Server **{target_guild}** has been **{active_status}**.",
+        )
+    else:
+        await interaction_response.edit(str(result))
+
+
+@client.slash_command(
+    name="remove_server",
+    description="Remove permission from a discord server.",
+    default_member_permissions=Permissions(administrator=True),
+    guild_ids=[899023632204980324],
+    dm_permission=False,
+)
+async def remove_server(interaction: Interaction, id: str = SlashOption(required=True)):
+    if interaction.user.id != 620593942559326265:
+        await interaction.send(
+            "You don't have enough permissions to use this command.", ephemeral=True
+        )
+        return
+
+    interaction_response = await interaction.send("Please wait...", ephemeral=True)
+
+    server_id = int(id)
+    target_guild = client.get_guild(server_id)
+    if target_guild is None:
+        await interaction_response.edit("Server with this id does not exists.")
+        return
+
+    result = data.remove_server(server_id)
+    if result == server_id:
+        await interaction_response.edit(
+            f"Server **{target_guild}** has been removed.",
+        )
+    else:
+        await interaction_response.edit(str(result))
 
 
 # Hafez
@@ -44,21 +143,22 @@ async def delete(
     interaction: Interaction, number: Optional[int] = SlashOption(required=True)
 ):
     try:
+        interaction_response = await interaction.send("Please wait...", ephemeral=True)
         if number <= 0:
-            await interaction.response.send_message(
-                f"{number} is not allowed", ephemeral=True
+            await interaction_response.edit(
+                f"{number} is not allowed"
             )
             return
 
         await interaction.channel.purge(limit=number)
         if number == 1:
-            await interaction.response.send_message(
-                f"{number} message deleted.", ephemeral=True
+            await interaction_response.edit(
+                f"{number} message deleted."
             )
             logging.warning(f"{number} message deleted.")
         else:
-            await interaction.response.send_message(
-                f"{number} messages have been deleted.", ephemeral=True
+            await interaction_response.edit(
+                f"{number} messages have been deleted."
             )
             logging.warning(f"{number} messages have been deleted.")
 
@@ -76,7 +176,6 @@ async def team(interaction: Interaction):
     except Exception as e:
         print(str(e) + " Exception happend in Team.")
         logging.error(str(e) + " Exception happend in Team.")
-
 
 
 # About Adean Gholam
@@ -121,7 +220,6 @@ async def hekmat(interaction: Interaction):
         await interaction_response.edit(
             f"Bebakhshid moshkeli pish oomade, dobare test kon!"
         )
-
 
 
 # Play command
