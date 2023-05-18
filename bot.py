@@ -19,6 +19,9 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 
 # SUBSCRIPTIONS = ast.literal_eval(os.getenv("SERVER_ID"))
 SUBSCRIPTIONS = get_subscriptions()
+ADMINS = os.getenv("ADMINS")
+HOME_GUILDS = os.getenv("HOME_GUILDS")
+
 
 # WELCOME_CH_ID = os.getenv("WELCOME_CH_ID")
 
