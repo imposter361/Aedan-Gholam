@@ -86,8 +86,95 @@ def get_welcome_channel_id(guild_id):
             if item["server_id"] == guild_id:
                 return item["welcome_channel_id"]
     except Exception as e:
+        return None
+
+
+def set_free_games_channel_id(guild_id, channel_id):
+    try:
+        index = get_server_index(guild_id)
+        if index == -1:
+            return "No server found with this id."
+        data[index]["free_games_channel_id"] = channel_id
+        save()
+        return channel_id
+    except Exception as e:
         print(e)
-    return None
+        return f"Error happened: {str(e)}"
+
+
+def get_free_games_channel_id(guild_id):
+    try:
+        for item in data:
+            if item["server_id"] == guild_id:
+                return item["free_games_channel_id"]
+    except Exception as e:
+        return None
+
+
+def set_epic_games_names(guild_id, games):
+    try:
+        index = get_server_index(guild_id)
+        if index == -1:
+            return "No server found with this id."
+        data[index]["epic_games"] = games
+        save()
+        return games
+    except Exception as e:
+        print(e)
+        return f"Error happened: {str(e)}"
+
+
+def get_epic_games_names(guild_id):
+    try:
+        for item in data:
+            if item["server_id"] == guild_id:
+                return item["epic_games"]
+    except Exception as e:
+        return []
+
+
+def set_klei_links(guild_id, links):
+    try:
+        index = get_server_index(guild_id)
+        if index == -1:
+            return "No server found with this id."
+        data[index]["klei_links"] = links
+        save()
+        return links
+    except Exception as e:
+        print(e)
+        return f"Error happened: {str(e)}"
+
+
+def get_klei_links(guild_id):
+    try:
+        for item in data:
+            if item["server_id"] == guild_id:
+                return item["klei_links"]
+    except Exception as e:
+        return []
+
+
+def set_member_count_channel_id(guild_id, channel_id):
+    try:
+        index = get_server_index(guild_id)
+        if index == -1:
+            return "No server found with this id."
+        data[index]["member_count_channel_id"] = channel_id
+        save()
+        return channel_id
+    except Exception as e:
+        print(e)
+        return f"Error happened: {str(e)}"
+
+
+def get_member_count_channel_id(guild_id):
+    try:
+        for item in data:
+            if item["server_id"] == guild_id:
+                return item["member_count_channel_id"]
+    except Exception as e:
+        return None
 
 
 def set_role_message_id(guild_id, message_id):

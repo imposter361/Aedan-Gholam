@@ -3,11 +3,11 @@ import nextcord
 import requests
 import unidecode
 from data import get_welcome_channel_id
-from bot import client, SUBSCRIPTIONS
+from bot import client, SUBSCRIPTIONS, HOME_GUILDS
 from PIL import Image, ImageDraw, ImageFont
 
 
-def create_welcome_banner(member, is_aedan):
+def create_welcome_banner(member, is_home):
     author_profile_pic = member.avatar
     response = requests.get(author_profile_pic)
 
@@ -23,7 +23,7 @@ def create_welcome_banner(member, is_aedan):
     name_font = None
     counter_font = None
 
-    if is_aedan:
+    if is_home:
         # for member name
         name_font = ImageFont.truetype(
             "BreeSerif-Regular.ttf", 30
@@ -34,10 +34,10 @@ def create_welcome_banner(member, is_aedan):
         )
     else:
         name_font = ImageFont.truetype(
-            "AkayaTelivigala-Regular.ttf", 35
+            "Righteous-Regular.ttf", 35
         )  # for member name
         counter_font = ImageFont.truetype(
-            "AkayaTelivigala-Regular.ttf", 25
+            "Righteous-Regular.ttf", 25
         )  # for member counter
 
     # Open the original image
@@ -67,7 +67,7 @@ def create_welcome_banner(member, is_aedan):
     # Define the position to paste the circular image onto the background image
     position = None
     position2 = None
-    if is_aedan:
+    if is_home:
         position = (280, 83)
         position2 = (276, 79)
     else:
@@ -78,7 +78,7 @@ def create_welcome_banner(member, is_aedan):
     background.paste(circle_img, position, circle_img)
 
     # paste booster image top of the profile pic (booster = aedan bird)
-    if is_aedan:
+    if is_home:
         booster = Image.open("s.png").resize((72, 51)).convert("RGBA")
         r, g, b, a = booster.split()
         new_image = Image.new("RGBA", background.size, (255, 255, 255, 0))
@@ -107,7 +107,6 @@ def create_welcome_banner(member, is_aedan):
 # send welcome message for new members:
 @client.event
 async def on_member_join(member):
-    member= member.author
     guild = member.guild
     if not (guild.id in SUBSCRIPTIONS and SUBSCRIPTIONS[guild.id]):
         return
@@ -118,11 +117,12 @@ async def on_member_join(member):
 
     channel = client.get_channel(welcome_channel_id)
     member_name = str(member)
-    is_aedan = False
-    if guild.id == 899023632204980324:  # Aedan Gaming server id
-        is_aedan = True
-    file = create_welcome_banner(member, is_aedan)
+    is_home = False
+    if guild.id == HOME_GUILDS:  # Aedan Gaming server id
+        is_home = True
+    file = create_welcome_banner(member, is_home)
     await channel.send(
         f"Salam {member.mention} be **{guild}** khosh oomadi!\n", file=file
     )
+    print(f"{member_name} joined {guild}.")
     logging.info(f"{member_name} joined {guild}.")

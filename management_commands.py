@@ -112,14 +112,14 @@ async def settings(
     setting: str = SlashOption(
         name="setting",
         required=True,
-        choices=["set welcome channel id", "set role message id"],
+        choices=["set welcome channel id", "set role message id","set free game channel id","set member count channel id"],
     ),
-    value: str = SlashOption(required=True)
+    id: str = SlashOption(required=True)
 ):
     interaction_response = await interaction.send("Please wait...", ephemeral=True)
     if setting == "set welcome channel id":
         try:
-            if value.lower() in ["none", "null", "0", "-"]:
+            if id.lower() in ["none", "null", "0", "-"]:
                 result = data.set_welcome_channel_id(
                     interaction.guild_id, None)
                 if result == None:
@@ -130,7 +130,7 @@ async def settings(
                     await interaction_response.edit(str(result))
                 return
 
-            message_id = int(value)
+            message_id = int(id)
             result = data.set_welcome_channel_id(
                 interaction.guild_id, message_id)
             if result == message_id:
@@ -143,6 +143,60 @@ async def settings(
             print(e)
             await interaction_response.edit(str(e))
 
+    if setting == "set free game channel id":
+        try:
+            if id.lower() in ["none", "null", "0", "-"]:
+                result = data.set_free_games_channel_id(
+                    interaction.guild_id, None)
+                if result == None:
+                    await interaction_response.edit(
+                        "free game channel has been unset.",
+                    )
+                else:
+                    await interaction_response.edit(str(result))
+                return
+
+            message_id = int(id)
+            result = data.set_free_games_channel_id(
+                interaction.guild_id, message_id)
+            if result == message_id:
+                await interaction_response.edit(
+                    "free game channel has been set.",
+                )
+            else:
+                await interaction_response.edit(str(result))
+        except Exception as e:
+            print(e)
+            await interaction_response.edit(str(e))
+    
+    
+    if setting == "set member count channel id":
+        try:
+            if id.lower() in ["none", "null", "0", "-"]:
+                result = data.set_member_count_channel_id(
+                    interaction.guild_id, None)
+                if result == None:
+                    await interaction_response.edit(
+                        "member count channel has been unset.",
+                    )
+                else:
+                    await interaction_response.edit(str(result))
+                return
+
+            message_id = int(id)
+            result = data.set_member_count_channel_id(
+                interaction.guild_id, message_id)
+            if result == message_id:
+                await interaction_response.edit(
+                    "member count channel has been set.",
+                )
+            else:
+                await interaction_response.edit(str(result))
+        except Exception as e:
+            print(e)
+            await interaction_response.edit(str(e))
+
+            
     # if setting == "set role message id":
     #     try:
     #         if value.lower() in ["none", "null", "0", "-"]:

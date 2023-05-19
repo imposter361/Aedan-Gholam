@@ -7,8 +7,22 @@ import subprocess
 import re
 from bot import client
 from version import VERSION
-from nextcord import Interaction, SlashOption, FFmpegPCMAudio
+from nextcord import Interaction, SlashOption, FFmpegPCMAudio, Permissions
 from typing import Optional
+
+
+# help
+@client.slash_command(name="help", description="Display help message")
+async def help(interaction: Interaction):
+    interaction_response = await interaction.send(f"Please wait ...", ephemeral=True)
+    help_message = "Salam, AedanGholam dar khedmate shomast.\nAz command haye `/hafez` va `/hekmat` baraye gereftan falle hafez va daryafte yek hekmat az Nahj al-balagha estefade konid!\nhamchenin mitavanid az command `/about` va `/team` baraye ashenayi bishtar ba ma estefade konid!"
+
+    help_message_admins = "Command haye marboot be admin:\nBaraye set kardan tanzimate bot az command `/settings` estefade konid.\nOption `set welcome channel id` baraye set kardane id text channel marboot be payam haye khosh amad gooyi mibashad."
+
+    if not interaction.user.guild_permissions.administrator:
+        await interaction_response.edit(f"{help_message}")
+    else:
+        await interaction_response.edit(f"{help_message}\n\n{help_message_admins}")
 
 
 # Hafez
@@ -46,21 +60,15 @@ async def delete(
     try:
         interaction_response = await interaction.send("Please wait...", ephemeral=True)
         if number <= 0:
-            await interaction_response.edit(
-                f"{number} is not allowed"
-            )
+            await interaction_response.edit(f"{number} is not allowed")
             return
 
         await interaction.channel.purge(limit=number)
         if number == 1:
-            await interaction_response.edit(
-                f"{number} message deleted."
-            )
+            await interaction_response.edit(f"{number} message deleted.")
             logging.warning(f"{number} message deleted.")
         else:
-            await interaction_response.edit(
-                f"{number} messages have been deleted."
-            )
+            await interaction_response.edit(f"{number} messages have been deleted.")
             logging.warning(f"{number} messages have been deleted.")
 
     except Exception as e:
