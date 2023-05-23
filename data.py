@@ -188,3 +188,34 @@ def set_role_message_id(guild_id, message_id):
     except Exception as e:
         print(e)
         return f"Error happened: {str(e)}"
+
+
+def get_role_message_id(guild_id):
+    try:
+        for item in data:
+            if item["server_id"] == guild_id:
+                return item["set_role_message_id"]
+    except Exception as e:
+        return None
+
+
+def set_role_emoji(guild_id, emoji_id):
+    try:
+        index = get_server_index(guild_id)
+        if index == -1:
+            return "No server found with this id."
+        data[index]["set_role_emoji"] = emoji_id
+        save()
+        return emoji_id
+    except Exception as e:
+        print(e)
+        return f"Error happened: {str(e)}"
+
+
+def get_role_emoji(guild_id):
+    try:
+        for item in data:
+            if item["server_id"] == guild_id:
+                return item["set_role_emoji"]
+    except Exception as e:
+        return None

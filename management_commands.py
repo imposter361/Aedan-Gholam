@@ -112,16 +112,20 @@ async def settings(
     setting: str = SlashOption(
         name="setting",
         required=True,
-        choices=["set welcome channel id", "set role message id","set free game channel id","set member count channel id"],
+        choices=[
+            "set welcome channel id",
+            "set role message id",
+            "set free game channel id",
+            "set member count channel id",
+        ],
     ),
-    id: str = SlashOption(required=True)
+    id: str = SlashOption(required=True),
 ):
     interaction_response = await interaction.send("Please wait...", ephemeral=True)
     if setting == "set welcome channel id":
         try:
             if id.lower() in ["none", "null", "0", "-"]:
-                result = data.set_welcome_channel_id(
-                    interaction.guild_id, None)
+                result = data.set_welcome_channel_id(interaction.guild_id, None)
                 if result == None:
                     await interaction_response.edit(
                         "Welcome channel has been unset.",
@@ -131,8 +135,7 @@ async def settings(
                 return
 
             message_id = int(id)
-            result = data.set_welcome_channel_id(
-                interaction.guild_id, message_id)
+            result = data.set_welcome_channel_id(interaction.guild_id, message_id)
             if result == message_id:
                 await interaction_response.edit(
                     "Welcome channel has been set.",
@@ -146,8 +149,7 @@ async def settings(
     if setting == "set free game channel id":
         try:
             if id.lower() in ["none", "null", "0", "-"]:
-                result = data.set_free_games_channel_id(
-                    interaction.guild_id, None)
+                result = data.set_free_games_channel_id(interaction.guild_id, None)
                 if result == None:
                     await interaction_response.edit(
                         "free game channel has been unset.",
@@ -157,8 +159,7 @@ async def settings(
                 return
 
             message_id = int(id)
-            result = data.set_free_games_channel_id(
-                interaction.guild_id, message_id)
+            result = data.set_free_games_channel_id(interaction.guild_id, message_id)
             if result == message_id:
                 await interaction_response.edit(
                     "free game channel has been set.",
@@ -168,13 +169,11 @@ async def settings(
         except Exception as e:
             print(e)
             await interaction_response.edit(str(e))
-    
-    
+
     if setting == "set member count channel id":
         try:
             if id.lower() in ["none", "null", "0", "-"]:
-                result = data.set_member_count_channel_id(
-                    interaction.guild_id, None)
+                result = data.set_member_count_channel_id(interaction.guild_id, None)
                 if result == None:
                     await interaction_response.edit(
                         "member count channel has been unset.",
@@ -184,8 +183,7 @@ async def settings(
                 return
 
             message_id = int(id)
-            result = data.set_member_count_channel_id(
-                interaction.guild_id, message_id)
+            result = data.set_member_count_channel_id(interaction.guild_id, message_id)
             if result == message_id:
                 await interaction_response.edit(
                     "member count channel has been set.",
@@ -196,28 +194,53 @@ async def settings(
             print(e)
             await interaction_response.edit(str(e))
 
-            
-    # if setting == "set role message id":
-    #     try:
-    #         if value.lower() in ["none", "null", "0", "-"]:
-    #             result = data.set_role_message_id(
-    #                 interaction.guild_id, None)
-    #             if result == None:
-    #                 await interaction_response.edit(
-    #                     "Role message has been unset."
-    #                 ),
-    #             else:
-    #                 await interaction_response.edit(str(result))
-    #             return
+    if setting == "set role message id":
+        try:
+            if id.lower() in ["none", "null", "0", "-"]:
+                result = data.set_role_message_id(interaction.guild_id, None)
+                if result == None:
+                    await interaction_response.edit("Role message has been unset."),
+                else:
+                    await interaction_response.edit(str(result))
+                return
 
-    #         message_id = int(value)
-    #         result = data.set_role_message_id(interaction.guild_id, message_id)
-    #         if result == message_id:
-    #             await interaction_response.edit(
-    #                 "Role message has been set.",
-    #             )
-    #         else:
-    #             await interaction_response.edit(str(result))
-    #     except Exception as e:
-    #         print(e)
-    #         await interaction_response.edit(str(e))
+            message_id = int(id)
+            result = data.set_role_message_id(interaction.guild_id, message_id)
+            if result == message_id:
+                await interaction_response.edit(
+                    "Role message has been set.",
+                )
+            else:
+                await interaction_response.edit(str(result))
+        except Exception as e:
+            print(e)
+            await interaction_response.edit(str(e))
+
+
+# set roles by emojis
+@client.slash_command(
+    name="set_role_emoji",
+    description="Choose an emoji to assign a roll",
+    default_member_permissions=Permissions(administrator=True),
+    dm_permission=False,
+)
+async def set_role_emoji(
+    interaction: Interaction,
+    emoji_name: str = SlashOption(
+        name="emoji_name",
+        required=True,
+    ),
+    role_name: str = SlashOption(name="role_name", required=True),
+):
+    interaction_response = await interaction.send(f"Please wait ...", ephemeral=True)
+
+    get_roles = data.get_role_emoji(interaction.guild_id)
+    if get_roles == None:
+        get_roles = {}
+    if role_name.lower() in ["none", "null", "0", "-"]:
+        get_roles.pop(emoji_name)
+        await interaction_response.edit("Emoji and roll removed!")
+    else:
+        get_roles[emoji_name] = role_name
+        await interaction_response.edit("Emoji and roll paired!")
+    data.set_role_emoji(interaction.guild_id, get_roles)
