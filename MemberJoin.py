@@ -1,7 +1,6 @@
 import logging
 import nextcord
 import requests
-import unidecode
 from data import get_welcome_channel_id
 from bot import client, SUBSCRIPTIONS, HOME_GUILDS
 from PIL import Image, ImageDraw, ImageFont
