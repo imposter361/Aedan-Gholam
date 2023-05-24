@@ -1,5 +1,5 @@
 import os
-import ast
+import json
 import nextcord
 from data import get_subscriptions
 from dotenv import load_dotenv
@@ -14,7 +14,7 @@ client = commands.Bot(command_prefix="!", intents=intents)
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
-ADMINS = os.getenv("ADMINS")
-HOME_GUILDS = os.getenv("HOME_GUILDS")
+ADMINS = json.loads(os.getenv("ADMINS"))
+HOME_GUILDS = json.loads(os.getenv("HOME_GUILDS"))
 
 SUBSCRIPTIONS = get_subscriptions()
