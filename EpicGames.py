@@ -40,7 +40,15 @@ async def check_discounts():
                 if game["price"]["totalPrice"]["discountPrice"] != 0:
                     continue
                 try:
-                    slug = game["catalogNs"]["mappings"][0]["pageSlug"]
+                    slug = None
+                    try:
+                        slug = game["productSlug"]
+                    except Exception:
+                        pass
+                    try:
+                        slug = game["catalogNs"]["mappings"][0]["pageSlug"]
+                    except Exception:
+                        pass
                     if not game["promotions"]["promotionalOffers"]:
                         continue
                     end_date = datetime.strptime(
