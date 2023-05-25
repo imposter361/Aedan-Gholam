@@ -1,8 +1,8 @@
 import logging
 import nextcord
 import requests
-from data import get_welcome_channel_id
-from bot import client, SUBSCRIPTIONS, HOME_GUILDS
+from data import get_welcome_channel_id, get_subscriptions
+from bot import client, HOME_GUILDS
 from PIL import Image, ImageDraw, ImageFont
 
 
@@ -107,7 +107,8 @@ def create_welcome_banner(member, is_home):
 @client.event
 async def on_member_join(member):
     guild = member.guild
-    if not (guild.id in SUBSCRIPTIONS and SUBSCRIPTIONS[guild.id]):
+    subscriptions = get_subscriptions()
+    if not (guild.id in subscriptions and subscriptions[guild.id]):
         return
 
     welcome_channel_id = get_welcome_channel_id(guild.id)
