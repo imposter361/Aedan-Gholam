@@ -12,14 +12,15 @@ from typing import Optional
 @client.slash_command(name="help", description="Display help message")
 async def help(interaction: Interaction):
     interaction_response = await interaction.send(f"Please wait ...", ephemeral=True)
-    help_message = "Salam, AedanGholam dar khedmate shomast.\nAz command haye `/hafez` va `/hekmat` baraye gereftan falle hafez va daryafte yek hekmat az Nahj al-balagha estefade konid!\nhamchenin mitavanid az command `/about` va `/team` baraye ashenayi bishtar ba ma estefade konid!"
 
-    help_message_admins = "Command haye marboot be admin:\nBaraye set kardan tanzimate bot az command `/settings` estefade konid.\nOption `set welcome channel id` baraye set kardane id text channel marboot be payam haye khosh amad gooyi mibashad."
-
-    if not interaction.user.guild_permissions.administrator:
-        await interaction_response.edit(f"{help_message}")
-    else:
-        await interaction_response.edit(f"{help_message}\n\n{help_message_admins}")
+    help_message = (
+        "Salam, AedanGholam dar khedmate shomast.\n\n"
+        "Command haye marboot be admin:\n"
+        "`/settings`: Baraye set kardan tanzimate bot az in command estefade konid.\n"
+        "`set welcome channel id`: in option baraye set kardane id text channel marboot be payam haye khosh amad gooyi mibashad.\n"
+        "`/embed`: baraye neveshtan yek payam dar embed ast ke mitavan az rang haye mokhtalef estefade kard."
+    )
+    await interaction_response.edit(help_message)
 
 
 # Hafez
