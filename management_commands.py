@@ -254,27 +254,33 @@ async def set_role_emoji(
     dm_permission=False,
 )
 async def embed(
-    interaction: Interaction,
-    text: str = SlashOption(required=True),
-    color: str = SlashOption(
-        required=False, description="Color name or HEX e.g: red/ff0000"
-    ),
-):
+        interaction: Interaction,
+        text: str = SlashOption(required=True, description="Write a text in embed"),
+        color: str = SlashOption(
+            required=False, description="Color name or HEX e.g: red/ff0000, default color is cyan."
+        ),
+    ):
     try:
-        rgb = webcolors.name_to_rgb(color)
-        hex_value = webcolors.rgb_to_hex(rgb)
-        embed_color = hex_value.replace("#", "0x")
-        embed_color = int(embed_color, base=16)
-    except ValueError:
-        hex_value = None
 
-    if hex_value is None:
+        default_color = "cyan"
+        if color is None:
+            color=default_color
         try:
-            embed_color = int(f"0x{color}", base=16)
+            rgb = webcolors.name_to_rgb(color)
+            hex_value = webcolors.rgb_to_hex(rgb)
+            embed_color = hex_value.replace("#", "0x")
+            embed_color = int(embed_color, base=16)
         except Exception:
             await interaction.send("Your color or HEX not found.", ephemeral=True)
             return
+        if hex_value is None:
+            try:
+                embed_color = int(f"0x{color}", base=16)
+            except Exception:
+                await interaction.send("Your color or HEX not found.", ephemeral=True)
+                return
 
-    embed = Embed(title=text, color=embed_color)
-
-    await interaction.send(embed=embed)
+        embed = Embed(title=text, color=embed_color)
+        await interaction.send(embed=embed)
+    except Exception:
+            await interaction.send("Unknown error.", ephemeral=True)
