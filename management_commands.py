@@ -1,6 +1,7 @@
 from bot import client, ADMINS, HOME_GUILDS
 import data
-from nextcord import Interaction, Permissions, SlashOption
+from nextcord import Interaction, Permissions, SlashOption, Embed
+import webcolors
 
 
 @client.slash_command(
@@ -244,3 +245,36 @@ async def set_role_emoji(
         get_roles[emoji_name] = role_name
         await interaction_response.edit("Emoji and roll paired!")
     data.set_role_emoji(interaction.guild_id, get_roles)
+
+
+@client.slash_command(
+    name="embed",
+    description=" Send an embed message",
+    default_member_permissions=Permissions(administrator=True),
+    dm_permission=False,
+)
+async def embed(
+    interaction: Interaction,
+    text: str = SlashOption(required=True),
+    color: str = SlashOption(
+        required=False, description="Color name or HEX e.g: red/ff0000"
+    ),
+):
+    try:
+        rgb = webcolors.name_to_rgb(color)
+        hex_value = webcolors.rgb_to_hex(rgb)
+        embed_color = hex_value.replace("#", "0x")
+        embed_color = int(embed_color, base=16)
+    except ValueError:
+        hex_value = None
+
+    if hex_value is None:
+        try:
+            embed_color = int(f"0x{color}", base=16)
+        except Exception:
+            await interaction.send("Your color or HEX not found.", ephemeral=True)
+            return
+
+    embed = Embed(title=text, color=embed_color)
+
+    await interaction.send(embed=embed)
