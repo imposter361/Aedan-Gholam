@@ -4,12 +4,17 @@ import random
 import re
 from bot import client
 from version import VERSION
-from nextcord import Interaction, SlashOption
+from nextcord import Interaction, SlashOption, Permissions
 from typing import Optional
 
 
 # help
-@client.slash_command(name="help", description="Display help message")
+@client.slash_command(
+    name="help",
+    description="Display help message",
+    default_member_permissions=Permissions(administrator=True),
+    dm_permission=False,
+)
 async def help(interaction: Interaction):
     interaction_response = await interaction.send(f"Please wait ...", ephemeral=True)
 
@@ -100,9 +105,20 @@ async def about(interaction: Interaction):
 
 # Hekmat
 @client.slash_command(name="hekmat", description="Yek Hekmat az Nahj al-balagha")
-async def hekmat(interaction: Interaction):
+async def hekmat(
+    interaction: Interaction,
+    number: int = SlashOption(
+        required=False, description="Yek adad beyne 1 ta 480 vared konid"
+    ),
+):
+    if number is None:
+        number = random.randrange(1, 481)
+    if number > 480 or number < 1:
+        await interaction.response.send_message(
+            "Yek adad beyne 1 ta 480 vared konid!", ephemeral=True
+        )
+        return
     interaction_response = await interaction.send(f"Please wait ...")
-    number = random.randrange(1, 481)
     try:
         url = f"https://alimaktab.ir/json/wisdom/?n={number}"
         response = requests.get(url)
