@@ -1,14 +1,31 @@
 import logging
 import requests
-import nextcord
-import asyncio
 import random
-import subprocess
 import re
 from bot import client
 from version import VERSION
-from nextcord import Interaction, SlashOption, FFmpegPCMAudio
+from nextcord import Interaction, SlashOption, Permissions
 from typing import Optional
+
+
+# help
+@client.slash_command(
+    name="help",
+    description="Display help message",
+    default_member_permissions=Permissions(administrator=True),
+    dm_permission=False,
+)
+async def help(interaction: Interaction):
+    interaction_response = await interaction.send(f"Please wait ...", ephemeral=True)
+
+    help_message = (
+        "Salam, AedanGholam dar khedmate shomast.\n\n"
+        "Command haye marboot be admin:\n"
+        "`/settings`: Baraye set kardan tanzimate bot az in command estefade konid.\n"
+        "`set welcome channel id`: in option baraye set kardane id text channel marboot be payam haye khosh amad gooyi mibashad.\n"
+        "`/embed`: baraye neveshtan yek payam dar embed ast ke mitavan az rang haye mokhtalef estefade kard."
+    )
+    await interaction_response.edit(help_message)
 
 
 # Hafez
@@ -44,22 +61,17 @@ async def delete(
     interaction: Interaction, number: Optional[int] = SlashOption(required=True)
 ):
     try:
+        interaction_response = await interaction.send("Please wait...", ephemeral=True)
         if number <= 0:
-            await interaction.response.send_message(
-                f"{number} is not allowed", ephemeral=True
-            )
+            await interaction_response.edit(f"{number} is not allowed")
             return
 
         await interaction.channel.purge(limit=number)
         if number == 1:
-            await interaction.response.send_message(
-                f"{number} message deleted.", ephemeral=True
-            )
+            await interaction_response.edit(f"{number} message deleted.")
             logging.warning(f"{number} message deleted.")
         else:
-            await interaction.response.send_message(
-                f"{number} messages have been deleted.", ephemeral=True
-            )
+            await interaction_response.edit(f"{number} messages have been deleted.")
             logging.warning(f"{number} messages have been deleted.")
 
     except Exception as e:
@@ -78,7 +90,6 @@ async def team(interaction: Interaction):
         logging.error(str(e) + " Exception happend in Team.")
 
 
-
 # About Adean Gholam
 @client.slash_command(name="about", description="About Gholam")
 async def about(interaction: Interaction):
@@ -94,9 +105,20 @@ async def about(interaction: Interaction):
 
 # Hekmat
 @client.slash_command(name="hekmat", description="Yek Hekmat az Nahj al-balagha")
-async def hekmat(interaction: Interaction):
+async def hekmat(
+    interaction: Interaction,
+    number: int = SlashOption(
+        required=False, description="Yek adad beyne 1 ta 480 vared konid"
+    ),
+):
+    if number is None:
+        number = random.randrange(1, 481)
+    if number > 480 or number < 1:
+        await interaction.response.send_message(
+            "Yek adad beyne 1 ta 480 vared konid!", ephemeral=True
+        )
+        return
     interaction_response = await interaction.send(f"Please wait ...")
-    number = random.randrange(1, 481)
     try:
         url = f"https://alimaktab.ir/json/wisdom/?n={number}"
         response = requests.get(url)
@@ -121,152 +143,3 @@ async def hekmat(interaction: Interaction):
         await interaction_response.edit(
             f"Bebakhshid moshkeli pish oomade, dobare test kon!"
         )
-
-
-
-# Play command
-voice_clients = []
-next_and_previous_requests = []
-
-
-@client.slash_command(name="play", description="Select a singer or bot plays random.")
-async def play(
-    interaction: Interaction, query: Optional[str] = SlashOption(required=False)
-):
-    if interaction.user.voice is None:
-        await interaction.send(
-            "You need to be in a voice channel to use this command.", ephemeral=True
-        )
-        return
-    voice_channel = interaction.user.voice.channel
-    if voice_channel is not None:
-        interaction_response = await interaction.send("Queuing...")
-        # create playlist
-        playlist = []
-        with open("Tracks.txt", "r") as file:
-            for line in file.readlines():
-                index = random.randint(0, len(playlist))
-                playlist.insert(index, line.strip())
-
-        # apply user query to the playlist
-        if query is not None:
-            playlist2 = []
-            for link in playlist:
-                if query.lower() in str(link).lower():
-                    playlist2.append(link)
-            playlist = playlist2
-
-        try:
-            voice_client = await voice_channel.connect()
-            voice_clients.append(voice_client)
-            next_and_previous_requests.append(
-                {"guild_id": voice_client.guild.id, "next": False, "previous": False}
-            )
-            index = 0
-            while index <= len(playlist) - 1:
-                audio_source = FFmpegPCMAudio(playlist[index])
-                voice_client.play(audio_source)
-                command = f"ffprobe -i {playlist[index]} -show_entries format=duration -v quiet"
-                duration = (
-                    subprocess.run(command.split(), stdout=subprocess.PIPE)
-                    .stdout.decode("utf-8")
-                    .split("\n")[1]
-                    .split("=")[1]
-                    .split(".")[0]
-                )
-                embed = nextcord.Embed(
-                    description=playlist[index]
-                    + " - "
-                    + str(int(int(duration) / 60))
-                    + ":"
-                    + "{:02d}".format(int(duration) % 60)
-                )
-                await interaction_response.edit(
-                    f"Playing track {index+1} of {len(playlist)}", embed=embed
-                )
-                while voice_client.is_playing():
-                    for request in next_and_previous_requests:
-                        if request["guild_id"] == voice_client.guild.id:
-                            if request["next"] == True:
-                                voice_client.stop()
-                                request["next"] = False
-                                break
-                            if request["previous"] == True:
-                                voice_client.stop()
-                                request["previous"] = False
-                                index -= 2
-                                break
-                    await asyncio.sleep(1)
-                index += 1
-                if index < 0:
-                    index = 0
-            await voice_client.disconnect()
-            await interaction_response.edit(
-                f"End of the playlist {index} of {len(playlist)}", embed=None
-            )
-        except Exception as e:
-            print(e)
-        finally:
-            for request in next_and_previous_requests:
-                if request["guild_id"] == voice_client.guild.id:
-                    next_and_previous_requests.remove(request)
-                    break
-            for item in voice_clients:
-                if item.guild.id == voice_client.guild.id:
-                    voice_clients.remove(item)
-                    break
-
-    else:
-        await interaction.send(
-            "You need to be in a voice channel to use this command.", ephemeral=True
-        )
-
-
-# Next
-@client.slash_command()
-async def next(interaction: Interaction):
-    if interaction.user.voice is None:
-        await interaction.send(
-            "Bot needs to be in a voice channel to use this command.", ephemeral=True
-        )
-        return
-    for next_request in next_and_previous_requests:
-        if next_request["guild_id"] == interaction.guild_id:
-            next_request["next"] = True
-            answer = await interaction.send("Skipped")
-            await asyncio.sleep(5)
-            await answer.delete()
-            return
-    await interaction.send("You can't skip nothing idiot", ephemeral=True)
-
-
-# Previous
-@client.slash_command()
-async def previous(interaction: Interaction):
-    if interaction.user.voice is None:
-        await interaction.send(
-            "Bot needs to be in a voice channel to use this command.", ephemeral=True
-        )
-        return
-    for request in next_and_previous_requests:
-        if request["guild_id"] == interaction.guild_id:
-            request["previous"] = True
-            answer = await interaction.send("Here we go again!")
-            await asyncio.sleep(5)
-            await answer.delete()
-            return
-    await interaction.send("You can't return nothing idiot", ephemeral=True)
-
-
-# Stop command
-@client.slash_command()
-async def stop(interaction: Interaction):
-    if interaction.user.voice is None:
-        await interaction.send(
-            "Bot needs to be in a voice channel to use this command.", ephemeral=True
-        )
-        return
-    for voice_client in voice_clients:
-        if voice_client.guild.id == interaction.guild_id:
-            await voice_client.disconnect()
-            await interaction.send("Stopped")

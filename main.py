@@ -7,6 +7,7 @@ import KleiPoint
 import Ready
 import SetRole
 import Commands
+import management_commands
 from bot import client, TOKEN
 
 # does logging in debug level up to critical

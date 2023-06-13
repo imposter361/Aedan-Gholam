@@ -1,6 +1,7 @@
 import logging
 import nextcord
-from bot import client, SUBSCRIPTIONS
+from bot import client
+from data import get_subscriptions
 from version import VERSION
 from urlextract import URLExtract
 
@@ -45,10 +46,8 @@ async def on_message(message):
     if steam_store in user_message or steam_community in user_message:
         try:
             # Check if the server has an active subscription or not
-            if (
-                str(message.guild.id) in SUBSCRIPTIONS
-                and SUBSCRIPTIONS[str(message.guild.id)]
-            ):
+            subscriptions = get_subscriptions()
+            if message.guild.id in subscriptions and subscriptions[message.guild.id]:
                 URL = "".join(steam_links)
                 embed = nextcord.Embed(description=URL)
                 await message.reply(
