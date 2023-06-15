@@ -134,6 +134,8 @@ async def hekmat(
             return re.sub(clean, "", text)
 
         clean_text = remove_html(new_string)
+        clean_text = clean_text.replace("&raquo;", "»")
+        clean_text = clean_text.replace("&laquo;", "«")
 
         await interaction_response.edit(clean_text)
 
