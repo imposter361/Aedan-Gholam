@@ -7,15 +7,23 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 def create_welcome_banner(member, is_home):
-    author_profile_pic = member.avatar
-    response = requests.get(author_profile_pic)
+    get_author_profile_pic = member.avatar
+    if get_author_profile_pic:
+        try:
+            response = requests.get(get_author_profile_pic)
+            with open("p.png", "wb") as file:
+                file.write(response.content)
+            author_profile_pic = "p.png"
+        except Exception as e:
+            print(e + " Request to get new member's profile picture failed")
+    else:
+        get_author_profile_pic = Image.open("NoPic.png").convert("RGBA")
+        author_profile_pic = "NoPic.png"    
 
-    with open("p.png", "wb") as file:
-        file.write(response.content)
 
     # get username and guild member count
     guild = member.guild
-    member_name = str(member)
+    member_name = str(member.name)
     member_number = f"Now there are '{guild.member_count}' of us"
 
     # set font
@@ -41,7 +49,7 @@ def create_welcome_banner(member, is_home):
 
     # Open the original image
     size = (150, 150)  # profile pic size
-    img = Image.open("p.png").resize(size)
+    img = Image.open(author_profile_pic).resize(size)
     size2 = (158, 158)  # white circle
 
     # Create a new image with a circular mask
@@ -116,7 +124,8 @@ async def on_member_join(member):
         return
 
     channel = client.get_channel(welcome_channel_id)
-    member_name = str(member)
+    member_name = str(member.name)
+
     is_home = False
     if guild.id == HOME_GUILDS:  # Aedan Gaming server id
         is_home = True
