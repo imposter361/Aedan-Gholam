@@ -20,7 +20,6 @@ async def help(interaction: Interaction):
 
     help_message = (
         "Salam, AedanGholam dar khedmate shomast.\n\n"
-        "Command haye marboot be admin:\n"
         "`/settings`: Baraye set kardan tanzimate bot az in command estefade konid.\n"
         "`set welcome channel id`: in option baraye set kardane id text channel marboot be payam haye khosh amad gooyi mibashad.\n"
         "`/embed`: baraye neveshtan yek payam dar embed ast ke mitavan az rang haye mokhtalef estefade kard."

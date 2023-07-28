@@ -114,16 +114,18 @@ async def settings(
         name="setting",
         required=True,
         choices=[
-            "set welcome channel id",
-            "set role message id",
-            "set free game channel id",
-            "set member count channel id",
+            "Set welcome channel id",
+            "Set role message id",
+            "Set free game channel id",
+            "Set free game role id",
+            "Set DST role id",
+            "Set member count channel id",
         ],
     ),
     id: str = SlashOption(required=True),
 ):
     interaction_response = await interaction.send("Please wait...", ephemeral=True)
-    if setting == "set welcome channel id":
+    if setting == "Set welcome channel id":
         try:
             if id.lower() in ["none", "null", "0", "-"]:
                 result = data.set_welcome_channel_id(interaction.guild_id, None)
@@ -147,7 +149,7 @@ async def settings(
             print(e)
             await interaction_response.edit(str(e))
 
-    if setting == "set free game channel id":
+    if setting == "Set free game channel id":
         try:
             if id.lower() in ["none", "null", "0", "-"]:
                 result = data.set_free_games_channel_id(interaction.guild_id, None)
@@ -171,7 +173,55 @@ async def settings(
             print(e)
             await interaction_response.edit(str(e))
 
-    if setting == "set member count channel id":
+    if setting == "Set free game role id":
+        try:
+            if id.lower() in ["none", "null", "0", "-"]:
+                result = data.set_free_games_role_id(interaction.guild_id, None)
+                if result == None:
+                    await interaction_response.edit(
+                        "Free game role has been unset.",
+                    )
+                else:
+                    await interaction_response.edit(str(result))
+                return
+
+            role_id = int(id)
+            result = data.set_free_games_role_id(interaction.guild_id, role_id)
+            if result == role_id:
+                await interaction_response.edit(
+                    "Free game role has been set.",
+                )
+            else:
+                await interaction_response.edit(str(result))
+        except Exception as e:
+            print(e)
+            await interaction_response.edit(str(e))
+
+    if setting == "Set DST role id":
+        try:
+            if id.lower() in ["none", "null", "0", "-"]:
+                result = data.set_dst_role_id(interaction.guild_id, None)
+                if result == None:
+                    await interaction_response.edit(
+                        "DST role has been unset.",
+                    )
+                else:
+                    await interaction_response.edit(str(result))
+                return
+
+            role_id = int(id)
+            result = data.set_dst_role_id(interaction.guild_id, role_id)
+            if result == role_id:
+                await interaction_response.edit(
+                    "DST role has been set.",
+                )
+            else:
+                await interaction_response.edit(str(result))
+        except Exception as e:
+            print(e)
+            await interaction_response.edit(str(e))
+
+    if setting == "Set member count channel id":
         try:
             if id.lower() in ["none", "null", "0", "-"]:
                 result = data.set_member_count_channel_id(interaction.guild_id, None)
@@ -195,7 +245,7 @@ async def settings(
             print(e)
             await interaction_response.edit(str(e))
 
-    if setting == "set role message id":
+    if setting == "Set role message id":
         try:
             if id.lower() in ["none", "null", "0", "-"]:
                 result = data.set_role_message_id(interaction.guild_id, None)
@@ -254,17 +304,17 @@ async def set_role_emoji(
     dm_permission=False,
 )
 async def embed(
-        interaction: Interaction,
-        text: str = SlashOption(required=True, description="Write a text in embed"),
-        color: str = SlashOption(
-            required=False, description="Color name or HEX e.g: red/ff0000, default color is cyan."
-        ),
-    ):
+    interaction: Interaction,
+    text: str = SlashOption(required=True, description="Write a text in embed"),
+    color: str = SlashOption(
+        required=False,
+        description="Color name or HEX e.g: red/ff0000, default color is cyan.",
+    ),
+):
     try:
-
         default_color = "cyan"
         if color is None:
-            color=default_color
+            color = default_color
         try:
             rgb = webcolors.name_to_rgb(color)
             hex_value = webcolors.rgb_to_hex(rgb)
@@ -283,4 +333,4 @@ async def embed(
         embed = Embed(title=text, color=embed_color)
         await interaction.send(embed=embed)
     except Exception:
-            await interaction.send("Unknown error.", ephemeral=True)
+        await interaction.send("Unknown error.", ephemeral=True)

@@ -1,12 +1,7 @@
 import logging
 import requests
+import data
 from bot import client
-from data import (
-    get_free_games_channel_id,
-    get_subscriptions,
-    get_epic_games_names,
-    set_epic_games_names,
-)
 from datetime import datetime
 from nextcord.ext import tasks
 
@@ -15,15 +10,15 @@ from nextcord.ext import tasks
 @tasks.loop(hours=12)
 async def check_discounts():
     await client.wait_until_ready()
-    subscriptions = get_subscriptions()
+    subscriptions = data.get_subscriptions()
     for guild_id in subscriptions:
         if subscriptions[guild_id] == False:
             continue
-        if get_free_games_channel_id(guild_id) == None:
+        if data.get_free_games_channel_id(guild_id) == None:
             continue
 
         try:
-            channel = client.get_channel(get_free_games_channel_id(guild_id))
+            channel = client.get_channel(data.get_free_games_channel_id(guild_id))
 
             # Make a request to the Epic Games
             response = requests.get(
@@ -63,14 +58,20 @@ async def check_discounts():
                     game_name = game["title"]
                     game_link = f"https://launcher.store.epicgames.com/en-US/p/{slug}"
 
-                    sent_games = get_epic_games_names(guild_id)
+                    sent_games = data.get_epic_games_names(guild_id)
                     if game_name not in sent_games:
                         message = "The following game is currently available for free on the Epic Games Store:\n"
-                        await channel.send(
-                            f"<@&1101090907752771595>\n{message}\n<:epic_icon:1101097658153713774> **{game_name}** - (ends {end_date_str})\n{game_link}\n"
-                        )
+                        role_id = data.get_free_games_role_id(guild_id)
+                        if role_id:
+                            await channel.send(
+                                f"<@&{role_id}>\n{message}\n<:epic_icon:1101097658153713774> **{game_name}** - (ends {end_date_str})\n{game_link}\n"
+                            )
+                        else:
+                            await channel.send(
+                                f"{message}\n<:epic_icon:1101097658153713774> **{game_name}** - (ends {end_date_str})\n{game_link}\n"
+                            )
                         sent_games.append(game_name)
-                        set_epic_games_names(guild_id, sent_games)
+                        data.set_epic_games_names(guild_id, sent_games)
 
                 except Exception as e:
                     print(str(e) + " - There is a broken Epic game link")

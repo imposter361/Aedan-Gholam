@@ -111,6 +111,50 @@ def get_free_games_channel_id(guild_id):
         return None
 
 
+def set_free_games_role_id(guild_id, role_id):
+    try:
+        index = get_server_index(guild_id)
+        if index == -1:
+            return "No server found with this id."
+        data[index]["free_games_role_id"] = role_id
+        save()
+        return role_id
+    except Exception as e:
+        print(e)
+        return f"Error happened: {str(e)}"
+
+
+def get_free_games_role_id(guild_id):
+    try:
+        for item in data:
+            if item["server_id"] == guild_id:
+                return item["free_games_role_id"]
+    except Exception as e:
+        return None
+
+
+def set_dst_role_id(guild_id, role_id):
+    try:
+        index = get_server_index(guild_id)
+        if index == -1:
+            return "No server found with this id."
+        data[index]["dst_role_id"] = role_id
+        save()
+        return role_id
+    except Exception as e:
+        print(e)
+        return f"Error happened: {str(e)}"
+
+
+def get_dst_role_id(guild_id):
+    try:
+        for item in data:
+            if item["server_id"] == guild_id:
+                return item["dst_role_id"]
+    except Exception as e:
+        return None
+
+
 def set_epic_games_names(guild_id, games):
     try:
         index = get_server_index(guild_id)
