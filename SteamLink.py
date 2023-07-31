@@ -19,12 +19,7 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    username = str(message.author)
     user_message = str(message.content)
-    channel = str(message.channel)
-
-    print(f"{username} said: '{user_message}' in channel: ({channel})")  # log
-
     steam_store = "https://store.steampowered.com"
     steam_community = "https://steamcommunity.com"
 

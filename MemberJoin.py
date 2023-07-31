@@ -7,15 +7,22 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 def create_welcome_banner(member, is_home):
-    author_profile_pic = member.avatar
-    response = requests.get(author_profile_pic)
-
-    with open("p.png", "wb") as file:
-        file.write(response.content)
+    get_author_profile_pic = member.avatar
+    if get_author_profile_pic:
+        try:
+            response = requests.get(get_author_profile_pic)
+            with open("p.png", "wb") as file:
+                file.write(response.content)
+            author_profile_pic = "p.png"
+        except Exception as e:
+            print(e + " Request to get new member's profile picture failed")
+    else:
+        get_author_profile_pic = Image.open("NoPic.png").convert("RGBA")
+        author_profile_pic = "NoPic.png"
 
     # get username and guild member count
     guild = member.guild
-    member_name = str(member)
+    member_name = str(member.name)
     member_number = f"Now there are '{guild.member_count}' of us"
 
     # set font
@@ -24,24 +31,18 @@ def create_welcome_banner(member, is_home):
 
     if is_home:
         # for member name
-        name_font = ImageFont.truetype(
-            "BreeSerif-Regular.ttf", 30
-        )
+        name_font = ImageFont.truetype("BreeSerif-Regular.ttf", 30)
         # for member counter
-        counter_font = ImageFont.truetype(
-            "BreeSerif-Regular.ttf", 20
-        )
+        counter_font = ImageFont.truetype("BreeSerif-Regular.ttf", 20)
     else:
-        name_font = ImageFont.truetype(
-            "Righteous-Regular.ttf", 35
-        )  # for member name
+        name_font = ImageFont.truetype("Righteous-Regular.ttf", 35)  # for member name
         counter_font = ImageFont.truetype(
             "Righteous-Regular.ttf", 25
         )  # for member counter
 
     # Open the original image
     size = (150, 150)  # profile pic size
-    img = Image.open("p.png").resize(size)
+    img = Image.open(author_profile_pic).resize(size)
     size2 = (158, 158)  # white circle
 
     # Create a new image with a circular mask
@@ -88,8 +89,7 @@ def create_welcome_banner(member, is_home):
     text_width, text_height = draw.textsize(member_number, font=counter_font)
     x2 = (709 - text_width) / 2
     draw2 = ImageDraw.Draw(background)
-    draw2.text((x2, 25), member_number, fill=(
-        250, 208, 92, 255), font=counter_font)
+    draw2.text((x2, 25), member_number, fill=(250, 208, 92, 255), font=counter_font)
 
     # write member_name
     draw1 = ImageDraw.Draw(background)
@@ -116,9 +116,10 @@ async def on_member_join(member):
         return
 
     channel = client.get_channel(welcome_channel_id)
-    member_name = str(member)
+    member_name = str(member.name)
+
     is_home = False
-    if guild.id == HOME_GUILDS:  # Aedan Gaming server id
+    if guild.id in HOME_GUILDS:  # Aedan Gaming server id
         is_home = True
     file = create_welcome_banner(member, is_home)
     await channel.send(
