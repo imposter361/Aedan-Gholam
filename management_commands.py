@@ -279,9 +279,12 @@ async def set_role_emoji(
     interaction: Interaction,
     emoji_name: str = SlashOption(
         name="emoji_name",
+        description="CaSe sEnSiTiVe!",
         required=True,
     ),
-    role_name: str = SlashOption(name="role_name", required=True),
+    role_name: str = SlashOption(
+        name="role_name", description="CaSe sEnSiTiVe!", required=True
+    ),
 ):
     interaction_response = await interaction.send(f"Please wait ...", ephemeral=True)
 
