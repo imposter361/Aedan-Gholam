@@ -2,6 +2,8 @@ import logging
 import requests
 import random
 import re
+import data
+import pytube
 from bot import client
 from version import VERSION
 from nextcord import Interaction, SlashOption, Permissions
@@ -144,3 +146,36 @@ async def hekmat(
         await interaction_response.edit(
             f"Bebakhshid moshkeli pish oomade, dobare test kon!"
         )
+
+
+@client.slash_command(
+    name="YouTube",
+    description="Send new youtube videos in a channel.",
+    default_member_permissions=Permissions(administrator=True),
+    dm_permission=False,
+)
+async def add_yt_notif_rule(
+    interaction: Interaction,
+    link: str = SlashOption(required=True, description="Video link"),
+    channel_id: int = SlashOption(
+        required=False, description="Discord channel id"
+    ),
+):
+    interaction_response = await interaction.send("Please wait...", ephemeral=True)
+
+    x = pytube.YouTube(link)
+    channel_id = x.channel_id
+
+    server_id = int(link)
+    target_guild = client.get_guild(server_id)
+    if target_guild is None:
+        await interaction_response.edit("Server with this id does not exists.")
+        return
+
+    result = data.add_yt_notif_rule(str(target_guild), server_id)
+    if result == server_id:
+        await interaction_response.edit(
+            f"youtube",
+        )
+    else:
+        await interaction_response.edit(str(result))

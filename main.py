@@ -4,6 +4,7 @@ import MemberJoin
 import MemberCount
 import EpicGames
 import KleiPoint
+import youtube_notify
 import Ready
 import SetRole
 import Commands

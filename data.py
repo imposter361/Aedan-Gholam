@@ -263,3 +263,51 @@ def get_role_emoji(guild_id):
                 return item["set_role_emoji"]
     except Exception as e:
         return None
+
+
+def add_yt_notif_rule(guild_id, yt_channel_id, discord_channel_id):
+    try:
+        index = get_server_index(guild_id)
+        if index == -1:
+            return "No server found with this id."
+        if not data[index].get("yt_notif_rules"):
+            data[index]["yt_notif_rules"] = {}
+        if yt_channel_id in data[index]["yt_notif_rules"]:
+            if data[index]["yt_notif_rules"][yt_channel_id] == discord_channel_id:
+                return "Already exists."
+            else:
+                data[index]["yt_notif_rules"][yt_channel_id] = discord_channel_id
+                save()
+                return "Updated."
+
+        data[index]["yt_notif_rules"][yt_channel_id] = discord_channel_id
+        save()
+        return yt_channel_id
+    except Exception as e:
+        print(e)
+        return f"Error happened: {str(e)}"
+
+
+def get_yt_notif_rules(guild_id):
+    try:
+        for item in data:
+            if item["server_id"] == guild_id:
+                return item["yt_notif_rules"]
+    except Exception as e:
+        return None
+
+
+def remove_yt_notif_rule(guild_id, yt_channel_id):
+    try:
+        index = get_server_index(guild_id)
+        if index == -1:
+            return "No server found with this id."
+        if not data[index].get("yt_notif_rules"):
+            data[index]["yt_notif_rules"] = {}
+
+        data[index]["yt_notif_rules"].pop(yt_channel_id)
+        save()
+        return yt_channel_id
+    except Exception as e:
+        print(e)
+        return f"Error happened: {str(e)}"
