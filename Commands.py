@@ -154,28 +154,60 @@ async def hekmat(
     default_member_permissions=Permissions(administrator=True),
     dm_permission=False,
 )
-async def add_yt_notif_rule(
+async def youtube_notification_set(
     interaction: Interaction,
-    link: str = SlashOption(required=True, description="Video link"),
+    link: str = SlashOption(
+        required=True, description="A video link from the target youtube channel"
+    ),
     channel_id: int = SlashOption(
-        required=False, description="Discord channel id"
+        required=True,
+        description="Target Discord channel id to publish new youtube videos.",
     ),
 ):
-    interaction_response = await interaction.send("Please wait...", ephemeral=True)
+    try:
+        interaction_response = await interaction.send("Please wait...", ephemeral=True)
 
-    x = pytube.YouTube(link)
-    channel_id = x.channel_id
+        channel = client.get_channel(channel_id)
+        video = pytube.YouTube(link)
 
-    server_id = int(link)
-    target_guild = client.get_guild(server_id)
-    if target_guild is None:
-        await interaction_response.edit("Server with this id does not exists.")
-        return
-
-    result = data.add_yt_notif_rule(str(target_guild), server_id)
-    if result == server_id:
-        await interaction_response.edit(
-            f"youtube",
+        result = data.add_yt_notif_rule(
+            interaction.guild_id, video.channel_id, channel_id
         )
-    else:
-        await interaction_response.edit(str(result))
+        if result == video.channel_id or result == "Updated.":
+            await interaction_response.edit(
+                f"Done. **{video.author}** new videos will be posted on **{channel.name}**.",
+            )
+        else:
+            await interaction_response.edit(str(result))
+    except Exception as e:
+        print(e)
+        await interaction_response.edit(str(e))
+
+
+@client.slash_command(
+    name="YouTube_Remove",
+    description="Remove a previously set notification rule.",
+    default_member_permissions=Permissions(administrator=True),
+    dm_permission=False,
+)
+async def youtube_notification_remove(
+    interaction: Interaction,
+    link: str = SlashOption(
+        required=True, description="A video link from the target youtube channel"
+    ),
+):
+    try:
+        interaction_response = await interaction.send("Please wait...", ephemeral=True)
+
+        video = pytube.YouTube(link)
+
+        result = data.remove_yt_notif_rule(interaction.guild_id, video.channel_id)
+        if result == video.channel_id:
+            await interaction_response.edit(
+                f"Done. You will no longer receive new videos from **{video.author}**.",
+            )
+        else:
+            await interaction_response.edit(str(result))
+    except Exception as e:
+        print(e)
+        await interaction_response.edit(str(e))

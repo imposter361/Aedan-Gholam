@@ -270,17 +270,25 @@ def add_yt_notif_rule(guild_id, yt_channel_id, discord_channel_id):
         index = get_server_index(guild_id)
         if index == -1:
             return "No server found with this id."
+
         if not data[index].get("yt_notif_rules"):
             data[index]["yt_notif_rules"] = {}
-        if yt_channel_id in data[index]["yt_notif_rules"]:
-            if data[index]["yt_notif_rules"][yt_channel_id] == discord_channel_id:
-                return "Already exists."
+
+        rules = data[index]["yt_notif_rules"]
+        yt_channel_id = str(yt_channel_id)
+
+        if yt_channel_id in rules:
+            if rules[yt_channel_id]["discord_channel_id"] == discord_channel_id:
+                return "This rule already exists."
             else:
-                data[index]["yt_notif_rules"][yt_channel_id] = discord_channel_id
+                rules[yt_channel_id]["discord_channel_id"] = discord_channel_id
                 save()
                 return "Updated."
 
-        data[index]["yt_notif_rules"][yt_channel_id] = discord_channel_id
+        rules[yt_channel_id] = {
+            "discord_channel_id": discord_channel_id,
+            "last_video_id": None,
+        }
         save()
         return yt_channel_id
     except Exception as e:
@@ -293,8 +301,35 @@ def get_yt_notif_rules(guild_id):
         for item in data:
             if item["server_id"] == guild_id:
                 return item["yt_notif_rules"]
-    except Exception as e:
+    except Exception:
         return None
+
+
+def set_yt_last_video_id(guild_id, yt_channel_id, video_id):
+    try:
+        index = get_server_index(guild_id)
+        if index == -1:
+            return "No server found with this id."
+
+        if not data[index].get("yt_notif_rules"):
+            return "The server has no Youtube notification rules defined."
+
+        rules = data[index]["yt_notif_rules"]
+        yt_channel_id = str(yt_channel_id)
+
+        if yt_channel_id not in rules:
+            return "The server has no rules defined for this Youtube channel."
+
+        if rules[yt_channel_id]["last_video_id"] == video_id:
+            return "Unchanged."
+        else:
+            rules[yt_channel_id]["last_video_id"] = video_id
+            save()
+            return video_id
+
+    except Exception as e:
+        print(e)
+        return f"Error happened: {str(e)}"
 
 
 def remove_yt_notif_rule(guild_id, yt_channel_id):
@@ -302,8 +337,15 @@ def remove_yt_notif_rule(guild_id, yt_channel_id):
         index = get_server_index(guild_id)
         if index == -1:
             return "No server found with this id."
+
         if not data[index].get("yt_notif_rules"):
             data[index]["yt_notif_rules"] = {}
+
+        rules = data[index]["yt_notif_rules"]
+        yt_channel_id = str(yt_channel_id)
+
+        if yt_channel_id not in rules:
+            return "No rule is set for this Youtube channel."
 
         data[index]["yt_notif_rules"].pop(yt_channel_id)
         save()
