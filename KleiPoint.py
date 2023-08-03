@@ -31,6 +31,8 @@ async def dst():
             if row_elements:
                 try:
                     for row_element in row_elements:
+                        if "Outdated" in str(row_element.contents[1]):
+                            continue
                         try:
                             link = (
                                 str(row_element.contents[1])
