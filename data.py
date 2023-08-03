@@ -1,8 +1,15 @@
+import os
 import json
 
 
 DATA_FILE = "data.json"
 data = None
+
+
+def init():
+    if not os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "w") as file:
+            file.write(json.dumps([]))
 
 
 def load():
@@ -16,6 +23,7 @@ def save():
         file.write(json.dumps(data, indent=4))
 
 
+init()
 load()
 
 

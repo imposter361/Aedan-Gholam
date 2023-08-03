@@ -1,16 +1,7 @@
 import data
-from bot import client
+import googleapiclient.discovery
+from bot import client, YOUTUBE_API_KEY
 from nextcord.ext import tasks
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google_auth_oauthlib.flow import InstalledAppFlow
-
-
-# Set up YouTube API
-SCOPES = ["https://www.googleapis.com/auth/youtube.readonly"]
-API_SERVICE_NAME = "youtube"
-API_VERSION = "v3"
-CLIENT_SECRETS_FILE = "youtube_client_secrets.json"
 
 
 @tasks.loop(minutes=10)
@@ -20,7 +11,11 @@ async def check_for_new_youtube_video():
     for guild_id in subscriptions:
         if subscriptions[guild_id] == False:
             continue
+
         rules = data.get_yt_notif_rules(guild_id)
+        if not rules:
+            continue
+
         for yt_channel_id in rules:
             try:
                 last_video_id = get_last_video_id_of_youtube_channel(yt_channel_id)
@@ -29,7 +24,7 @@ async def check_for_new_youtube_video():
                     discord_channel = client.get_channel(
                         rules[yt_channel_id]["discord_channel_id"]
                     )
-                    discord_channel.send(
+                    await discord_channel.send(
                         f"https://www.youtube.com/watch?v={last_video_id}"
                     )
                     # update stored last video id
@@ -39,25 +34,23 @@ async def check_for_new_youtube_video():
 
 
 def get_last_video_id_of_youtube_channel(yt_channel_id):
-    # Authorization flow
-    flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
-    credentials = flow.run_console()
-
-    # Create the YouTube service
-    youtube_service = build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
-
-    # Get the latest uploaded video from a specific channel
-    request = youtube_service.search().list(
-        part="snippet",
-        channelId=yt_channel_id,
-        maxResults=1,
-        order="date",
-        type="video",
+    youtube_api = googleapiclient.discovery.build(
+        "youtube", "v3", developerKey=YOUTUBE_API_KEY
     )
 
-    response = request.execute()
+    # Get the latest video from the channel
+    channel_videos = (
+        youtube_api.search()
+        .list(
+            part="snippet",
+            channelId=yt_channel_id,
+            type="video",
+            order="date",
+            maxResults=1,
+        )
+        .execute()
+    )
 
-    # Get the video ID of the latest video
-    latest_video_id = response["items"][0]["id"]["videoId"]
+    latest_video_id = channel_videos["items"][0]["id"]["videoId"]
 
     return latest_video_id

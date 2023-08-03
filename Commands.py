@@ -149,7 +149,7 @@ async def hekmat(
 
 
 @client.slash_command(
-    name="YouTube",
+    name="youtube",
     description="Send new youtube videos in a channel.",
     default_member_permissions=Permissions(administrator=True),
     dm_permission=False,
@@ -159,7 +159,7 @@ async def youtube_notification_set(
     link: str = SlashOption(
         required=True, description="A video link from the target youtube channel"
     ),
-    channel_id: int = SlashOption(
+    channel_id: str = SlashOption(
         required=True,
         description="Target Discord channel id to publish new youtube videos.",
     ),
@@ -167,6 +167,7 @@ async def youtube_notification_set(
     try:
         interaction_response = await interaction.send("Please wait...", ephemeral=True)
 
+        channel_id = int(channel_id)
         channel = client.get_channel(channel_id)
         video = pytube.YouTube(link)
 
@@ -185,7 +186,7 @@ async def youtube_notification_set(
 
 
 @client.slash_command(
-    name="YouTube_Remove",
+    name="youtube_remove",
     description="Remove a previously set notification rule.",
     default_member_permissions=Permissions(administrator=True),
     dm_permission=False,
@@ -204,7 +205,7 @@ async def youtube_notification_remove(
         result = data.remove_yt_notif_rule(interaction.guild_id, video.channel_id)
         if result == video.channel_id:
             await interaction_response.edit(
-                f"Done. You will no longer receive new videos from **{video.author}**.",
+                f"You will no longer receive new videos from **{video.author}**.",
             )
         else:
             await interaction_response.edit(str(result))
