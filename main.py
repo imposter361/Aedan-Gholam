@@ -1,13 +1,13 @@
 import logging
-import SteamLink
-import MemberJoin
-import MemberCount
-import EpicGames
-import KleiPoint
+import ready
+import set_role
+import epic_games
+import steam_link
+import klei_points
+import member_join
+import member_count
 import youtube_notify
-import Ready
-import SetRole
-import Commands
+import commands
 import management_commands
 from bot import client, TOKEN
 

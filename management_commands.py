@@ -1,7 +1,29 @@
-from bot import client, ADMINS, HOME_GUILDS
 import data
-from nextcord import Interaction, Permissions, SlashOption, Embed
+import pytube
+import logging
 import webcolors
+from typing import Optional
+from bot import client, ADMINS, HOME_GUILDS
+from nextcord import Interaction, Permissions, SlashOption, Embed
+
+
+# help
+@client.slash_command(
+    name="help",
+    description="Display help message",
+    default_member_permissions=Permissions(administrator=True),
+    dm_permission=False,
+)
+async def help(interaction: Interaction):
+    interaction_response = await interaction.send(f"Please wait ...", ephemeral=True)
+
+    help_message = (
+        "Salam, AedanGholam dar khedmate shomast.\n\n"
+        "`/settings`: Baraye set kardan tanzimate bot az in command estefade konid.\n"
+        "`set welcome channel id`: in option baraye set kardane id text channel marboot be payam haye khosh amad gooyi mibashad.\n"
+        "`/embed`: baraye neveshtan yek payam dar embed ast ke mitavan az rang haye mokhtalef estefade kard."
+    )
+    await interaction_response.edit(help_message)
 
 
 @client.slash_command(
@@ -137,9 +159,16 @@ async def settings(
                     await interaction_response.edit(str(result))
                 return
 
-            message_id = int(id)
-            result = data.set_welcome_channel_id(interaction.guild_id, message_id)
-            if result == message_id:
+            channel_id = int(id)
+            channel = client.get_channel(channel_id)
+            if interaction.guild_id != channel.guild.id:
+                await interaction_response.edit(
+                    "Invalid channel ID.",
+                )
+                return
+
+            result = data.set_welcome_channel_id(interaction.guild_id, channel_id)
+            if result == channel_id:
                 await interaction_response.edit(
                     "Welcome channel has been set.",
                 )
@@ -161,9 +190,15 @@ async def settings(
                     await interaction_response.edit(str(result))
                 return
 
-            message_id = int(id)
-            result = data.set_free_games_channel_id(interaction.guild_id, message_id)
-            if result == message_id:
+            channel_id = int(id)
+            channel = client.get_channel(channel_id)
+            if interaction.guild_id != channel.guild.id:
+                await interaction_response.edit(
+                    "Invalid channel ID.",
+                )
+                return
+            result = data.set_free_games_channel_id(interaction.guild_id, channel_id)
+            if result == channel_id:
                 await interaction_response.edit(
                     "free game channel has been set.",
                 )
@@ -233,9 +268,15 @@ async def settings(
                     await interaction_response.edit(str(result))
                 return
 
-            message_id = int(id)
-            result = data.set_member_count_channel_id(interaction.guild_id, message_id)
-            if result == message_id:
+            channel_id = int(id)
+            channel = client.get_channel(channel_id)
+            if interaction.guild_id != channel.guild.id:
+                await interaction_response.edit(
+                    "Invalid channel ID.",
+                )
+                return
+            result = data.set_member_count_channel_id(interaction.guild_id, channel_id)
+            if result == channel_id:
                 await interaction_response.edit(
                     "member count channel has been set.",
                 )
@@ -256,6 +297,20 @@ async def settings(
                 return
 
             message_id = int(id)
+            channel = interaction.channel
+            message = None
+            try:
+                message = await channel.fetch_message(message_id)
+            except Exception as e:
+                pass
+
+            if not message:
+                await interaction_response.edit(
+                    "Invalid message id. Make sure to run this command "
+                    + "in the same channel as the target message.",
+                )
+                return
+
             result = data.set_role_message_id(interaction.guild_id, message_id)
             if result == message_id:
                 await interaction_response.edit(
@@ -300,6 +355,34 @@ async def set_role_emoji(
     data.set_role_emoji(interaction.guild_id, get_roles)
 
 
+# Delete messages
+@client.slash_command(
+    name="delete",
+    description="Delete how many messages you want",
+    default_member_permissions=8,
+)
+async def delete(
+    interaction: Interaction, number: Optional[int] = SlashOption(required=True)
+):
+    try:
+        interaction_response = await interaction.send("Please wait...", ephemeral=True)
+        if number <= 0:
+            await interaction_response.edit(f"{number} is not allowed")
+            return
+
+        await interaction.channel.purge(limit=number)
+        if number == 1:
+            await interaction_response.edit(f"{number} message deleted.")
+            logging.warning(f"{number} message deleted.")
+        else:
+            await interaction_response.edit(f"{number} messages have been deleted.")
+            logging.warning(f"{number} messages have been deleted.")
+
+    except Exception as e:
+        print(str(e) + " Exception happend in Message delete.")
+        logging.error(str(e) + " Exception happend in Message delete.")
+
+
 @client.slash_command(
     name="embed",
     description=" Send an embed message",
@@ -337,3 +420,78 @@ async def embed(
         await interaction.send(embed=embed)
     except Exception:
         await interaction.send("Unknown error.", ephemeral=True)
+
+
+@client.slash_command(
+    name="youtube",
+    description="Send new youtube videos in a channel.",
+    default_member_permissions=Permissions(administrator=True),
+    dm_permission=False,
+)
+async def youtube_notification_set(
+    interaction: Interaction,
+    link: str = SlashOption(
+        required=True, description="A video link from the target youtube channel"
+    ),
+    channel_id: str = SlashOption(
+        required=False,
+        description="Target Discord channel id to publish new youtube videos.",
+    ),
+):
+    try:
+        interaction_response = await interaction.send("Please wait...", ephemeral=True)
+
+        if not channel_id:
+            channel_id = interaction.channel_id
+
+        channel_id = int(channel_id)
+        channel = client.get_channel(channel_id)
+        if interaction.guild_id != channel.guild.id:
+            await interaction_response.edit(
+                "Invalid channel ID.",
+            )
+            return
+
+        video = pytube.YouTube(link)
+
+        result = data.add_yt_notif_rule(
+            interaction.guild_id, video.channel_id, channel_id
+        )
+        if result == video.channel_id or result == "Updated.":
+            await interaction_response.edit(
+                f"Done. **{video.author}** new videos will be posted on **{channel.name}**.",
+            )
+        else:
+            await interaction_response.edit(str(result))
+    except Exception as e:
+        print(e)
+        await interaction_response.edit(str(e))
+
+
+@client.slash_command(
+    name="youtube_remove",
+    description="Remove a previously set notification rule.",
+    default_member_permissions=Permissions(administrator=True),
+    dm_permission=False,
+)
+async def youtube_notification_remove(
+    interaction: Interaction,
+    link: str = SlashOption(
+        required=True, description="A video link from the target youtube channel"
+    ),
+):
+    try:
+        interaction_response = await interaction.send("Please wait...", ephemeral=True)
+
+        video = pytube.YouTube(link)
+
+        result = data.remove_yt_notif_rule(interaction.guild_id, video.channel_id)
+        if result == video.channel_id:
+            await interaction_response.edit(
+                f"You will no longer receive new videos from **{video.author}**.",
+            )
+        else:
+            await interaction_response.edit(str(result))
+    except Exception as e:
+        print(e)
+        await interaction_response.edit(str(e))

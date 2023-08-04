@@ -1,9 +1,9 @@
 import logging
 from bot import client
 from version import VERSION
-from KleiPoint import dst
-from MemberCount import member_count
-from EpicGames import check_discounts
+from klei_points import dst
+from member_count import member_count
+from epic_games import check_discounts
 from youtube_notify import check_for_new_youtube_video
 
 
