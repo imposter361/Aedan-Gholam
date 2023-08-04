@@ -1,10 +1,10 @@
 import data
-import googleapiclient.discovery
-from bot import client, YOUTUBE_API_KEY
+from bot import client
 from nextcord.ext import tasks
+from youtubesearchpython import Playlist, playlist_from_channel_id
 
 
-@tasks.loop(minutes=10)
+@tasks.loop(minutes=15)
 async def check_for_new_youtube_video():
     subscriptions = data.get_subscriptions()
 
@@ -25,7 +25,8 @@ async def check_for_new_youtube_video():
                         rules[yt_channel_id]["discord_channel_id"]
                     )
                     await discord_channel.send(
-                        f"A new video from **{last_video['channel_title']}**:point_down_tone1:\nhttps://www.youtube.com/watch?v={last_video['id']}"
+                        f"A new video from **{last_video['channel_name']}**:point_down_tone1:"
+                        + f"\nhttps://www.youtube.com/watch?v={last_video['id']}"
                     )
                     # update stored last video id
                     data.set_yt_last_video_id(guild_id, yt_channel_id, last_video["id"])
@@ -34,24 +35,9 @@ async def check_for_new_youtube_video():
 
 
 def get_last_video_of_youtube_channel(yt_channel_id):
-    youtube_api = googleapiclient.discovery.build(
-        "youtube", "v3", developerKey=YOUTUBE_API_KEY
-    )
-
-    # Get the latest video from the channel
-    channel_videos = (
-        youtube_api.search()
-        .list(
-            part="snippet",
-            channelId=yt_channel_id,
-            type="video",
-            order="date",
-            maxResults=1,
-        )
-        .execute()
-    )
-
-    latest_video_id = channel_videos["items"][0]["id"]["videoId"]
-    channel_title = channel_videos["items"][0]["snippet"]["channelTitle"]
-
-    return {"id": latest_video_id, "channel_title": channel_title}
+    playlist = Playlist(playlist_from_channel_id(yt_channel_id))
+    video = playlist.videos[0]
+    return {
+        "id": video["id"],
+        "channel_name": video["channel"]["name"],
+    }
