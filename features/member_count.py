@@ -1,7 +1,7 @@
 import logging
 from bot import client
 from nextcord.ext import tasks
-from data import get_member_count_channel_id, get_subscriptions
+from data.data import get_member_count_channel_id, get_subscriptions
 
 
 # Update member count every 11 minutes

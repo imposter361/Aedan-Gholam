@@ -1,6 +1,6 @@
-import data
 import logging
 import nextcord
+from data import data
 from bot import client
 
 

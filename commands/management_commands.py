@@ -1,4 +1,4 @@
-import data
+import data.data as data
 import pytube
 import logging
 import webcolors

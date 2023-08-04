@@ -1,4 +1,4 @@
-import data
+import data.data as data
 from bot import client
 from nextcord.ext import tasks
 from youtubesearchpython import Playlist, playlist_from_channel_id

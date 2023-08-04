@@ -1,4 +1,4 @@
-import data
+import data.data as data
 import logging
 import requests
 from bot import client
