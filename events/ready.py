@@ -19,4 +19,4 @@ async def on_ready():
     member_count_task.start()
     youtube_notify_task.start()
 
-    print("Starting tasks have finished!")
+    print("Starting tasks have started!")

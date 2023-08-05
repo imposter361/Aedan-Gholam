@@ -33,7 +33,7 @@ async def check_for_new_youtube_video():
 
         for yt_channel_id in rules:
             try:
-                last_video = _get_last_video_of_youtube_channel(yt_channel_id)
+                last_video = get_last_video_of_youtube_channel(yt_channel_id)
                 if rules[yt_channel_id]["last_video_id"] != last_video["id"]:
                     # send message
                     discord_channel = client.get_channel(
@@ -49,7 +49,7 @@ async def check_for_new_youtube_video():
                 print(e)
 
 
-def _get_last_video_of_youtube_channel(yt_channel_id):
+def get_last_video_of_youtube_channel(yt_channel_id):
     playlist = Playlist(playlist_from_channel_id(yt_channel_id))
     video = playlist.videos[0]
     return {
