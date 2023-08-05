@@ -2,20 +2,36 @@ import logging
 import nextcord
 from bot import client
 from urlextract import URLExtract
-from data.data import get_subscriptions
+from data import get_subscriptions
+
+
+if "_acive" not in dir():
+    global _active
+    _active = False
+
+
+def is_active():
+    return _active
+
+
+def activate():
+    global _active
+    _active = True
 
 
 # on_message
-def process(message):
-    subscriptions = get_subscriptions()
+async def process(message):
+    if not _active:
+        return False
 
+    subscriptions = get_subscriptions()
     # Check if the server has an active subscription or not
     if message.guild.id not in subscriptions or not subscriptions[message.guild.id]:
-        return None
+        return False
 
     # add "steam://openurl/" at the beginning of steam links.
     if message.author == client.user:
-        return None
+        return False
 
     user_message = str(message.content)
     steam_store = "https://store.steampowered.com"
@@ -30,7 +46,7 @@ def process(message):
 
     steam_links = []
     if all_start_with_steam:
-        return None
+        return False
     else:
         for i in message_urls:
             if i.startswith(steam_store) or i.startswith(steam_community):
@@ -40,13 +56,13 @@ def process(message):
         try:
             URL = "".join(steam_links)
             embed = nextcord.Embed(description=URL)
-            return {
-                "response_text": "Open directly in  <:steam_icon:1099351469674729553>",
-                "embed": embed,
-            }
+            await message.reply(
+                "Open directly in  <:steam_icon:1099351469674729553>", embed=embed
+            )
+            return True
 
         except Exception as e:
             print(str(e) + "Exception happened in Steamlink edition")
             logging.error(str(e) + "Exception happened in Steamlink edition")
 
-    return None
+    return False

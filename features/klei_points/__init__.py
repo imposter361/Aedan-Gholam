@@ -1,14 +1,30 @@
-import data.data as data
+import data
 import logging
 import requests
 from bot import client
 from bs4 import BeautifulSoup
-from nextcord.ext import tasks
 
 
-# send Klei point links in a channel.
-@tasks.loop(hours=11)
-async def dst():
+if "_acive" not in dir():
+    global _active
+    _active = False
+
+
+def is_active():
+    return _active
+
+
+def activate():
+    global _active
+    _active = True
+    from . import task
+
+
+# Check for free klei points then send them in the chat.
+async def check_klei_points():
+    if not _active:
+        return False
+
     subscriptions = data.get_subscriptions()
     for guild_id in subscriptions:
         if subscriptions[guild_id] == False:

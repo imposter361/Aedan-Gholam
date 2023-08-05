@@ -1,9 +1,8 @@
 .env
 .venv
 .vscode
-games.txt
-KleiLinks.txt
-DiscordBot.log
 __pycache__
-LinkExport.py
+DiscordBot.log
 data.json
+p.png
+final_image.png

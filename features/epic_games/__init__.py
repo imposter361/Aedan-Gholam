@@ -1,14 +1,30 @@
-import data.data as data
+import data
 import logging
 import requests
 from bot import client
 from datetime import datetime
-from nextcord.ext import tasks
 
 
-# Run the task every 12 hours
-@tasks.loop(hours=12)
-async def check_discounts():
+if "_acive" not in dir():
+    global _active
+    _active = False
+
+
+def is_active():
+    return _active
+
+
+def activate():
+    global _active
+    _active = True
+    from . import task
+
+
+# Check for free games on epic games then send them in the chat.
+async def check_free_games():
+    if not _active:
+        return False
+
     await client.wait_until_ready()
     subscriptions = data.get_subscriptions()
     for guild_id in subscriptions:

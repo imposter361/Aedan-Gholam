@@ -1,13 +1,28 @@
-import data.data as data
+import data
 from bot import client
-from nextcord.ext import tasks
 from youtubesearchpython import Playlist, playlist_from_channel_id
 
 
-@tasks.loop(minutes=15)
-async def check_for_new_youtube_video():
-    subscriptions = data.get_subscriptions()
+if "_acive" not in dir():
+    global _active
+    _active = False
 
+
+def is_active():
+    return _active
+
+
+def activate():
+    global _active
+    _active = True
+    from . import task
+
+
+async def check_for_new_youtube_video():
+    if not _active:
+        return False
+
+    subscriptions = data.get_subscriptions()
     for guild_id in subscriptions:
         if subscriptions[guild_id] == False:
             continue
@@ -18,7 +33,7 @@ async def check_for_new_youtube_video():
 
         for yt_channel_id in rules:
             try:
-                last_video = get_last_video_of_youtube_channel(yt_channel_id)
+                last_video = _get_last_video_of_youtube_channel(yt_channel_id)
                 if rules[yt_channel_id]["last_video_id"] != last_video["id"]:
                     # send message
                     discord_channel = client.get_channel(
@@ -34,7 +49,7 @@ async def check_for_new_youtube_video():
                 print(e)
 
 
-def get_last_video_of_youtube_channel(yt_channel_id):
+def _get_last_video_of_youtube_channel(yt_channel_id):
     playlist = Playlist(playlist_from_channel_id(yt_channel_id))
     video = playlist.videos[0]
     return {

@@ -1,6 +1,7 @@
-import data.data as data
-import pytube
+import data
+import features
 import logging
+import pytube
 import webcolors
 from typing import Optional
 from bot import client, ADMINS, HOME_GUILDS
@@ -441,6 +442,12 @@ async def youtube_notification_set(
     try:
         interaction_response = await interaction.send("Please wait...", ephemeral=True)
 
+        if not features.youtube_notify.is_active():
+            await interaction_response.edit(
+                "Sorry! This feature is unavailable at the moment...",
+            )
+            return
+
         if not channel_id:
             channel_id = interaction.channel_id
 
@@ -482,6 +489,12 @@ async def youtube_notification_remove(
 ):
     try:
         interaction_response = await interaction.send("Please wait...", ephemeral=True)
+
+        if not features.youtube_notify.is_active():
+            await interaction_response.edit(
+                "Sorry! This feature is unavailable at the moment...",
+            )
+            return
 
         video = pytube.YouTube(link)
 

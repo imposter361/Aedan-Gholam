@@ -1,15 +1,29 @@
+import data
 import logging
 import nextcord
-from data import data
 from bot import client
 
 
-# add or remove roles by reactions
+if "_acive" not in dir():
+    global _active
+    _active = False
 
 
-# Add roles
-@client.event
-async def on_raw_reaction_add(added_reaction):
+def is_active():
+    return _active
+
+
+def activate():
+    global _active
+    _active = True
+
+
+# Add or remove user roles based on reactions
+# Add role
+async def set_role_based_on_reaction(added_reaction):
+    if not _active:
+        return False
+
     guild = nextcord.utils.find(
         lambda g: g.id == added_reaction.guild_id, client.guilds
     )
@@ -32,18 +46,25 @@ async def on_raw_reaction_add(added_reaction):
                 logging.info(f"Role {role} added to {member}")
 
 
-# Remove roles
-@client.event
-async def on_raw_reaction_remove(role_unset):
-    guild = nextcord.utils.find(lambda g: g.id == role_unset.guild_id, client.guilds)
-    reaction = role_unset.emoji.name
+# Remove role
+async def unset_role_based_on_reaction(removed_reaction):
+    if not _active:
+        return False
+
+    guild = nextcord.utils.find(
+        lambda g: g.id == removed_reaction.guild_id, client.guilds
+    )
+    reaction = removed_reaction.emoji.name
     reactions = data.get_role_emoji(guild.id)
     set_role_message_id = data.get_role_message_id(guild.id)
-    if reaction in reactions.keys() and role_unset.message_id == set_role_message_id:
+    if (
+        reaction in reactions.keys()
+        and removed_reaction.message_id == set_role_message_id
+    ):
         role = nextcord.utils.get(guild.roles, name=reactions.get(reaction))
         if role is not None:
             member = nextcord.utils.find(
-                lambda m: m.id == role_unset.user_id, guild.members
+                lambda m: m.id == removed_reaction.user_id, guild.members
             )
             if member is not None:
                 await member.remove_roles(role)
