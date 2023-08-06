@@ -465,7 +465,11 @@ async def youtube_notification_set(
         )
 
         result = data.add_yt_notif_rule(
-            interaction.guild_id, video.channel_id, channel_id, last_channel_video["id"]
+            interaction.guild_id,
+            video.channel_id,
+            video.author,
+            channel_id,
+            last_channel_video["id"],
         )
         if result == video.channel_id or result == "Updated.":
             await interaction_response.edit(

@@ -274,7 +274,7 @@ def get_role_emoji(guild_id):
 
 
 def add_yt_notif_rule(
-    guild_id, yt_channel_id, discord_channel_id, last_video_id=None
+    guild_id, yt_channel_id, yt_channel_name, discord_channel_id, last_video_id=None
 ):
     try:
         index = get_server_index(guild_id)
@@ -288,6 +288,9 @@ def add_yt_notif_rule(
         yt_channel_id = str(yt_channel_id)
 
         if yt_channel_id in rules:
+            if rules[yt_channel_id].get("name") != yt_channel_name:
+                rules[yt_channel_id]["name"] = yt_channel_name
+                _save()
             if rules[yt_channel_id]["discord_channel_id"] == discord_channel_id:
                 return "This rule already exists."
             else:
@@ -296,6 +299,7 @@ def add_yt_notif_rule(
                 return "Updated."
 
         rules[yt_channel_id] = {
+            "name": yt_channel_name,
             "discord_channel_id": discord_channel_id,
             "last_video_id": last_video_id,
         }
@@ -315,7 +319,7 @@ def get_yt_notif_rules(guild_id):
         return None
 
 
-def set_yt_last_video_id(guild_id, yt_channel_id, video_id):
+def set_yt_last_video_id(guild_id, yt_channel_id, yt_channel_name, video_id):
     try:
         index = get_server_index(guild_id)
         if index == -1:
@@ -330,6 +334,9 @@ def set_yt_last_video_id(guild_id, yt_channel_id, video_id):
         if yt_channel_id not in rules:
             return "The server has no rules defined for this Youtube channel."
 
+        if rules[yt_channel_id].get("name") != yt_channel_name:
+            rules[yt_channel_id]["name"] = yt_channel_name
+            _save()
         if rules[yt_channel_id]["last_video_id"] == video_id:
             return "Unchanged."
         else:

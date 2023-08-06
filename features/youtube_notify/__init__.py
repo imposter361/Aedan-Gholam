@@ -50,7 +50,12 @@ async def check_for_new_youtube_video():
                         + f"\nhttps://www.youtube.com/watch?v={last_video['id']}"
                     )
                     # update stored last video id
-                    data.set_yt_last_video_id(guild_id, yt_channel_id, last_video["id"])
+                    data.set_yt_last_video_id(
+                        guild_id,
+                        yt_channel_id,
+                        last_video["channel_name"],
+                        last_video["id"],
+                    )
             except Exception as e:
                 print(e)
 

@@ -101,21 +101,29 @@ def _get_klei_points():
 async def _send_klei_points_for_guild(guild_id, channel_id, klei_points):
     channel = client.get_channel(channel_id)
     sent_links = data.get_klei_links(guild_id)
+    valid_sent_links = []
 
     for klei_point in klei_points:
         if klei_point["url"] in sent_links:
+            valid_sent_links.append(klei_point["url"])
             continue
 
         role_id = data.get_dst_role_id(guild_id)
-
         message_header = "🇳 🇪 🇼  🥹  🇱 🇮 🇳 🇰\n+---------------------------------------------------------+\n"
         if role_id:
             message_header = f"🇳 🇪 🇼  🥹  🇱 🇮 🇳 🇰 <@&{role_id}>\n+---------------------------------------------------------+\n"
-        await channel.send(
-            message_header
-            + "<:dst_icon:1101262983788769351> Open the link below :point_down::skin-tone-1: to claim **klei point** for **Don't starve together**\n"
-            + f"**Date:** {klei_point['date']}\n**Points:** {klei_point['points']}\n**Spools:** {klei_point['spools']}\n**Link:** <{klei_point['url']}>\n"
-            + "+---------------------------------------------------------+"
-        )
-        sent_links.append(klei_point["url"])
-        data.set_klei_links(guild_id, sent_links)
+        try:
+            await channel.send(
+                message_header
+                + "<:dst_icon:1101262983788769351> Open the link below :point_down::skin-tone-1: to claim **klei point** for **Don't starve together**\n"
+                + f"**Date:** {klei_point['date']}\n**Points:** {klei_point['points']}\n**Spools:** {klei_point['spools']}\n**Link:** <{klei_point['url']}>\n"
+                + "+---------------------------------------------------------+"
+            )
+            valid_sent_links.append(klei_point["url"])
+            sent_links.append(klei_point["url"])
+            data.set_klei_links(guild_id, sent_links)
+        except Exception as e:
+            print(e)
+
+    # Cleanup expired links (only keep valid sent links in the data storage)
+    data.set_klei_links(guild_id, valid_sent_links)
