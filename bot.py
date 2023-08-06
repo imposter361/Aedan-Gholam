@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 from nextcord.ext import commands
 
 
-intents = nextcord.Intents.all()
-client = commands.Bot(command_prefix="!", intents=intents)
+_intents = nextcord.Intents.all()
+client = commands.Bot(command_prefix="!", intents=_intents)
 
 
 load_dotenv()

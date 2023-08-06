@@ -6,19 +6,61 @@ from PIL import Image, ImageDraw, ImageFont
 from data import get_welcome_channel_id, get_subscriptions
 
 
-def create_welcome_banner(member, is_home):
+if "_acive" not in dir():
+    global _active
+    _active = False
+
+
+def is_active():
+    return _active
+
+
+def activate():
+    global _active
+    _active = True
+
+
+# send welcome message for new members:
+async def send_welcome_banner(member):
+    if not _active:
+        return False
+
+    guild = member.guild
+    subscriptions = get_subscriptions()
+    if not (guild.id in subscriptions and subscriptions[guild.id]):
+        return
+
+    welcome_channel_id = get_welcome_channel_id(guild.id)
+    if welcome_channel_id is None:
+        return
+
+    channel = client.get_channel(welcome_channel_id)
+    member_name = str(member.name)
+
+    is_home = False
+    if guild.id in HOME_GUILDS:  # Aedan Gaming server id
+        is_home = True
+    file = _create_welcome_banner(member, is_home)
+    await channel.send(
+        f"Salam {member.mention} be **{guild}** khosh oomadi!\n", file=file
+    )
+    print(f"{member_name} joined {guild}.")
+    logging.info(f"{member_name} joined {guild}.")
+
+
+def _create_welcome_banner(member, is_home):
     get_author_profile_pic = member.avatar
     if get_author_profile_pic:
         try:
             response = requests.get(get_author_profile_pic)
-            with open("p.png", "wb") as file:
+            with open("resources/p.png", "wb") as file:
                 file.write(response.content)
-            author_profile_pic = "p.png"
+            author_profile_pic = "resources/p.png"
         except Exception as e:
             print(e + " Request to get new member's profile picture failed")
     else:
-        get_author_profile_pic = Image.open("NoPic.png").convert("RGBA")
-        author_profile_pic = "NoPic.png"
+        get_author_profile_pic = Image.open("resources/NoPic.png").convert("RGBA")
+        author_profile_pic = "resources/NoPic.png"
 
     # get username and guild member count
     guild = member.guild
@@ -31,13 +73,15 @@ def create_welcome_banner(member, is_home):
 
     if is_home:
         # for member name
-        name_font = ImageFont.truetype("BreeSerif-Regular.ttf", 30)
+        name_font = ImageFont.truetype("resources/BreeSerif-Regular.ttf", 30)
         # for member counter
-        counter_font = ImageFont.truetype("BreeSerif-Regular.ttf", 20)
+        counter_font = ImageFont.truetype("resources/BreeSerif-Regular.ttf", 20)
     else:
-        name_font = ImageFont.truetype("Righteous-Regular.ttf", 35)  # for member name
+        name_font = ImageFont.truetype(
+            "resources/Righteous-Regular.ttf", 35
+        )  # for member name
         counter_font = ImageFont.truetype(
-            "Righteous-Regular.ttf", 25
+            "resources/Righteous-Regular.ttf", 25
         )  # for member counter
 
     # Open the original image
@@ -62,7 +106,7 @@ def create_welcome_banner(member, is_home):
     circle_img.paste(img, (0, 0), mask=mask)
 
     # Open the background image
-    background = Image.open("b.jpg").convert("RGBA")
+    background = Image.open("resources/b.jpg").convert("RGBA")
 
     # Define the position to paste the circular image onto the background image
     position = None
@@ -79,7 +123,7 @@ def create_welcome_banner(member, is_home):
 
     # paste booster image top of the profile pic (booster = aedan bird)
     if is_home:
-        booster = Image.open("s.png").resize((72, 51)).convert("RGBA")
+        booster = Image.open("resources/s.png").resize((72, 51)).convert("RGBA")
         r, g, b, a = booster.split()
         new_image = Image.new("RGBA", background.size, (255, 255, 255, 0))
         new_image.paste(Image.merge("RGBA", (r, g, b, a)), (320, 212), a)
@@ -98,32 +142,6 @@ def create_welcome_banner(member, is_home):
     draw1.text((x, 285), member_name, fill=(250, 208, 92, 255), font=name_font)
 
     # Save the final image
-    background.save("final_image.png")
-    file = nextcord.File("final_image.png", filename="welcome.png")
+    background.save("resources/final_image.png")
+    file = nextcord.File("resources/final_image.png", filename="welcome.png")
     return file
-
-
-# send welcome message for new members:
-@client.event
-async def on_member_join(member):
-    guild = member.guild
-    subscriptions = get_subscriptions()
-    if not (guild.id in subscriptions and subscriptions[guild.id]):
-        return
-
-    welcome_channel_id = get_welcome_channel_id(guild.id)
-    if welcome_channel_id is None:
-        return
-
-    channel = client.get_channel(welcome_channel_id)
-    member_name = str(member.name)
-
-    is_home = False
-    if guild.id in HOME_GUILDS:  # Aedan Gaming server id
-        is_home = True
-    file = create_welcome_banner(member, is_home)
-    await channel.send(
-        f"Salam {member.mention} be **{guild}** khosh oomadi!\n", file=file
-    )
-    print(f"{member_name} joined {guild}.")
-    logging.info(f"{member_name} joined {guild}.")

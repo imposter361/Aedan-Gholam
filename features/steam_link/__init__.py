@@ -1,23 +1,37 @@
 import logging
 import nextcord
 from bot import client
-from version import VERSION
 from urlextract import URLExtract
 from data import get_subscriptions
 
 
+if "_acive" not in dir():
+    global _active
+    _active = False
+
+
+def is_active():
+    return _active
+
+
+def activate():
+    global _active
+    _active = True
+
+
 # on_message
-@client.event
-async def on_message(message):
-    # gholam command added (auto reply)
-    lower_message = str(message.content).lower()
-    if ("gholam") in lower_message:
-        if message.author != client.user:
-            await message.reply(f"Gholametam v{VERSION}")
+async def process(message):
+    if not _active:
+        return False
+
+    subscriptions = get_subscriptions()
+    # Check if the server has an active subscription or not
+    if message.guild.id not in subscriptions or not subscriptions[message.guild.id]:
+        return False
 
     # add "steam://openurl/" at the beginning of steam links.
     if message.author == client.user:
-        return
+        return False
 
     user_message = str(message.content)
     steam_store = "https://store.steampowered.com"
@@ -32,7 +46,7 @@ async def on_message(message):
 
     steam_links = []
     if all_start_with_steam:
-        return
+        return False
     else:
         for i in message_urls:
             if i.startswith(steam_store) or i.startswith(steam_community):
@@ -40,16 +54,15 @@ async def on_message(message):
 
     if steam_store in user_message or steam_community in user_message:
         try:
-            # Check if the server has an active subscription or not
-            subscriptions = get_subscriptions()
-            if message.guild.id in subscriptions and subscriptions[message.guild.id]:
-                URL = "".join(steam_links)
-                embed = nextcord.Embed(description=URL)
-                await message.reply(
-                    f" Open directly in  <:steam_icon:1099351469674729553> ",
-                    embed=embed,
-                )
+            URL = "".join(steam_links)
+            embed = nextcord.Embed(description=URL)
+            await message.reply(
+                "Open directly in  <:steam_icon:1099351469674729553>", embed=embed
+            )
+            return True
 
         except Exception as e:
             print(str(e) + "Exception happened in Steamlink edition")
             logging.error(str(e) + "Exception happened in Steamlink edition")
+
+    return False

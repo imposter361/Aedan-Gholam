@@ -1,13 +1,30 @@
 import data
 from bot import client
-from nextcord.ext import tasks
 from youtubesearchpython import Playlist, playlist_from_channel_id
 
 
-@tasks.loop(minutes=15)
-async def check_for_new_youtube_video():
-    subscriptions = data.get_subscriptions()
+if "_acive" not in dir():
+    global _active
+    _active = False
 
+
+def is_active():
+    return _active
+
+
+def activate():
+    global _active
+    _active = True
+    from . import task
+
+
+async def check_for_new_youtube_video():
+    if not _active:
+        return False
+
+    channels_last_videos = {}
+
+    subscriptions = data.get_subscriptions()
     for guild_id in subscriptions:
         if subscriptions[guild_id] == False:
             continue
@@ -18,7 +35,11 @@ async def check_for_new_youtube_video():
 
         for yt_channel_id in rules:
             try:
-                last_video = get_last_video_of_youtube_channel(yt_channel_id)
+                if yt_channel_id not in channels_last_videos:
+                    last_video = get_last_video_of_youtube_channel(yt_channel_id)
+                    channels_last_videos[yt_channel_id] = last_video
+
+                last_video = channels_last_videos[yt_channel_id]
                 if rules[yt_channel_id]["last_video_id"] != last_video["id"]:
                     # send message
                     discord_channel = client.get_channel(
@@ -29,7 +50,12 @@ async def check_for_new_youtube_video():
                         + f"\nhttps://www.youtube.com/watch?v={last_video['id']}"
                     )
                     # update stored last video id
-                    data.set_yt_last_video_id(guild_id, yt_channel_id, last_video["id"])
+                    data.set_yt_last_video_id(
+                        guild_id,
+                        yt_channel_id,
+                        last_video["channel_name"],
+                        last_video["id"],
+                    )
             except Exception as e:
                 print(e)
 

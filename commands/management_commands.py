@@ -1,6 +1,7 @@
 import data
-import pytube
+import features
 import logging
+import pytube
 import webcolors
 from typing import Optional
 from bot import client, ADMINS, HOME_GUILDS
@@ -441,6 +442,12 @@ async def youtube_notification_set(
     try:
         interaction_response = await interaction.send("Please wait...", ephemeral=True)
 
+        if not features.youtube_notify.is_active():
+            await interaction_response.edit(
+                "Sorry! This feature is unavailable at the moment...",
+            )
+            return
+
         if not channel_id:
             channel_id = interaction.channel_id
 
@@ -453,9 +460,16 @@ async def youtube_notification_set(
             return
 
         video = pytube.YouTube(link)
+        last_channel_video = features.youtube_notify.get_last_video_of_youtube_channel(
+            video.channel_id
+        )
 
         result = data.add_yt_notif_rule(
-            interaction.guild_id, video.channel_id, channel_id
+            interaction.guild_id,
+            video.channel_id,
+            video.author,
+            channel_id,
+            last_channel_video["id"],
         )
         if result == video.channel_id or result == "Updated.":
             await interaction_response.edit(
@@ -482,6 +496,12 @@ async def youtube_notification_remove(
 ):
     try:
         interaction_response = await interaction.send("Please wait...", ephemeral=True)
+
+        if not features.youtube_notify.is_active():
+            await interaction_response.edit(
+                "Sorry! This feature is unavailable at the moment...",
+            )
+            return
 
         video = pytube.YouTube(link)
 

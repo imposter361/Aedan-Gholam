@@ -1,14 +1,8 @@
-import logging
-import ready
-import set_role
-import epic_games
-import steam_link
-import klei_points
-import member_join
-import member_count
-import youtube_notify
+import events
+import features
 import commands
-import management_commands
+
+import logging
 from bot import client, TOKEN
 
 # does logging in debug level up to critical
