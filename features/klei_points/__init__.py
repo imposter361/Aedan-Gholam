@@ -25,7 +25,7 @@ async def check_klei_points():
     if not _active:
         return False
 
-    links = None
+    klei_points = None
 
     subscriptions = data.get_subscriptions()
     for guild_id in subscriptions:
@@ -36,14 +36,17 @@ async def check_klei_points():
         if not channel_id:
             continue
 
-        if not links:
-            links = _get_klei_links()
+        if not klei_points:
+            klei_points = _get_klei_points()
 
-        await _send_klei_links_for_guild(guild_id, channel_id, links)
+        try:
+            await _send_klei_points_for_guild(guild_id, channel_id, klei_points)
+        except Exception as e:
+            print(e)
 
 
-def _get_klei_links():
-    links = []
+def _get_klei_points():
+    klei_points = []
     # get links just for the first time
     url = "https://steamcommunity.com/sharedfiles/filedetails/?id=2308653652&tscn=1639750749"
 
@@ -55,14 +58,14 @@ def _get_klei_links():
         row_elements = soup.select(row_selector)
 
         if not row_elements:
-            return links
+            return klei_points
 
         try:
             for row_element in row_elements:
                 if "Outdated" in str(row_element.contents[1]):
                     continue
                 try:
-                    links.append(
+                    klei_points.append(
                         {
                             "url": (
                                 str(row_element.contents[1])
@@ -92,15 +95,15 @@ def _get_klei_links():
     except Exception as e:
         print(e)
 
-    return links
+    return klei_points
 
 
-async def _send_klei_links_for_guild(guild_id, channel_id, links):
+async def _send_klei_points_for_guild(guild_id, channel_id, klei_points):
     channel = client.get_channel(channel_id)
     sent_links = data.get_klei_links(guild_id)
 
-    for link in links:
-        if link["url"] in sent_links:
+    for klei_point in klei_points:
+        if klei_point["url"] in sent_links:
             continue
 
         role_id = data.get_dst_role_id(guild_id)
@@ -111,8 +114,8 @@ async def _send_klei_links_for_guild(guild_id, channel_id, links):
         await channel.send(
             message_header
             + "<:dst_icon:1101262983788769351> Open the link below :point_down::skin-tone-1: to claim **klei point** for **Don't starve together**\n"
-            + f"**Date:** {link['date']}\n**Points:** {link['points']}\n**Spools:** {link['spools']}\n**Link:** <{link['url']}>\n"
+            + f"**Date:** {klei_point['date']}\n**Points:** {klei_point['points']}\n**Spools:** {klei_point['spools']}\n**Link:** <{klei_point['url']}>\n"
             + "+---------------------------------------------------------+"
         )
-        sent_links.append(link)
+        sent_links.append(klei_point["url"])
         data.set_klei_links(guild_id, sent_links)
