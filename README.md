@@ -28,7 +28,7 @@
 3. Populate `.env` file with your secret information. (Bot token and etc.)
 4. Preferably create a new virtual environment and activate it
    ```
-   pyhton3 -m venv .venv
+   python3 -m venv .venv
    source .venv/bin/activate
    ```
 5. Install required packages
@@ -37,7 +37,7 @@
    ```
 6. Run `main.py` script
    ```
-   pyhton3 main.py
+   python3 main.py
    ```
 
 # To-Do
