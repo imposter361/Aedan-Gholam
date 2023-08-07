@@ -1,5 +1,5 @@
-from nextcord.ext import tasks
 from . import check_klei_points
+from nextcord.ext import tasks
 
 
 @tasks.loop(hours=11)

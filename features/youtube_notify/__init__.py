@@ -1,9 +1,12 @@
 import data
+import logging
 from bot import client
 from youtubesearchpython import Playlist, playlist_from_channel_id
 
 
-if "_acive" not in dir():
+_logger = logging.getLogger("main")
+
+if "_acive" not in dir():  # Run once
     global _active
     _active = False
 
@@ -15,6 +18,7 @@ def is_active():
 def activate():
     global _active
     _active = True
+    _logger.debug("Feature has been activated: 'youtube_notify'")
     from . import task
 
 
@@ -22,11 +26,13 @@ async def check_for_new_youtube_video():
     if not _active:
         return False
 
+    _logger.debug("Running Youtube notify task...")
+
     channels_last_videos = {}
 
     subscriptions = data.get_subscriptions()
     for guild_id in subscriptions:
-        if subscriptions[guild_id] == False:
+        if not subscriptions[guild_id]:
             continue
 
         rules = data.get_yt_notif_rules(guild_id)
@@ -49,6 +55,12 @@ async def check_for_new_youtube_video():
                         f"A new video from **{last_video['channel_name']}**:point_down_tone1:"
                         + f"\nhttps://www.youtube.com/watch?v={last_video['id']}"
                     )
+                    _logger.debug(
+                        f"Sent a youtube video notification. "
+                        + f"video_id: '{last_video['id']}' yt_channel: '{last_video['channel_name']}' "
+                        + f" channel: '{discord_channel.name}' ({discord_channel.id}) "
+                        + f" guild: '{discord_channel.guild.name}' ({discord_channel.guild.id}) "
+                    )
                     # update stored last video id
                     data.set_yt_last_video_id(
                         guild_id,
@@ -56,11 +68,14 @@ async def check_for_new_youtube_video():
                         last_video["channel_name"],
                         last_video["id"],
                     )
-            except Exception as e:
-                print(e)
+            except:
+                _logger.exception()
 
 
 def get_last_video_of_youtube_channel(yt_channel_id):
+    _logger.debug(
+        f"Getting the most recent Youtube video with channel id of '{yt_channel_id}'"
+    )
     playlist = Playlist(playlist_from_channel_id(yt_channel_id))
     video = playlist.videos[0]
     return {

@@ -2,7 +2,8 @@
 .venv
 .vscode
 __pycache__
-DiscordBot.log
 data.json
-p.png
-final_image.png
+logs/
+resources/final_image.png
+resources/p.png
+DiscordBot.log

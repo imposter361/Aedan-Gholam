@@ -2,8 +2,10 @@ import logging
 from bot import client
 from data import get_member_count_channel_id, get_subscriptions
 
+_logger = logging.getLogger("main")
 
-if "_acive" not in dir():
+
+if "_acive" not in dir():  # Run once
     global _active
     _active = False
 
@@ -15,12 +17,15 @@ def is_active():
 def activate():
     global _active
     _active = True
+    _logger.debug("Feature has been activated: 'member_count'")
     from . import task
 
 
 async def update_member_count():
     if not _active:
         return False
+
+    _logger.debug("Running member count updater task...")
 
     subscriptions = get_subscriptions()
     for guild_id in subscriptions:
@@ -35,11 +40,9 @@ async def update_member_count():
             )
             name = "Total members: " + str(members_count_channel.guild.member_count)
             await members_count_channel.edit(name=name)
-            print(
-                f"« {members_count_channel.guild.member_count} » people are in {str(members_count_channel.guild)}"
+            _logger.debug(
+                f"« {members_count_channel.guild.member_count} » members are in '{str(members_count_channel.guild)}' "
+                + f"({members_count_channel.guild.id})"
             )
-            logging.info(
-                f"« {members_count_channel.guild.member_count} » people are in {str(members_count_channel.guild)}"
-            )
-        except Exception as e:
-            print(e)
+        except:
+            _logger.exception()

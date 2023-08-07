@@ -1,17 +1,24 @@
-import re
-import random
 import logging
+import random
+import re
 import requests
+from .helper import handle_command_exception
 from bot import client
-from version import VERSION
 from nextcord import Interaction, SlashOption
+from version import VERSION
+
+_logger = logging.getLogger("main")
 
 
 # Hafez
 @client.slash_command(name="hafez", description="Fall Migholi ?!")
 async def hafez(interaction: Interaction):
-    interaction_response = await interaction.send(f"Please wait ...")
     try:
+        _logger.info(
+            f"Command 'hafez' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+        )
+        interaction_response = await interaction.send(f"Please wait ...")
         url = "https://c.ganjoor.net/beyt-xml.php?n=1&a=1&p=2"
         response = requests.get(url)
         xml = response.content
@@ -22,12 +29,8 @@ async def hafez(interaction: Interaction):
         poem = f"{m1}\n{m2}\n\n{up} {poet}"
         await interaction_response.edit(poem)
 
-    except Exception as e:
-        print(str(e) + " Exception happend in Hafez.")
-        logging.error(str(e) + " Exception happend in Hafez.")
-        await interaction_response.edit(
-            f"Bebakhshid moshkeli pish oomade, dobare test kon!"
-        )
+    except:
+        await handle_command_exception("hafez", interaction, interaction_response)
 
 
 # Hekmat
@@ -38,15 +41,19 @@ async def hekmat(
         required=False, description="Yek adad beyne 1 ta 480 vared konid"
     ),
 ):
-    if number is None:
-        number = random.randrange(1, 481)
-    if number > 480 or number < 1:
-        await interaction.response.send_message(
-            "Yek adad beyne 1 ta 480 vared konid!", ephemeral=True
-        )
-        return
-    interaction_response = await interaction.send(f"Please wait ...")
     try:
+        _logger.info(
+            f"Command 'hekmat' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: number:{number}"
+        )
+        if number is None:
+            number = random.randrange(1, 481)
+        if number > 480 or number < 1:
+            await interaction.response.send_message(
+                "Yek adad beyne 1 ta 480 vared konid!", ephemeral=True
+            )
+            return
+        interaction_response = await interaction.send(f"Please wait ...")
         url = f"https://alimaktab.ir/json/wisdom/?n={number}"
         response = requests.get(url)
         response_json = response.json()
@@ -66,33 +73,36 @@ async def hekmat(
 
         await interaction_response.edit(clean_text)
 
-    except Exception as e:
-        print(str(e) + " Exception happend in Hekmat.")
-        logging.error(str(e) + " Exception happend in Hekmat.")
-        await interaction_response.edit(
-            f"Bebakhshid moshkeli pish oomade, dobare test kon!"
-        )
+    except:
+        await handle_command_exception("hekmat", interaction, interaction_response)
 
 
 # About Aedan Team
 @client.slash_command(name="team", description="About Aedan Team")
 async def team(interaction: Interaction):
     try:
-        team = "<:Aedan_logo:1103676392606007356> Bunch of friends gathered together as a team:\n\nEhsan 👨‍💻\nHossein(Moz) 💃\nBagher 🫰\nHossein(Defalcator) 🪡\nAli 🪃\nSina 🧻\n"
+        _logger.info(
+            f"Command 'team' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+        )
+        team = "<:Aedan_logo:1103676392606007356> Bunch of friends gathered together "
+        +"as a team:\n\nEhsan 👨‍💻\nHossein(Moz) 💃\nBagher 🫰\nHossein(Defalcator) 🪡\nAli 🪃\nSina 🧻"
         await interaction.response.send_message(team)
-    except Exception as e:
-        print(str(e) + " Exception happend in Team.")
-        logging.error(str(e) + " Exception happend in Team.")
+    except:
+        await handle_command_exception("team", interaction)
 
 
 # About Adean Gholam
 @client.slash_command(name="about", description="About Gholam")
 async def about(interaction: Interaction):
     try:
+        _logger.info(
+            f"Command 'about' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+        )
         Ali = client.get_user(620593942559326265)
         guild_name = client.get_guild(899023632204980324)
         about = f"Gholamam v{VERSION} az **{guild_name}**\nSaakhte daste aghamoon {Ali.mention} kheyli chakerim."
         await interaction.response.send_message(about)
-    except Exception as e:
-        print(str(e) + " Exception happend in About.")
-        logging.error(str(e) + " Exception happend in About.")
+    except:
+        await handle_command_exception("about", interaction)

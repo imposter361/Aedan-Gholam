@@ -2,11 +2,13 @@ import logging
 import nextcord
 import requests
 from bot import client, HOME_GUILDS
-from PIL import Image, ImageDraw, ImageFont
 from data import get_welcome_channel_id, get_subscriptions
+from PIL import Image, ImageDraw, ImageFont
+
+_logger = logging.getLogger("main")
 
 
-if "_acive" not in dir():
+if "_acive" not in dir():  # Run once
     global _active
     _active = False
 
@@ -18,34 +20,45 @@ def is_active():
 def activate():
     global _active
     _active = True
+    _logger.debug("Feature has been activated: 'welcome_banner'")
 
 
 # send welcome message for new members:
-async def send_welcome_banner(member):
+async def send_welcome_banner(member: nextcord.Member):
     if not _active:
         return False
 
-    guild = member.guild
-    subscriptions = get_subscriptions()
-    if not (guild.id in subscriptions and subscriptions[guild.id]):
-        return
+    try:
+        guild = member.guild
+        subscriptions = get_subscriptions()
+        if guild.id not in subscriptions or not subscriptions[guild.id]:
+            return
 
-    welcome_channel_id = get_welcome_channel_id(guild.id)
-    if welcome_channel_id is None:
-        return
+        welcome_channel_id = get_welcome_channel_id(guild.id)
+        if welcome_channel_id is None:
+            return
 
-    channel = client.get_channel(welcome_channel_id)
-    member_name = str(member.name)
+        _logger.info(f"{member.name} ({member.id}) ")
+        _logger.debug(
+            f"Generating welcome banner for the new member: "
+            + f"'{member.name}' ({member.id}) in '{guild.name}' ({guild.id})"
+        )
 
-    is_home = False
-    if guild.id in HOME_GUILDS:  # Aedan Gaming server id
-        is_home = True
-    file = _create_welcome_banner(member, is_home)
-    await channel.send(
-        f"Salam {member.mention} be **{guild}** khosh oomadi!\n", file=file
-    )
-    print(f"{member_name} joined {guild}.")
-    logging.info(f"{member_name} joined {guild}.")
+        channel = client.get_channel(welcome_channel_id)
+
+        is_home = False
+        if guild.id in HOME_GUILDS:  # Aedan Gaming server id
+            is_home = True
+        file = _create_welcome_banner(member, is_home)
+        await channel.send(
+            f"Salam {member.mention} be **{guild}** khosh oomadi!\n", file=file
+        )
+        _logger.debug(
+            f"Welcome banner has been sent for '{member.name}' ({member.id}) "
+            + f"at channel '{channel.name}' ({channel.id}) in '{guild.name}' ({guild.id})"
+        )
+    except:
+        _logger.exception()
 
 
 def _create_welcome_banner(member, is_home):

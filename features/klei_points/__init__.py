@@ -4,8 +4,10 @@ import requests
 from bot import client
 from bs4 import BeautifulSoup
 
+_logger = logging.getLogger("main")
 
-if "_acive" not in dir():
+
+if "_acive" not in dir():  # Run once
     global _active
     _active = False
 
@@ -17,6 +19,7 @@ def is_active():
 def activate():
     global _active
     _active = True
+    _logger.debug("Feature has been activated: 'klei_points'")
     from . import task
 
 
@@ -24,6 +27,8 @@ def activate():
 async def check_klei_points():
     if not _active:
         return False
+
+    _logger.debug("Running free Klei points task...")
 
     klei_points = None
 
@@ -39,13 +44,11 @@ async def check_klei_points():
         if not klei_points:
             klei_points = _get_klei_points()
 
-        try:
-            await _send_klei_points_for_guild(guild_id, channel_id, klei_points)
-        except Exception as e:
-            print(e)
+        await _send_klei_points_for_guild(guild_id, channel_id, klei_points)
 
 
 def _get_klei_points():
+    _logger.debug("Getting free Klei points list...")
     klei_points = []
     # get links just for the first time
     url = "https://steamcommunity.com/sharedfiles/filedetails/?id=2308653652&tscn=1639750749"
@@ -88,42 +91,44 @@ def _get_klei_points():
                 except:
                     continue
 
-        except Exception as e:
-            print(str(e) + "Exception happened in Keli")
-            logging.error(str(e) + "Exception happened in Keli")
+        except:
+            _logger.exception("Could not process free klei points links.")
 
-    except Exception as e:
-        print(e)
+    except:
+        _logger.exception("Could not get free klei points links.")
 
     return klei_points
 
 
 async def _send_klei_points_for_guild(guild_id, channel_id, klei_points):
-    channel = client.get_channel(channel_id)
-    sent_links = data.get_klei_links(guild_id)
-    valid_sent_links = []
+    try:
+        channel = client.get_channel(channel_id)
+        sent_links = data.get_klei_links(guild_id)
+        valid_sent_links = []
 
-    for klei_point in klei_points:
-        if klei_point["url"] in sent_links:
-            valid_sent_links.append(klei_point["url"])
-            continue
+        for klei_point in klei_points:
+            if klei_point["url"] in sent_links:
+                valid_sent_links.append(klei_point["url"])
+                continue
 
-        role_id = data.get_dst_role_id(guild_id)
-        message_header = "🇳 🇪 🇼  🥹  🇱 🇮 🇳 🇰\n+---------------------------------------------------------+\n"
-        if role_id:
-            message_header = f"🇳 🇪 🇼  🥹  🇱 🇮 🇳 🇰 <@&{role_id}>\n+---------------------------------------------------------+\n"
-        try:
-            await channel.send(
-                message_header
-                + "<:dst_icon:1101262983788769351> Open the link below :point_down::skin-tone-1: to claim **klei point** for **Don't starve together**\n"
-                + f"**Date:** {klei_point['date']}\n**Points:** {klei_point['points']}\n**Spools:** {klei_point['spools']}\n**Link:** <{klei_point['url']}>\n"
-                + "+---------------------------------------------------------+"
-            )
-            valid_sent_links.append(klei_point["url"])
-            sent_links.append(klei_point["url"])
-            data.set_klei_links(guild_id, sent_links)
-        except Exception as e:
-            print(e)
+            role_id = data.get_dst_role_id(guild_id)
+            message_header = "🇳 🇪 🇼  🥹  🇱 🇮 🇳 🇰\n+---------------------------------------------------------+\n"
+            if role_id:
+                message_header = f"🇳 🇪 🇼  🥹  🇱 🇮 🇳 🇰 <@&{role_id}>\n+---------------------------------------------------------+\n"
+            try:
+                await channel.send(
+                    message_header
+                    + "<:dst_icon:1101262983788769351> Open the link below :point_down::skin-tone-1: to claim **klei point** for **Don't starve together**\n"
+                    + f"**Date:** {klei_point['date']}\n**Points:** {klei_point['points']}\n**Spools:** {klei_point['spools']}\n**Link:** <{klei_point['url']}>\n"
+                    + "+---------------------------------------------------------+"
+                )
+                valid_sent_links.append(klei_point["url"])
+                sent_links.append(klei_point["url"])
+                data.set_klei_links(guild_id, sent_links)
+            except:
+                _logger.exception()
 
-    # Cleanup expired links (only keep valid sent links in the data storage)
-    data.set_klei_links(guild_id, valid_sent_links)
+        # Cleanup expired links (only keep valid sent links in the data storage)
+        data.set_klei_links(guild_id, valid_sent_links)
+    except:
+        _logger.exception()

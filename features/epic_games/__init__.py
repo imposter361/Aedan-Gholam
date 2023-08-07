@@ -4,8 +4,10 @@ import requests
 from bot import client
 from datetime import datetime
 
+_logger = logging.getLogger("main")
 
-if "_acive" not in dir():
+
+if "_acive" not in dir():  # Run once
     global _active
     _active = False
 
@@ -17,6 +19,7 @@ def is_active():
 def activate():
     global _active
     _active = True
+    _logger.debug("Feature has been activated: 'epic_games'")
     from . import task
 
 
@@ -24,6 +27,8 @@ def activate():
 async def check_free_games():
     if not _active:
         return False
+
+    _logger.debug("Running free Epic Games task...")
 
     free_games = None
 
@@ -39,13 +44,11 @@ async def check_free_games():
         if not free_games:
             free_games = _get_free_games_links()
 
-        try:
-            await _send_free_games_for_guild(guild_id, channel_id, free_games)
-        except Exception as e:
-            print(e)
+        await _send_free_games_for_guild(guild_id, channel_id, free_games)
 
 
 def _get_free_games_links():
+    _logger.debug("Getting Epic Games' free games list...")
     free_games = []
     try:
         # Make a request to the Epic Games
@@ -73,6 +76,10 @@ def _get_free_games_links():
                     slug = game["catalogNs"]["mappings"][0]["pageSlug"]
                 except Exception:
                     pass
+
+                if not game["promotions"]:
+                    continue
+
                 if not game["promotions"]["promotionalOffers"]:
                     continue
 
@@ -95,30 +102,32 @@ def _get_free_games_links():
                 )
 
             except Exception as e:
-                print(str(e) + " - There is a broken Epic Games link")
-                logging.error(str(e) + " - There is a broken Epic Games link")
+                _logger.debug("There is a broken Epic Games link: " + str(e))
 
-    except Exception as e:
-        print(e)
+    except:
+        _logger.exception("Failed to get free games list from Epic Games.")
 
     return free_games
 
 
 async def _send_free_games_for_guild(guild_id, channel_id, free_games):
-    channel = client.get_channel(channel_id)
-    sent_games = data.get_epic_games_names(guild_id)
+    try:
+        channel = client.get_channel(channel_id)
+        sent_games = data.get_epic_games_names(guild_id)
 
-    for game in free_games:
-        if game["name"] in sent_games:
-            continue
+        for game in free_games:
+            if game["name"] in sent_games:
+                continue
 
-        message = "The following game is currently available for free on the Epic Games Store:\n"
-        role_id = data.get_free_games_role_id(guild_id)
-        role_mention = ""
-        if role_id:
-            role_mention = f"<@&{role_id}>\n"
-        await channel.send(
-            f"{role_mention}{message}\n<:epic_icon:1101097658153713774> **{game['name']}** - (ends {game['end_date']})\n{game['url']}\n"
-        )
-        sent_games.append(game["name"])
-        data.set_epic_games_names(guild_id, sent_games)
+            message = "The following game is currently available for free on the Epic Games Store:\n"
+            role_id = data.get_free_games_role_id(guild_id)
+            role_mention = ""
+            if role_id:
+                role_mention = f"<@&{role_id}>\n"
+            await channel.send(
+                f"{role_mention}{message}\n<:epic_icon:1101097658153713774> **{game['name']}** - (ends {game['end_date']})\n{game['url']}\n"
+            )
+            sent_games.append(game["name"])
+            data.set_epic_games_names(guild_id, sent_games)
+    except:
+        _logger.exception()

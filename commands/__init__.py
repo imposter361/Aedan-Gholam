@@ -1,2 +1,2 @@
-from . import general_commands
-from . import management_commands
+from . import general
+from . import management

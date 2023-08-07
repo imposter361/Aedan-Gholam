@@ -1,5 +1,8 @@
-import os
 import json
+import logging
+import os
+
+_logger = logging.getLogger("main")
 
 
 _DATA_FILE = "data/data.json"
@@ -8,17 +11,20 @@ _data = None
 
 def _init():
     if not os.path.exists(_DATA_FILE):
+        _logger.debug(f"Data file does not exist. Creating {_DATA_FILE}")
         with open(_DATA_FILE, "w") as file:
             file.write(json.dumps([]))
 
 
 def _load():
+    _logger.debug(f"Loading data from {_DATA_FILE}")
     with open(_DATA_FILE) as file:
         global _data
         _data = json.load(file)
 
 
 def _save():
+    _logger.debug(f"Saving data to {_DATA_FILE}")
     with open(_DATA_FILE, "w") as file:
         file.write(json.dumps(_data, indent=4))
 
@@ -84,7 +90,7 @@ def set_welcome_channel_id(guild_id, channel_id):
         _save()
         return channel_id
     except Exception as e:
-        print(e)
+        _logger.exception()
         return f"Error happened: {str(e)}"
 
 
@@ -93,7 +99,10 @@ def get_welcome_channel_id(guild_id):
         for item in _data:
             if item["server_id"] == guild_id:
                 return item["welcome_channel_id"]
-    except Exception as e:
+    except:
+        _logger.debug(
+            f"Could not find welcome_channel_id for guild_id:{guild_id}. Returning None"
+        )
         return None
 
 
@@ -106,7 +115,7 @@ def set_free_games_channel_id(guild_id, channel_id):
         _save()
         return channel_id
     except Exception as e:
-        print(e)
+        _logger.exception()
         return f"Error happened: {str(e)}"
 
 
@@ -115,7 +124,10 @@ def get_free_games_channel_id(guild_id):
         for item in _data:
             if item["server_id"] == guild_id:
                 return item["free_games_channel_id"]
-    except Exception as e:
+    except:
+        _logger.debug(
+            f"Could not find free_games_channel_id for guild_id:{guild_id}. Returning None"
+        )
         return None
 
 
@@ -128,7 +140,7 @@ def set_free_games_role_id(guild_id, role_id):
         _save()
         return role_id
     except Exception as e:
-        print(e)
+        _logger.exception()
         return f"Error happened: {str(e)}"
 
 
@@ -137,7 +149,10 @@ def get_free_games_role_id(guild_id):
         for item in _data:
             if item["server_id"] == guild_id:
                 return item["free_games_role_id"]
-    except Exception as e:
+    except:
+        _logger.debug(
+            f"Could not find free_games_role_id for guild_id:{guild_id}. Returning None"
+        )
         return None
 
 
@@ -150,7 +165,7 @@ def set_dst_role_id(guild_id, role_id):
         _save()
         return role_id
     except Exception as e:
-        print(e)
+        _logger.exception()
         return f"Error happened: {str(e)}"
 
 
@@ -159,7 +174,10 @@ def get_dst_role_id(guild_id):
         for item in _data:
             if item["server_id"] == guild_id:
                 return item["dst_role_id"]
-    except Exception as e:
+    except:
+        _logger.debug(
+            f"Could not find dst_role_id for guild_id:{guild_id}. Returning None"
+        )
         return None
 
 
@@ -172,7 +190,7 @@ def set_epic_games_names(guild_id, games):
         _save()
         return games
     except Exception as e:
-        print(e)
+        _logger.exception()
         return f"Error happened: {str(e)}"
 
 
@@ -181,7 +199,10 @@ def get_epic_games_names(guild_id):
         for item in _data:
             if item["server_id"] == guild_id:
                 return item["epic_games"]
-    except Exception as e:
+    except:
+        _logger.debug(
+            f"Could not find epic_games for guild_id:{guild_id}. Returning None"
+        )
         return []
 
 
@@ -194,7 +215,7 @@ def set_klei_links(guild_id, links):
         _save()
         return links
     except Exception as e:
-        print(e)
+        _logger.exception()
         return f"Error happened: {str(e)}"
 
 
@@ -203,7 +224,10 @@ def get_klei_links(guild_id):
         for item in _data:
             if item["server_id"] == guild_id:
                 return item["klei_links"]
-    except Exception as e:
+    except:
+        _logger.debug(
+            f"Could not find klei_links for guild_id:{guild_id}. Returning None"
+        )
         return []
 
 
@@ -216,7 +240,7 @@ def set_member_count_channel_id(guild_id, channel_id):
         _save()
         return channel_id
     except Exception as e:
-        print(e)
+        _logger.exception()
         return f"Error happened: {str(e)}"
 
 
@@ -225,7 +249,10 @@ def get_member_count_channel_id(guild_id):
         for item in _data:
             if item["server_id"] == guild_id:
                 return item["member_count_channel_id"]
-    except Exception as e:
+    except:
+        _logger.debug(
+            f"Could not find member_count_channel_id for guild_id:{guild_id}. Returning None"
+        )
         return None
 
 
@@ -238,7 +265,7 @@ def set_role_message_id(guild_id, message_id):
         _save()
         return message_id
     except Exception as e:
-        print(e)
+        _logger.exception()
         return f"Error happened: {str(e)}"
 
 
@@ -247,7 +274,10 @@ def get_role_message_id(guild_id):
         for item in _data:
             if item["server_id"] == guild_id:
                 return item["set_role_message_id"]
-    except Exception as e:
+    except:
+        _logger.debug(
+            f"Could not find set_role_message_id for guild_id:{guild_id}. Returning None"
+        )
         return None
 
 
@@ -260,7 +290,7 @@ def set_role_emoji(guild_id, emoji_id):
         _save()
         return emoji_id
     except Exception as e:
-        print(e)
+        _logger.exception()
         return f"Error happened: {str(e)}"
 
 
@@ -269,7 +299,10 @@ def get_role_emoji(guild_id):
         for item in _data:
             if item["server_id"] == guild_id:
                 return item["set_role_emoji"]
-    except Exception as e:
+    except:
+        _logger.debug(
+            f"Could not find set_role_emoji for guild_id:{guild_id}. Returning None"
+        )
         return None
 
 
@@ -306,7 +339,7 @@ def add_yt_notif_rule(
         _save()
         return yt_channel_id
     except Exception as e:
-        print(e)
+        _logger.exception()
         return f"Error happened: {str(e)}"
 
 
@@ -316,6 +349,9 @@ def get_yt_notif_rules(guild_id):
             if item["server_id"] == guild_id:
                 return item["yt_notif_rules"]
     except Exception:
+        _logger.debug(
+            f"Could not find yt_notif_rules for guild_id:{guild_id}. Returning None"
+        )
         return None
 
 
@@ -345,7 +381,7 @@ def set_yt_last_video_id(guild_id, yt_channel_id, yt_channel_name, video_id):
             return video_id
 
     except Exception as e:
-        print(e)
+        _logger.exception()
         return f"Error happened: {str(e)}"
 
 
@@ -368,5 +404,5 @@ def remove_yt_notif_rule(guild_id, yt_channel_id):
         _save()
         return yt_channel_id
     except Exception as e:
-        print(e)
+        _logger.exception()
         return f"Error happened: {str(e)}"

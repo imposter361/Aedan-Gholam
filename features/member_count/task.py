@@ -1,5 +1,5 @@
-from nextcord.ext import tasks
 from . import update_member_count
+from nextcord.ext import tasks
 
 
 @tasks.loop(minutes=11)

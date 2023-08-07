@@ -1,5 +1,5 @@
-from nextcord.ext import tasks
 from . import check_free_games
+from nextcord.ext import tasks
 
 
 @tasks.loop(hours=12)
