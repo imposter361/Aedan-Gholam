@@ -307,7 +307,12 @@ def get_role_emoji(guild_id):
 
 
 def add_yt_notif_rule(
-    guild_id, yt_channel_id, yt_channel_name, discord_channel_id, last_video_id=None
+    guild_id,
+    yt_channel_id,
+    yt_channel_name,
+    discord_channel_id,
+    last_video_id,
+    custom_message=None,
 ):
     try:
         index = get_server_index(guild_id)
@@ -335,6 +340,7 @@ def add_yt_notif_rule(
             "name": yt_channel_name,
             "discord_channel_id": discord_channel_id,
             "last_video_id": last_video_id,
+            "custom_text_message": custom_message,
         }
         _save()
         return yt_channel_id

@@ -601,6 +601,9 @@ async def youtube_notification_set(
         required=False,
         description="Target Discord channel id to publish new youtube videos.",
     ),
+    custom_message: str = SlashOption(
+        required=False, description="Write your custom message"
+    ),
 ):
     try:
         _logger.info(
@@ -642,6 +645,7 @@ async def youtube_notification_set(
             video.author,
             channel_id,
             last_channel_video["id"],
+            custom_message,
         )
         if result == video.channel_id or result == "Updated.":
             _logger.info(

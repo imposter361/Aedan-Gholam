@@ -51,10 +51,11 @@ async def check_for_new_youtube_video():
                     discord_channel = client.get_channel(
                         rules[yt_channel_id]["discord_channel_id"]
                     )
-                    await discord_channel.send(
+                    message = (
                         f"A new video from **{last_video['channel_name']}**:point_down_tone1:"
                         + f"\nhttps://www.youtube.com/watch?v={last_video['id']}"
                     )
+                    await discord_channel.send(message)
                     _logger.debug(
                         f"Sent a youtube video notification. "
                         + f"video_id: '{last_video['id']}' yt_channel: '{last_video['channel_name']}' "
