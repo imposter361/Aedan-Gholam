@@ -85,8 +85,10 @@ async def team(interaction: Interaction):
             f"Command 'team' was called by '{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
         )
-        team = "<:Aedan_logo:1103676392606007356> Bunch of friends gathered together "
-        +"as a team:\n\nEhsan 👨‍💻\nHossein(Moz) 💃\nBagher 🫰\nHossein(Defalcator) 🪡\nAli 🪃\nSina 🧻"
+        team = (
+            "<:Aedan_logo:1103676392606007356> Bunch of friends gathered together "
+            + "as a team:\n\nEhsan 👨‍💻\nHossein(Moz) 💃\nBagher 🫰\nHossein(Defalcator) 🪡\nAli 🪃\nSina 🧻"
+        )
         await interaction.response.send_message(team)
     except:
         await handle_command_exception("team", interaction)

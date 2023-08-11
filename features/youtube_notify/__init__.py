@@ -51,8 +51,11 @@ async def check_for_new_youtube_video():
                     discord_channel = client.get_channel(
                         rules[yt_channel_id]["discord_channel_id"]
                     )
+                    message = f"A new video from **{last_video['channel_name']}**:point_down_tone1:"
+                    if rules[yt_channel_id].get("custom_text_message"):
+                        message = rules[yt_channel_id]["custom_text_message"]
                     message = (
-                        f"A new video from **{last_video['channel_name']}**:point_down_tone1:"
+                        message
                         + f"\nhttps://www.youtube.com/watch?v={last_video['id']}"
                     )
                     await discord_channel.send(message)
