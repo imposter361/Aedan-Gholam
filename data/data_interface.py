@@ -11,20 +11,22 @@ _data = None
 
 def _init():
     if not os.path.exists(_DATA_FILE):
-        _logger.debug(f"Data file does not exist. Creating {_DATA_FILE}")
+        _logger.debug(
+            f"data_interface: Data file does not exist. Creating {_DATA_FILE}"
+        )
         with open(_DATA_FILE, "w") as file:
             file.write(json.dumps([]))
 
 
 def _load():
-    _logger.debug(f"Loading data from {_DATA_FILE}")
+    _logger.debug(f"data_interface: Loading data from {_DATA_FILE}")
     with open(_DATA_FILE) as file:
         global _data
         _data = json.load(file)
 
 
 def _save():
-    _logger.debug(f"Saving data to {_DATA_FILE}")
+    _logger.debug(f"data_interface: Saving data to {_DATA_FILE}")
     with open(_DATA_FILE, "w") as file:
         file.write(json.dumps(_data, indent=4))
 
@@ -90,7 +92,10 @@ def set_welcome_channel_id(guild_id, channel_id):
         _save()
         return channel_id
     except Exception as e:
-        _logger.exception()
+        _logger.exception(
+            "data_interface: Failed to set welcome channel id "
+            + f"({channel_id}) for guild ({guild_id})"
+        )
         return f"Error happened: {str(e)}"
 
 
@@ -101,7 +106,8 @@ def get_welcome_channel_id(guild_id):
                 return item["welcome_channel_id"]
     except:
         _logger.debug(
-            f"Could not find welcome_channel_id for guild_id:{guild_id}. Returning None"
+            "data_interface: Could not find welcome_channel_id "
+            + f"for guild_id:{guild_id}. Returning None"
         )
         return None
 
@@ -115,7 +121,10 @@ def set_free_games_channel_id(guild_id, channel_id):
         _save()
         return channel_id
     except Exception as e:
-        _logger.exception()
+        _logger.exception(
+            "data_interface: Failed to set free games "
+            + f"channel id ({channel_id}) for guild ({guild_id})"
+        )
         return f"Error happened: {str(e)}"
 
 
@@ -126,7 +135,8 @@ def get_free_games_channel_id(guild_id):
                 return item["free_games_channel_id"]
     except:
         _logger.debug(
-            f"Could not find free_games_channel_id for guild_id:{guild_id}. Returning None"
+            "data_interface: Could not find free_games_channel_id "
+            + f"for guild_id:{guild_id}. Returning None"
         )
         return None
 
@@ -140,7 +150,9 @@ def set_free_games_role_id(guild_id, role_id):
         _save()
         return role_id
     except Exception as e:
-        _logger.exception()
+        _logger.exception(
+            f"data_interface: Failed to set free games role id ({role_id}) for guild ({guild_id})"
+        )
         return f"Error happened: {str(e)}"
 
 
@@ -151,7 +163,8 @@ def get_free_games_role_id(guild_id):
                 return item["free_games_role_id"]
     except:
         _logger.debug(
-            f"Could not find free_games_role_id for guild_id:{guild_id}. Returning None"
+            "data_interface: Could not find free_games_role_id "
+            + f"for guild_id:{guild_id}. Returning None"
         )
         return None
 
@@ -165,7 +178,9 @@ def set_dst_role_id(guild_id, role_id):
         _save()
         return role_id
     except Exception as e:
-        _logger.exception()
+        _logger.exception(
+            f"data_interface: Failed to set DST role id ({role_id}) for guild ({guild_id})"
+        )
         return f"Error happened: {str(e)}"
 
 
@@ -176,7 +191,7 @@ def get_dst_role_id(guild_id):
                 return item["dst_role_id"]
     except:
         _logger.debug(
-            f"Could not find dst_role_id for guild_id:{guild_id}. Returning None"
+            f"data_interface: Could not find dst_role_id for guild_id:{guild_id}. Returning None"
         )
         return None
 
@@ -190,7 +205,9 @@ def set_epic_games_names(guild_id, games):
         _save()
         return games
     except Exception as e:
-        _logger.exception()
+        _logger.exception(
+            f"data_interface: Failed to set free games names ({games}) for guild ({guild_id})"
+        )
         return f"Error happened: {str(e)}"
 
 
@@ -201,7 +218,7 @@ def get_epic_games_names(guild_id):
                 return item["epic_games"]
     except:
         _logger.debug(
-            f"Could not find epic_games for guild_id:{guild_id}. Returning None"
+            f"data_interface: Could not find epic_games for guild_id:{guild_id}. Returning None"
         )
         return []
 
@@ -215,7 +232,9 @@ def set_klei_links(guild_id, links):
         _save()
         return links
     except Exception as e:
-        _logger.exception()
+        _logger.exception(
+            f"data_interface: Failed to set klei links ({links}) for guild ({guild_id})"
+        )
         return f"Error happened: {str(e)}"
 
 
@@ -226,7 +245,7 @@ def get_klei_links(guild_id):
                 return item["klei_links"]
     except:
         _logger.debug(
-            f"Could not find klei_links for guild_id:{guild_id}. Returning None"
+            f"data_interface: Could not find klei_links for guild_id:{guild_id}. Returning None"
         )
         return []
 
@@ -240,7 +259,10 @@ def set_member_count_channel_id(guild_id, channel_id):
         _save()
         return channel_id
     except Exception as e:
-        _logger.exception()
+        _logger.exception(
+            "data_interface: Failed to set member count channel id "
+            + f"({channel_id}) for guild ({guild_id})"
+        )
         return f"Error happened: {str(e)}"
 
 
@@ -251,7 +273,8 @@ def get_member_count_channel_id(guild_id):
                 return item["member_count_channel_id"]
     except:
         _logger.debug(
-            f"Could not find member_count_channel_id for guild_id:{guild_id}. Returning None"
+            "data_interface: Could not find member_count_channel_id "
+            + f"for guild_id:{guild_id}. Returning None"
         )
         return None
 
@@ -265,7 +288,10 @@ def set_role_message_id(guild_id, message_id):
         _save()
         return message_id
     except Exception as e:
-        _logger.exception()
+        _logger.exception(
+            "data_interface: Failed to set set-role message id "
+            + f"({message_id}) for guild ({guild_id})"
+        )
         return f"Error happened: {str(e)}"
 
 
@@ -276,7 +302,8 @@ def get_role_message_id(guild_id):
                 return item["set_role_message_id"]
     except:
         _logger.debug(
-            f"Could not find set_role_message_id for guild_id:{guild_id}. Returning None"
+            "data_interface: Could not find set_role_message_id "
+            + f"for guild_id:{guild_id}. Returning None"
         )
         return None
 
@@ -290,7 +317,9 @@ def set_role_emoji(guild_id, emoji_id):
         _save()
         return emoji_id
     except Exception as e:
-        _logger.exception()
+        _logger.exception(
+            f"data_interface: Failed to set role emoji id ({emoji_id}) for guild ({guild_id})"
+        )
         return f"Error happened: {str(e)}"
 
 
@@ -301,7 +330,8 @@ def get_role_emoji(guild_id):
                 return item["set_role_emoji"]
     except:
         _logger.debug(
-            f"Could not find set_role_emoji for guild_id:{guild_id}. Returning None"
+            "data_interface: Could not find set_role_emoji for "
+            + f"guild_id:{guild_id}. Returning None"
         )
         return None
 
@@ -345,7 +375,13 @@ def add_yt_notif_rule(
         _save()
         return yt_channel_id
     except Exception as e:
-        _logger.exception()
+        _logger.exception(
+            "data_interface: Failed to add youtube notification rule with these parameters: "
+            + f"yt_channel_id ({yt_channel_id}), yt_channel_name ({yt_channel_name}), "
+            + f"discord_channel_id ({discord_channel_id}), last_video_id ({last_video_id}), "
+            + f"custom_message ({custom_message}) "
+            + f"in guild ({guild_id})"
+        )
         return f"Error happened: {str(e)}"
 
 
@@ -356,7 +392,8 @@ def get_yt_notif_rules(guild_id):
                 return item["yt_notif_rules"]
     except Exception:
         _logger.debug(
-            f"Could not find yt_notif_rules for guild_id:{guild_id}. Returning None"
+            "data_interface: Could not find yt_notif_rules for "
+            + f"guild_id:{guild_id}. Returning None"
         )
         return None
 
@@ -387,7 +424,11 @@ def set_yt_last_video_id(guild_id, yt_channel_id, yt_channel_name, video_id):
             return video_id
 
     except Exception as e:
-        _logger.exception()
+        _logger.exception(
+            f"data_interface: Failed to set last youtube video id ({video_id}) "
+            + f"for yt_channel_id ({yt_channel_id}), yt_channel_name ({yt_channel_name}), "
+            + f"in guild ({guild_id})"
+        )
         return f"Error happened: {str(e)}"
 
 
@@ -410,5 +451,8 @@ def remove_yt_notif_rule(guild_id, yt_channel_id):
         _save()
         return yt_channel_id
     except Exception as e:
-        _logger.exception()
+        _logger.exception(
+            "data_interface: Failed to remove youtube notification rule of yt_channel_id "
+            + f"({yt_channel_id}) from guild ({guild_id})"
+        )
         return f"Error happened: {str(e)}"

@@ -18,7 +18,7 @@ def is_active():
 def activate():
     global _active
     _active = True
-    _logger.debug("Feature has been activated: 'gholametam'")
+    _logger.debug("features: Feature has been activated: 'gholametam'")
 
 
 async def gholametam(message: Message):

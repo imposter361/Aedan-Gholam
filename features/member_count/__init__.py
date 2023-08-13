@@ -17,7 +17,7 @@ def is_active():
 def activate():
     global _active
     _active = True
-    _logger.debug("Feature has been activated: 'member_count'")
+    _logger.debug("features: Feature has been activated: 'member_count'")
     from . import task
 
 
@@ -25,7 +25,7 @@ async def update_member_count():
     if not _active:
         return False
 
-    _logger.debug("Running member count updater task...")
+    _logger.debug("features/member_count: Running member count updater task...")
 
     subscriptions = get_subscriptions()
     for guild_id in subscriptions:
@@ -38,11 +38,15 @@ async def update_member_count():
             members_count_channel = client.get_channel(
                 get_member_count_channel_id(guild_id)
             )
-            name = "Total members: " + str(members_count_channel.guild.member_count)
+            guild = members_count_channel.guild
+            name = "Total members: " + str(guild.member_count)
             await members_count_channel.edit(name=name)
             _logger.debug(
-                f"« {members_count_channel.guild.member_count} » members are in '{str(members_count_channel.guild)}' "
-                + f"({members_count_channel.guild.id})"
+                f"features/member_count: « {guild.member_count} » "
+                + f"members are in '{str(guild)}' ({guild.id})"
             )
         except:
-            _logger.exception()
+            _logger.exception(
+                "features/member_count: Failed to update member count for "
+                + f"guild ({guild_id})"
+            )

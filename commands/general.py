@@ -15,7 +15,8 @@ _logger = logging.getLogger("main")
 async def hafez(interaction: Interaction):
     try:
         _logger.info(
-            f"Command 'hafez' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            "commands/general: Command 'hafez' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
         )
         interaction_response = await interaction.send(f"Please wait ...")
@@ -43,7 +44,8 @@ async def hekmat(
 ):
     try:
         _logger.info(
-            f"Command 'hekmat' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            "commands/general: Command 'hekmat' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: number:{number}"
         )
         if number is None:
@@ -82,7 +84,8 @@ async def hekmat(
 async def team(interaction: Interaction):
     try:
         _logger.info(
-            f"Command 'team' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            "commands/general: Command 'team' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
         )
         team = (
@@ -99,7 +102,8 @@ async def team(interaction: Interaction):
 async def about(interaction: Interaction):
     try:
         _logger.info(
-            f"Command 'about' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            "commands/general: Command 'about' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
         )
         Ali = client.get_user(620593942559326265)

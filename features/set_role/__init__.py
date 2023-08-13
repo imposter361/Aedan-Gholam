@@ -18,7 +18,7 @@ def is_active():
 def activate():
     global _active
     _active = True
-    _logger.debug("Feature has been activated: 'set_role'")
+    _logger.debug("features: Feature has been activated: 'set_role'")
 
 
 # Add or remove user roles based on reactions
@@ -49,11 +49,14 @@ async def set_role_based_on_reaction(added_reaction: nextcord.Reaction):
 
         await member.add_roles(role)
         _logger.debug(
-            f"Role '{role}' added to '{member.name}' ({member.id}) "
-            + f"in '{guild.name}' ({guild.id})"
+            f"features/set_role: Role '{role}' was added to "
+            + f"'{member.name}' ({member.id}) in '{guild.name}' ({guild.id})"
         )
     except:
-        _logger.exception()
+        _logger.exception(
+            f"features/set_role: Failed to set role for user ({added_reaction.user_id}) "
+            + f"emoji: '{added_reaction.emoji.name}' in guild ({added_reaction.guild_id})"
+        )
 
 
 # Remove role
@@ -83,8 +86,11 @@ async def unset_role_based_on_reaction(removed_reaction: nextcord.Reaction):
 
         await member.remove_roles(role)
         _logger.debug(
-            f"Role '{role}' removed from '{member.name}' ({member.id}) "
-            + f"in '{guild.name}' ({guild.id})"
+            f"features/set_role: Role '{role}' was removed from "
+            + f"'{member.name}' ({member.id}) in '{guild.name}' ({guild.id})"
         )
     except:
-        _logger.exception()
+        _logger.exception(
+            f"features/set_role: Failed to unset role for user ({removed_reaction.user_id}) "
+            + f"emoji: '{removed_reaction.emoji.name}' in guild ({removed_reaction.guild_id})"
+        )

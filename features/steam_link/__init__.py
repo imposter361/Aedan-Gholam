@@ -19,7 +19,7 @@ def is_active():
 def activate():
     global _active
     _active = True
-    _logger.debug("Feature has been activated: 'steam_link'")
+    _logger.debug("features: Feature has been activated: 'steam_link'")
 
 
 # on_message
@@ -65,6 +65,9 @@ async def process(message: nextcord.Message):
             return True
 
     except:
-        _logger.exception()
+        _logger.exception(
+            f"features/steam_link: Failed to process user message ({user_message}) "
+            + "or Failed to reply the answer"
+        )
 
     return False

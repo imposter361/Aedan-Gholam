@@ -10,5 +10,5 @@ from bot import client, TOKEN
 _logger = logging.getLogger("main")
 
 
-_logger.info("Starting the bot...")
+_logger.info("main: Starting the bot...")
 client.run(TOKEN)

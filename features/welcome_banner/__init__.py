@@ -20,7 +20,7 @@ def is_active():
 def activate():
     global _active
     _active = True
-    _logger.debug("Feature has been activated: 'welcome_banner'")
+    _logger.debug("features: Feature has been activated: 'welcome_banner'")
 
 
 # send welcome message for new members:
@@ -38,9 +38,8 @@ async def send_welcome_banner(member: nextcord.Member):
         if welcome_channel_id is None:
             return
 
-        _logger.info(f"{member.name} ({member.id}) ")
         _logger.debug(
-            f"Generating welcome banner for the new member: "
+            f"features/welcome_banner: Generating welcome banner for the new member: "
             + f"'{member.name}' ({member.id}) in '{guild.name}' ({guild.id})"
         )
 
@@ -54,11 +53,11 @@ async def send_welcome_banner(member: nextcord.Member):
             f"Salam {member.mention} be **{guild}** khosh oomadi!\n", file=file
         )
         _logger.debug(
-            f"Welcome banner has been sent for '{member.name}' ({member.id}) "
+            f"features/welcome_banner: Welcome banner has been sent for '{member.name}' ({member.id}) "
             + f"at channel '{channel.name}' ({channel.id}) in '{guild.name}' ({guild.id})"
         )
     except:
-        _logger.exception()
+        _logger.exception(f"features/welcome_banner: Failed to send welcome banner")
 
 
 def _create_welcome_banner(member, is_home):

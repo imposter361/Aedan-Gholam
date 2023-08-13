@@ -18,7 +18,7 @@ def is_active():
 def activate():
     global _active
     _active = True
-    _logger.debug("Feature has been activated: 'youtube_notify'")
+    _logger.debug("features: Feature has been activated: 'youtube_notify'")
     from . import task
 
 
@@ -26,7 +26,7 @@ async def check_for_new_youtube_video():
     if not _active:
         return False
 
-    _logger.debug("Running Youtube notify task...")
+    _logger.debug("features/youtube_notify: Running Youtube notify task...")
 
     channels_last_videos = {}
 
@@ -60,7 +60,7 @@ async def check_for_new_youtube_video():
                     )
                     await discord_channel.send(message)
                     _logger.debug(
-                        f"Sent a youtube video notification. "
+                        f"features/youtube_notify: Sent a youtube video notification. "
                         + f"video_id: '{last_video['id']}' yt_channel: '{last_video['channel_name']}' "
                         + f" channel: '{discord_channel.name}' ({discord_channel.id}) "
                         + f" guild: '{discord_channel.guild.name}' ({discord_channel.guild.id}) "
@@ -73,12 +73,16 @@ async def check_for_new_youtube_video():
                         last_video["id"],
                     )
             except:
-                _logger.exception()
+                _logger.exception(
+                    "features/youtube_notify: Failed to process possible "
+                    + f"new video notification for channel id '{yt_channel_id}'"
+                )
 
 
 def get_last_video_of_youtube_channel(yt_channel_id):
     _logger.debug(
-        f"Getting the most recent Youtube video with channel id of '{yt_channel_id}'"
+        "features/youtube_notify: Getting the most recent Youtube video "
+        + f"with channel id of '{yt_channel_id}'"
     )
     playlist = Playlist(playlist_from_channel_id(yt_channel_id))
     video = playlist.videos[0]

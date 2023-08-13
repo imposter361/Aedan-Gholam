@@ -19,7 +19,7 @@ def is_active():
 def activate():
     global _active
     _active = True
-    _logger.debug("Feature has been activated: 'klei_points'")
+    _logger.debug("features: Feature has been activated: 'klei_points'")
     from . import task
 
 
@@ -28,7 +28,7 @@ async def check_klei_points():
     if not _active:
         return False
 
-    _logger.debug("Running free Klei points task...")
+    _logger.debug("features/klei_points: Running free Klei points task...")
 
     klei_points = None
 
@@ -48,7 +48,7 @@ async def check_klei_points():
 
 
 def _get_klei_points():
-    _logger.debug("Getting free Klei points list...")
+    _logger.debug("features/klei_points: Getting free Klei points list...")
     klei_points = []
     # get links just for the first time
     url = "https://steamcommunity.com/sharedfiles/filedetails/?id=2308653652&tscn=1639750749"
@@ -92,10 +92,10 @@ def _get_klei_points():
                     continue
 
         except:
-            _logger.exception("Could not process free klei points links.")
+            _logger.exception("features/klei_points: Could not process free klei points links.")
 
     except:
-        _logger.exception("Could not get free klei points links.")
+        _logger.exception("features/klei_points: Could not get free klei points links.")
 
     return klei_points
 
@@ -126,9 +126,15 @@ async def _send_klei_points_for_guild(guild_id, channel_id, klei_points):
                 sent_links.append(klei_point["url"])
                 data.set_klei_links(guild_id, sent_links)
             except:
-                _logger.exception()
+                _logger.exception(
+                    f"features/klei_points: Failed to send klei points ({klei_point}) "
+                    + f"to the respective channel ({channel_id}) at guild ({guild_id})"
+                )
 
         # Cleanup expired links (only keep valid sent links in the data storage)
         data.set_klei_links(guild_id, valid_sent_links)
     except:
-        _logger.exception()
+        _logger.exception(
+                    f"features/klei_points: Failed to send klei points ({klei_points}) "
+                    + f"to the respective channel ({channel_id}) at guild ({guild_id})"
+                )

@@ -11,7 +11,7 @@ _intents = nextcord.Intents.all()
 client = commands.Bot(command_prefix="!", intents=_intents)
 
 
-_logger.debug("Loading .env file...")
+_logger.debug("bot: Loading .env file...")
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 ADMINS = json.loads(os.getenv("ADMINS"))

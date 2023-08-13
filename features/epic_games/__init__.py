@@ -19,7 +19,7 @@ def is_active():
 def activate():
     global _active
     _active = True
-    _logger.debug("Feature has been activated: 'epic_games'")
+    _logger.debug("features: Feature has been activated: 'epic_games'")
     from . import task
 
 
@@ -28,7 +28,7 @@ async def check_free_games():
     if not _active:
         return False
 
-    _logger.debug("Running free Epic Games task...")
+    _logger.debug("features/epic_games: Running free Epic Games task...")
 
     free_games = None
 
@@ -48,7 +48,7 @@ async def check_free_games():
 
 
 def _get_free_games_links():
-    _logger.debug("Getting Epic Games' free games list...")
+    _logger.debug("features/epic_games: Getting Epic Games' free games list...")
     free_games = []
     try:
         # Make a request to the Epic Games
@@ -102,10 +102,14 @@ def _get_free_games_links():
                 )
 
             except Exception as e:
-                _logger.debug("There is a broken Epic Games link: " + str(e))
+                _logger.debug(
+                    "features/epic_games: There is a broken Epic Games link: " + str(e)
+                )
 
     except:
-        _logger.exception("Failed to get free games list from Epic Games.")
+        _logger.exception(
+            "features/epic_games: Failed to get free games list from Epic Games."
+        )
 
     return free_games
 
@@ -130,4 +134,7 @@ async def _send_free_games_for_guild(guild_id, channel_id, free_games):
             sent_games.append(game["name"])
             data.set_epic_games_names(guild_id, sent_games)
     except:
-        _logger.exception()
+        _logger.exception(
+            f"features/epic_games: Failed to send free Epic games ({free_games}) "
+            + f"to the respective channel ({channel_id}) at guild ({guild_id})"
+        )
