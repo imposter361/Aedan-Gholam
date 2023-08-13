@@ -35,6 +35,9 @@ async def set_role_based_on_reaction(added_reaction: nextcord.Reaction):
         reaction_role_dic = data.get_role_emoji(guild.id)
         set_role_message_id = data.get_role_message_id(guild.id)
 
+        if not reaction_name or not set_role_message_id:
+            return
+
         if (
             reaction_name not in reaction_role_dic.keys()
             or added_reaction.message_id != set_role_message_id
