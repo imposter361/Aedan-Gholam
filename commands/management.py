@@ -628,7 +628,7 @@ async def youtube_notification_set(
         description="Target Discord channel id to publish new youtube videos.",
     ),
     custom_message: str = SlashOption(
-        required=False, description="Write your custom message"
+        required=False, description="Use '\\n' for new line. Leave empty to use the default message."
     ),
 ):
     try:

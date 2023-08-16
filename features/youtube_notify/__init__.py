@@ -54,6 +54,8 @@ async def check_for_new_youtube_video():
                     message = f"A new video from **{last_video['channel_name']}**:point_down_tone1:"
                     if rules[yt_channel_id].get("custom_text_message"):
                         message = rules[yt_channel_id]["custom_text_message"]
+                    if "\\n" in message:
+                        message = message.replace("\\n", "\n")
                     message = (
                         message
                         + f"\nhttps://www.youtube.com/watch?v={last_video['id']}"
