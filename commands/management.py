@@ -550,9 +550,9 @@ async def delete(
 
         report = ""
         if number == 1:
-            report = "{number} message has been deleted."
+            report = f"{number} message has been deleted."
         else:
-            report = "{number} messages have been deleted."
+            report = f"{number} messages have been deleted."
 
         _logger.info(
             f"commands/management: {report} Guild: '{interaction.guild.name}' ({interaction.guild_id})"
@@ -628,7 +628,8 @@ async def youtube_notification_set(
         description="Target Discord channel id to publish new youtube videos.",
     ),
     custom_message: str = SlashOption(
-        required=False, description="Use '\\n' for new line. Leave empty to use the default message."
+        required=False,
+        description="Use '\\n' for new line. Leave empty to use the default message.",
     ),
 ):
     try:
