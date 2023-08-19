@@ -141,30 +141,59 @@ def get_welcome_message(guild_id):
         return None
 
 
-def set_free_games_channel_id(guild_id, channel_id):
+def set_epic_games_channel_id(guild_id, channel_id):
     try:
         index = get_server_index(guild_id)
         if index == -1:
             return "No server found with this id."
-        _data[index]["free_games_channel_id"] = channel_id
+        _data[index]["epic_games_channel_id"] = channel_id
         _save()
         return channel_id
     except Exception as e:
         _logger.exception(
-            "data_interface: Failed to set free games "
+            "data_interface: Failed to set epic_games_channel_id"
             + f"channel id ({channel_id}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
 
 
-def get_free_games_channel_id(guild_id):
+def get_epic_games_channel_id(guild_id):
     try:
         for item in _data:
             if item["server_id"] == guild_id:
-                return item["free_games_channel_id"]
+                return item["epic_games_channel_id"]
     except:
         _logger.debug(
-            "data_interface: Could not find free_games_channel_id "
+            "data_interface: Could not find epic_games_channel_id "
+            + f"for guild_id:{guild_id}. Returning None"
+        )
+        return None
+
+
+def set_klei_links_channel_id(guild_id, channel_id):
+    try:
+        index = get_server_index(guild_id)
+        if index == -1:
+            return "No server found with this id."
+        _data[index]["klei_links_channel_id"] = channel_id
+        _save()
+        return channel_id
+    except Exception as e:
+        _logger.exception(
+            "data_interface: Failed to set klei_links_channel_id"
+            + f"channel id ({channel_id}) for guild ({guild_id})"
+        )
+        return f"Error happened: {str(e)}"
+
+
+def get_klei_links_channel_id(guild_id):
+    try:
+        for item in _data:
+            if item["server_id"] == guild_id:
+                return item["klei_links_channel_id"]
+    except:
+        _logger.debug(
+            "data_interface: Could not find klei_links_channel_id"
             + f"for guild_id:{guild_id}. Returning None"
         )
         return None

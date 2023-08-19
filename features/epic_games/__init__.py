@@ -37,7 +37,7 @@ async def check_free_games():
         if not subscriptions[guild_id]:
             continue
 
-        channel_id = data.get_free_games_channel_id(guild_id)
+        channel_id = data.get_epic_games_channel_id(guild_id)
         if not channel_id:
             continue
 

@@ -37,7 +37,7 @@ async def check_klei_points():
         if not subscriptions[guild_id]:
             continue
 
-        channel_id = data.get_free_games_channel_id(guild_id)
+        channel_id = data.get_klei_links_channel_id(guild_id)
         if not channel_id:
             continue
 
@@ -92,7 +92,9 @@ def _get_klei_points():
                     continue
 
         except:
-            _logger.exception("features/klei_points: Could not process free klei points links.")
+            _logger.exception(
+                "features/klei_points: Could not process free klei points links."
+            )
 
     except:
         _logger.exception("features/klei_points: Could not get free klei points links.")
@@ -135,6 +137,6 @@ async def _send_klei_points_for_guild(guild_id, channel_id, klei_points):
         data.set_klei_links(guild_id, valid_sent_links)
     except:
         _logger.exception(
-                    f"features/klei_points: Failed to send klei points ({klei_points}) "
-                    + f"to the respective channel ({channel_id}) at guild ({guild_id})"
-                )
+            f"features/klei_points: Failed to send klei points ({klei_points}) "
+            + f"to the respective channel ({channel_id}) at guild ({guild_id})"
+        )

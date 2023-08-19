@@ -276,7 +276,8 @@ async def settings(
         choices=[
             "Set welcome channel id",
             "Set role message id",
-            "Set free game channel id",
+            "Set epic games channel id",
+            "Set klei links channel id",
             "Set free game role id",
             "Set DST role id",
             "Set member count channel id",
@@ -334,17 +335,17 @@ async def settings(
                 )
                 await interaction_response.edit("Operation failed.")
 
-        if setting == "Set free game channel id":
+        if setting == "Set epic games channel id":
             try:
                 if id.lower() in ["none", "null", "0", "-"]:
-                    result = data.set_free_games_channel_id(interaction.guild_id, None)
+                    result = data.set_epic_games_channel_id(interaction.guild_id, None)
                     if result == None:
                         _logger.info(
-                            "commands/management: Free games channel id has been unset "
+                            "commands/management: epic games channel id has been unset "
                             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                         )
                         await interaction_response.edit(
-                            "free game channel has been unset.",
+                            "epic games channel has been unset.",
                         )
                     else:
                         await interaction_response.edit(str(result))
@@ -358,22 +359,66 @@ async def settings(
                         "Invalid channel ID.",
                     )
                     return
-                result = data.set_free_games_channel_id(
+                result = data.set_epic_games_channel_id(
                     interaction.guild_id, channel_id
                 )
                 if result == channel_id:
                     _logger.info(
-                        f"commands/management: Free games channel id has been set to {id} "
+                        f"commands/management: epic games channel id has been set to {id} "
                         + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                     )
                     await interaction_response.edit(
-                        "free game channel has been set.",
+                        "epic games channel has been set.",
                     )
                 else:
                     await interaction_response.edit(str(result))
             except:
                 _logger.exception(
-                    f"commands/management: Failed to set free game channel id ({id}) "
+                    f"commands/management: Failed to set epic games channel id ({id}) "
+                    + f"in guild ({interaction.guild_id})"
+                )
+                await interaction_response.edit("Operation failed.")
+
+        if setting == "Set klei links channel id":
+            try:
+                if id.lower() in ["none", "null", "0", "-"]:
+                    result = data.set_klei_links_channel_id(interaction.guild_id, None)
+                    if result == None:
+                        _logger.info(
+                            "commands/management: klei links channel id has been unset "
+                            + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                        )
+                        await interaction_response.edit(
+                            "klei links channel has been unset.",
+                        )
+                    else:
+                        await interaction_response.edit(str(result))
+                    return
+
+                channel_id = int(id)
+                channel = client.get_channel(channel_id)
+                if interaction.guild_id != channel.guild.id:
+                    _logger.debug(f"commands/management: Channel id ({id}) is invalid.")
+                    await interaction_response.edit(
+                        "Invalid channel ID.",
+                    )
+                    return
+                result = data.set_klei_links_channel_id(
+                    interaction.guild_id, channel_id
+                )
+                if result == channel_id:
+                    _logger.info(
+                        f"commands/management: klei links channel id has been set to {id} "
+                        + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                    )
+                    await interaction_response.edit(
+                        "klei links channel has been set.",
+                    )
+                else:
+                    await interaction_response.edit(str(result))
+            except:
+                _logger.exception(
+                    f"commands/management: Failed to set klei links channel id ({id}) "
                     + f"in guild ({interaction.guild_id})"
                 )
                 await interaction_response.edit("Operation failed.")
