@@ -518,3 +518,91 @@ def remove_yt_notif_rule(guild_id, yt_channel_id):
             + f"({yt_channel_id}) from guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
+
+
+def add_twitch_notif_rule(
+    guild_id,
+    twitch_user_id: int,
+    twitch_username: str,
+    discord_channel_id,
+    custom_message=None,
+):
+    try:
+        index = get_server_index(guild_id)
+        if index == -1:
+            return "No server found with this id."
+
+        if not _data[index].get("twitch_notif_rules"):
+            _data[index]["twitch_notif_rules"] = {}
+
+        rules = _data[index]["twitch_notif_rules"]
+
+        if twitch_user_id in rules:
+            if rules[twitch_username].get("name") != twitch_username:
+                rules[twitch_username]["name"] = twitch_username
+                _save()
+            if (
+                rules[twitch_user_id]["discord_channel_id"] == discord_channel_id
+                and rules[twitch_user_id]["custom_text_message"] == custom_message
+            ):
+                return "This rule already exists."
+            else:
+                rules[twitch_user_id]["discord_channel_id"] = discord_channel_id
+                rules[twitch_user_id]["custom_text_message"] = custom_message
+                _save()
+                return "Updated."
+
+        rules[twitch_user_id] = {
+            "name": twitch_username,
+            "discord_channel_id": discord_channel_id,
+            "custom_text_message": custom_message,
+        }
+        _save()
+        return twitch_user_id
+    except Exception as e:
+        _logger.exception(
+            "data_interface: Failed to add twitch notification rule with these parameters: "
+            + f"twitch_username ({twitch_user_id}), "
+            + f"discord_channel_id ({discord_channel_id}), "
+            + f"custom_message ({custom_message}) "
+            + f"in guild ({guild_id})"
+        )
+        return f"Error happened: {str(e)}"
+
+
+def get_twitch_notif_rules(guild_id):
+    try:
+        for item in _data:
+            if item["server_id"] == guild_id:
+                return item["twitch_notif_rules"]
+    except Exception:
+        _logger.debug(
+            "data_interface: Could not find twitch_notif_rules for "
+            + f"guild_id:{guild_id}. Returning None"
+        )
+        return None
+
+
+def remove_twitch_notif_rule(guild_id, twitch_username: str):
+    try:
+        index = get_server_index(guild_id)
+        if index == -1:
+            return "No server found with this id."
+
+        if not _data[index].get("twitch_notif_rules"):
+            _data[index]["twitch_notif_rules"] = {}
+
+        rules = _data[index]["twitch_notif_rules"]
+
+        if twitch_username not in rules:
+            return "No rule is set for this twitch channel."
+
+        _data[index]["twitch_notif_rules"].pop(twitch_username)
+        _save()
+        return twitch_username
+    except Exception as e:
+        _logger.exception(
+            "data_interface: Failed to remove twitch notification rule of twitch_username "
+            + f"({twitch_username}) from guild ({guild_id})"
+        )
+        return f"Error happened: {str(e)}"
