@@ -1,8 +1,8 @@
+import data
 import logging
 import nextcord
 import requests
 from bot import client, HOME_GUILDS
-from data import get_welcome_channel_id, get_subscriptions
 from PIL import Image, ImageDraw, ImageFont
 
 _logger = logging.getLogger("main")
@@ -30,11 +30,11 @@ async def send_welcome_banner(member: nextcord.Member):
 
     try:
         guild = member.guild
-        subscriptions = get_subscriptions()
+        subscriptions = data.get_subscriptions()
         if guild.id not in subscriptions or not subscriptions[guild.id]:
             return
 
-        welcome_channel_id = get_welcome_channel_id(guild.id)
+        welcome_channel_id = data.get_welcome_channel_id(guild.id)
         if welcome_channel_id is None:
             return
 
@@ -44,14 +44,19 @@ async def send_welcome_banner(member: nextcord.Member):
         )
 
         channel = client.get_channel(welcome_channel_id)
-
         is_home = False
         if guild.id in HOME_GUILDS:  # Aedan Gaming server id
             is_home = True
         file = _create_welcome_banner(member, is_home)
-        await channel.send(
-            f"Salam {member.mention} be **{guild}** khosh oomadi!\n", file=file
-        )
+        message: str = f"Salam {member.mention} be **{guild}** khosh oomadi!\n"
+        custom_message = data.get_welcome_message(guild.id)
+        
+        if custom_message:
+            message = custom_message
+            message = message.replace("{username}", member.mention)
+            message = message.replace("{servername}", guild.name)
+        await channel.send(message, file=file)
+
         _logger.debug(
             f"features/welcome_banner: Welcome banner has been sent for '{member.name}' ({member.id}) "
             + f"at channel '{channel.name}' ({channel.id}) in '{guild.name}' ({guild.id})"

@@ -191,6 +191,78 @@ async def remove_server(interaction: Interaction, id: str = SlashOption(required
 
 
 @client.slash_command(
+    name="customize",
+    description="customize bot settings.",
+    default_member_permissions=Permissions(administrator=True),
+    dm_permission=False,
+)
+async def customize(
+    interaction: Interaction,
+    customize: str = SlashOption(
+        name="customize",
+        required=True,
+        choices=[
+            "welcome message",
+        ],
+    ),
+    message: str = SlashOption(
+        required=True,
+        description="Available variables: {username} and {servername}, **Bold**",
+    ),
+):
+    print(message)
+    # try:
+    _logger.info(
+        "commands/management: Command 'customize' was called by "
+        + f"'{interaction.user.name}' ({interaction.user.id}) "
+        + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: customize:{customize} message:{message}"
+    )
+    interaction_response = await interaction.send("Please wait...", ephemeral=True)
+    if customize == "welcome message":
+        try:
+            if message != None:
+                result = data.set_welcome_message(interaction.guild_id, message)
+                if result == None:
+                    _logger.info(
+                        "commands/management: Welcome message has been unset "
+                        + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                    )
+                    await interaction_response.edit(
+                        "Welcome message has been unset.",
+                    )
+                else:
+                    await interaction_response.edit("Welcome message has been set.")
+                return
+
+            channel_id = int(id)
+            channel = client.get_channel(channel_id)
+            if interaction.guild_id != channel.guild.id:
+                _logger.debug(f"commands/management: Channel id ({id}) is invalid.")
+                await interaction_response.edit(
+                    "Invalid channel ID.",
+                )
+                return
+
+            result = data.set_welcome_message(interaction.guild_id, channel_id)
+            if result == channel_id:
+                _logger.info(
+                    f"commands/management: Welcome message has been set to {id} "
+                    + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                )
+                await interaction_response.edit(
+                    "Welcome channel has been set.",
+                )
+            else:
+                await interaction_response.edit(str(result))
+        except:
+            _logger.exception(
+                f"commands/management: Failed to set welcome message ({id}) "
+                + f"in guild ({interaction.guild_id})"
+            )
+            await interaction_response.edit("Operation failed.")
+
+
+@client.slash_command(
     name="settings",
     description="Change bot settings.",
     default_member_permissions=Permissions(administrator=True),

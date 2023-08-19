@@ -112,6 +112,35 @@ def get_welcome_channel_id(guild_id):
         return None
 
 
+def set_welcome_message(guild_id, channel_id):
+    try:
+        index = get_server_index(guild_id)
+        if index == -1:
+            return "No server found with this id."
+        _data[index]["welcome_message"] = channel_id
+        _save()
+        return channel_id
+    except Exception as e:
+        _logger.exception(
+            "data_interface: Failed to set welcome message "
+            + f"({channel_id}) for guild ({guild_id})"
+        )
+        return f"Error happened: {str(e)}"
+
+
+def get_welcome_message(guild_id):
+    try:
+        for item in _data:
+            if item["server_id"] == guild_id:
+                return item["welcome_message"]
+    except:
+        _logger.debug(
+            "data_interface: Could not find welcome_message "
+            + f"for guild_id:{guild_id}. Returning None"
+        )
+        return None
+
+
 def set_free_games_channel_id(guild_id, channel_id):
     try:
         index = get_server_index(guild_id)
