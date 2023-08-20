@@ -28,7 +28,7 @@ def _load():
 def _save():
     _logger.debug(f"data_interface: Saving data to {_DATA_FILE}")
     with open(_DATA_FILE, "w") as file:
-        file.write(json.dumps(_data, indent=4))
+        file.write(json.dumps(_data, indent=4, sort_keys=True))
 
 
 _init()
