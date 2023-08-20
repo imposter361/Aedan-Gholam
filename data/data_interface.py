@@ -6,7 +6,7 @@ _logger = logging.getLogger("main")
 
 
 _DATA_FILE = "data/data.json"
-_data = None
+_data = {}
 
 
 def _init():
@@ -15,7 +15,7 @@ def _init():
             f"data_interface: Data file does not exist. Creating {_DATA_FILE}"
         )
         with open(_DATA_FILE, "w") as file:
-            file.write(json.dumps([]))
+            file.write(json.dumps(_data))
 
 
 def _load():
@@ -36,117 +36,113 @@ _load()
 
 
 def get_subscriptions():
-    servers = {}
-    for item in _data:
-        servers[item["server_id"]] = item["active"]
-    return servers
+    subscriptions = {}
+    servers: dict = _data.get("servers")
+    if not servers:
+        return subscriptions
+    for server_id in servers.keys():
+        subscriptions[server_id] = servers[server_id]["active"]
+    return subscriptions
 
 
-def get_server_index(guild_id):
-    index = 0
-    while index < len(_data):
-        if _data[index]["server_id"] == guild_id:
-            return index
-        index = index + 1
-    return -1
+def get_server(guild_id):
+    servers: dict = _data.get("servers")
+    if not servers:
+        return None
+    return servers.get(str(guild_id))
 
 
 def add_server(name, id):
-    if get_server_index(id) >= 0:
+    server = get_server(id)
+    if server:
         return "The server is already registered."
-    _data.append(
-        {
-            "name": name,
-            "server_id": id,
-            "active": True,
-        }
-    )
+
+    if not _data.get("servers"):
+        _data["servers"] = {}
+
+    _data["servers"][id] = {
+        "name": name,
+        "active": True,
+    }
     _save()
     return id
 
 
 def edit_server(id, active):
-    index = get_server_index(id)
-    if index == -1:
+    server = get_server(id)
+    if not server:
         return "No server found with this id."
-    _data[index]["active"] = active
+
+    server["active"] = active
     _save()
     return id
 
 
 def remove_server(id):
-    index = get_server_index(id)
-    if index == -1:
+    server = get_server(id)
+    if not server:
         return "No server found with this id."
-    _data.pop(index)
+
+    _data["servers"].pop(str(id))
     _save()
     return id
 
 
 def set_welcome_channel_id(guild_id, channel_id):
     try:
-        index = get_server_index(guild_id)
-        if index == -1:
+        server = get_server(guild_id)
+        if not server:
             return "No server found with this id."
-        _data[index]["welcome_channel_id"] = channel_id
+
+        server["welcome_channel_id"] = channel_id
         _save()
         return channel_id
     except Exception as e:
         _logger.exception(
-            "data_interface: Failed to set welcome channel id "
+            "data_interface: Failed to set welcome_channel_id "
             + f"({channel_id}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
 
 
 def get_welcome_channel_id(guild_id):
-    try:
-        for item in _data:
-            if item["server_id"] == guild_id:
-                return item["welcome_channel_id"]
-    except:
-        _logger.debug(
-            "data_interface: Could not find welcome_channel_id "
-            + f"for guild_id:{guild_id}. Returning None"
-        )
+    server = get_server(guild_id)
+    if not server:
         return None
+    return server.get("welcome_channel_id")
 
 
-def set_welcome_message(guild_id, channel_id):
+def set_welcome_message(guild_id, message):
     try:
-        index = get_server_index(guild_id)
-        if index == -1:
+        server = get_server(guild_id)
+        if not server:
             return "No server found with this id."
-        _data[index]["welcome_message"] = channel_id
+
+        server["welcome_message"] = message
         _save()
-        return channel_id
+        return message
     except Exception as e:
         _logger.exception(
-            "data_interface: Failed to set welcome message "
-            + f"({channel_id}) for guild ({guild_id})"
+            "data_interface: Failed to set welcome_message "
+            + f"({message}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
 
 
 def get_welcome_message(guild_id):
-    try:
-        for item in _data:
-            if item["server_id"] == guild_id:
-                return item["welcome_message"]
-    except:
-        _logger.debug(
-            "data_interface: Could not find welcome_message "
-            + f"for guild_id:{guild_id}. Returning None"
-        )
+    server = get_server(guild_id)
+    if not server:
         return None
+    return server.get("welcome_message")
 
 
 def set_epic_games_channel_id(guild_id, channel_id):
     try:
-        index = get_server_index(guild_id)
-        if index == -1:
+        server = get_server(guild_id)
+        if not server:
             return "No server found with this id."
-        _data[index]["epic_games_channel_id"] = channel_id
+
+        server["epic_games_channel_id"] = channel_id
         _save()
         return channel_id
     except Exception as e:
@@ -158,24 +154,19 @@ def set_epic_games_channel_id(guild_id, channel_id):
 
 
 def get_epic_games_channel_id(guild_id):
-    try:
-        for item in _data:
-            if item["server_id"] == guild_id:
-                return item["epic_games_channel_id"]
-    except:
-        _logger.debug(
-            "data_interface: Could not find epic_games_channel_id "
-            + f"for guild_id:{guild_id}. Returning None"
-        )
+    server = get_server(guild_id)
+    if not server:
         return None
+    return server.get("epic_games_channel_id")
 
 
 def set_klei_links_channel_id(guild_id, channel_id):
     try:
-        index = get_server_index(guild_id)
-        if index == -1:
+        server = get_server(guild_id)
+        if not server:
             return "No server found with this id."
-        _data[index]["klei_links_channel_id"] = channel_id
+
+        server["klei_links_channel_id"] = channel_id
         _save()
         return channel_id
     except Exception as e:
@@ -187,24 +178,19 @@ def set_klei_links_channel_id(guild_id, channel_id):
 
 
 def get_klei_links_channel_id(guild_id):
-    try:
-        for item in _data:
-            if item["server_id"] == guild_id:
-                return item["klei_links_channel_id"]
-    except:
-        _logger.debug(
-            "data_interface: Could not find klei_links_channel_id"
-            + f"for guild_id:{guild_id}. Returning None"
-        )
+    server = get_server(guild_id)
+    if not server:
         return None
+    return server.get("klei_links_channel_id")
 
 
 def set_free_games_role_id(guild_id, role_id):
     try:
-        index = get_server_index(guild_id)
-        if index == -1:
+        server = get_server(guild_id)
+        if not server:
             return "No server found with this id."
-        _data[index]["free_games_role_id"] = role_id
+
+        server["free_games_role_id"] = role_id
         _save()
         return role_id
     except Exception as e:
@@ -215,24 +201,19 @@ def set_free_games_role_id(guild_id, role_id):
 
 
 def get_free_games_role_id(guild_id):
-    try:
-        for item in _data:
-            if item["server_id"] == guild_id:
-                return item["free_games_role_id"]
-    except:
-        _logger.debug(
-            "data_interface: Could not find free_games_role_id "
-            + f"for guild_id:{guild_id}. Returning None"
-        )
+    server = get_server(guild_id)
+    if not server:
         return None
+    return server.get("free_games_role_id")
 
 
 def set_dst_role_id(guild_id, role_id):
     try:
-        index = get_server_index(guild_id)
-        if index == -1:
+        server = get_server(guild_id)
+        if not server:
             return "No server found with this id."
-        _data[index]["dst_role_id"] = role_id
+
+        server["dst_role_id"] = role_id
         _save()
         return role_id
     except Exception as e:
@@ -243,23 +224,19 @@ def set_dst_role_id(guild_id, role_id):
 
 
 def get_dst_role_id(guild_id):
-    try:
-        for item in _data:
-            if item["server_id"] == guild_id:
-                return item["dst_role_id"]
-    except:
-        _logger.debug(
-            f"data_interface: Could not find dst_role_id for guild_id:{guild_id}. Returning None"
-        )
+    server = get_server(guild_id)
+    if not server:
         return None
+    return server.get("dst_role_id")
 
 
 def set_epic_games_names(guild_id, games):
     try:
-        index = get_server_index(guild_id)
-        if index == -1:
+        server = get_server(guild_id)
+        if not server:
             return "No server found with this id."
-        _data[index]["epic_games"] = games
+
+        server["epic_games"] = games
         _save()
         return games
     except Exception as e:
@@ -270,23 +247,22 @@ def set_epic_games_names(guild_id, games):
 
 
 def get_epic_games_names(guild_id):
-    try:
-        for item in _data:
-            if item["server_id"] == guild_id:
-                return item["epic_games"]
-    except:
-        _logger.debug(
-            f"data_interface: Could not find epic_games for guild_id:{guild_id}. Returning None"
-        )
-        return []
+    server = get_server(guild_id)
+    if not server:
+        return None
+    games = server.get("epic_games")
+    if games:
+        return games
+    return []
 
 
 def set_klei_links(guild_id, links):
     try:
-        index = get_server_index(guild_id)
-        if index == -1:
+        server = get_server(guild_id)
+        if not server:
             return "No server found with this id."
-        _data[index]["klei_links"] = links
+
+        server["klei_links"] = links
         _save()
         return links
     except Exception as e:
@@ -297,23 +273,22 @@ def set_klei_links(guild_id, links):
 
 
 def get_klei_links(guild_id):
-    try:
-        for item in _data:
-            if item["server_id"] == guild_id:
-                return item["klei_links"]
-    except:
-        _logger.debug(
-            f"data_interface: Could not find klei_links for guild_id:{guild_id}. Returning None"
-        )
-        return []
+    server = get_server(guild_id)
+    if not server:
+        return None
+    links = server.get("klei_links")
+    if links:
+        return links
+    return []
 
 
 def set_member_count_channel_id(guild_id, channel_id):
     try:
-        index = get_server_index(guild_id)
-        if index == -1:
+        server = get_server(guild_id)
+        if not server:
             return "No server found with this id."
-        _data[index]["member_count_channel_id"] = channel_id
+
+        server["member_count_channel_id"] = channel_id
         _save()
         return channel_id
     except Exception as e:
@@ -325,24 +300,19 @@ def set_member_count_channel_id(guild_id, channel_id):
 
 
 def get_member_count_channel_id(guild_id):
-    try:
-        for item in _data:
-            if item["server_id"] == guild_id:
-                return item["member_count_channel_id"]
-    except:
-        _logger.debug(
-            "data_interface: Could not find member_count_channel_id "
-            + f"for guild_id:{guild_id}. Returning None"
-        )
+    server = get_server(guild_id)
+    if not server:
         return None
+    return server.get("member_count_channel_id")
 
 
 def set_role_message_id(guild_id, message_id):
     try:
-        index = get_server_index(guild_id)
-        if index == -1:
+        server = get_server(guild_id)
+        if not server:
             return "No server found with this id."
-        _data[index]["set_role_message_id"] = message_id
+
+        server["set_role_message_id"] = message_id
         _save()
         return message_id
     except Exception as e:
@@ -354,24 +324,19 @@ def set_role_message_id(guild_id, message_id):
 
 
 def get_role_message_id(guild_id):
-    try:
-        for item in _data:
-            if item["server_id"] == guild_id:
-                return item["set_role_message_id"]
-    except:
-        _logger.debug(
-            "data_interface: Could not find set_role_message_id "
-            + f"for guild_id:{guild_id}. Returning None"
-        )
+    server = get_server(guild_id)
+    if not server:
         return None
+    return server.get("set_role_message_id")
 
 
 def set_role_emoji(guild_id, emoji_id):
     try:
-        index = get_server_index(guild_id)
-        if index == -1:
+        server = get_server(guild_id)
+        if not server:
             return "No server found with this id."
-        _data[index]["set_role_emoji"] = emoji_id
+
+        server["set_role_emoji"] = emoji_id
         _save()
         return emoji_id
     except Exception as e:
@@ -382,16 +347,10 @@ def set_role_emoji(guild_id, emoji_id):
 
 
 def get_role_emoji(guild_id):
-    try:
-        for item in _data:
-            if item["server_id"] == guild_id:
-                return item["set_role_emoji"]
-    except:
-        _logger.debug(
-            "data_interface: Could not find set_role_emoji for "
-            + f"guild_id:{guild_id}. Returning None"
-        )
+    server = get_server(guild_id)
+    if not server:
         return None
+    return server.get("set_role_emoji")
 
 
 def add_yt_notif_rule(
@@ -403,14 +362,14 @@ def add_yt_notif_rule(
     custom_message=None,
 ):
     try:
-        index = get_server_index(guild_id)
-        if index == -1:
+        server = get_server(guild_id)
+        if not server:
             return "No server found with this id."
 
-        if not _data[index].get("yt_notif_rules"):
-            _data[index]["yt_notif_rules"] = {}
+        if not server.get("yt_notif_rules"):
+            server["yt_notif_rules"] = {}
 
-        rules = _data[index]["yt_notif_rules"]
+        rules = server["yt_notif_rules"]
         yt_channel_id = str(yt_channel_id)
 
         if yt_channel_id in rules:
@@ -448,28 +407,22 @@ def add_yt_notif_rule(
 
 
 def get_yt_notif_rules(guild_id):
-    try:
-        for item in _data:
-            if item["server_id"] == guild_id:
-                return item["yt_notif_rules"]
-    except Exception:
-        _logger.debug(
-            "data_interface: Could not find yt_notif_rules for "
-            + f"guild_id:{guild_id}. Returning None"
-        )
+    server = get_server(guild_id)
+    if not server:
         return None
+    return server.get("yt_notif_rules")
 
 
 def set_yt_last_video_id(guild_id, yt_channel_id, yt_channel_name, video_id):
     try:
-        index = get_server_index(guild_id)
-        if index == -1:
+        server = get_server(guild_id)
+        if not server:
             return "No server found with this id."
 
-        if not _data[index].get("yt_notif_rules"):
+        if not server.get("yt_notif_rules"):
             return "The server has no Youtube notification rules defined."
 
-        rules = _data[index]["yt_notif_rules"]
+        rules = server["yt_notif_rules"]
         yt_channel_id = str(yt_channel_id)
 
         if yt_channel_id not in rules:
@@ -496,20 +449,20 @@ def set_yt_last_video_id(guild_id, yt_channel_id, yt_channel_name, video_id):
 
 def remove_yt_notif_rule(guild_id, yt_channel_id):
     try:
-        index = get_server_index(guild_id)
-        if index == -1:
+        server = get_server(guild_id)
+        if not server:
             return "No server found with this id."
 
-        if not _data[index].get("yt_notif_rules"):
-            _data[index]["yt_notif_rules"] = {}
+        if not server.get("yt_notif_rules"):
+            server["yt_notif_rules"] = {}
 
-        rules = _data[index]["yt_notif_rules"]
+        rules = server["yt_notif_rules"]
         yt_channel_id = str(yt_channel_id)
 
         if yt_channel_id not in rules:
             return "No rule is set for this Youtube channel."
 
-        _data[index]["yt_notif_rules"].pop(yt_channel_id)
+        server["yt_notif_rules"].pop(yt_channel_id)
         _save()
         return yt_channel_id
     except Exception as e:
