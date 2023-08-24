@@ -41,7 +41,7 @@ def get_subscriptions():
     if not servers:
         return subscriptions
     for server_id in servers.keys():
-        subscriptions[server_id] = servers[server_id]["active"]
+        subscriptions[int(server_id)] = servers[server_id]["active"]
     return subscriptions
 
 
@@ -60,7 +60,7 @@ def add_server(name, id):
     if not _data.get("servers"):
         _data["servers"] = {}
 
-    _data["servers"][id] = {
+    _data["servers"][str(id)] = {
         "name": name,
         "active": True,
     }

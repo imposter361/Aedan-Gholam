@@ -615,7 +615,7 @@ async def set_role_emoji(
             return
 
         target_emoji_id = None
-        if ":" in emoji_name:  # handle custom emojis <:custom_emoji:123456123456>
+        if ":" in emoji_name:  # handle custom emojis like: <:custom_emoji:123456123456>
             emoji_name = emoji_name.split(":")[1]
             target_emoji = nextcord.utils.get(interaction.guild.emojis, name=emoji_name)
             if not target_emoji:
@@ -656,7 +656,7 @@ async def set_role_emoji(
                 target_role = nextcord.utils.get(
                     interaction.guild.roles, name=role_name
                 )
-            
+
             if not target_role:
                 await interaction_response.edit("Invalid role.")
                 return

@@ -29,7 +29,7 @@ async def set_role_based_on_reaction(added_reaction: nextcord.Reaction):
 
     try:
         subscriptions = data.get_subscriptions()
-        if not subscriptions.get(str(added_reaction.guild_id)):
+        if not subscriptions.get(added_reaction.guild_id):
             return
 
         guild = client.get_guild(added_reaction.guild_id)
@@ -76,7 +76,7 @@ async def unset_role_based_on_reaction(removed_reaction: nextcord.Reaction):
 
     try:
         subscriptions = data.get_subscriptions()
-        if not subscriptions.get(str(removed_reaction.guild_id)):
+        if not subscriptions.get(removed_reaction.guild_id):
             return
 
         guild = client.get_guild(removed_reaction.guild_id)
