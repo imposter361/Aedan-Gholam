@@ -28,25 +28,32 @@ async def set_role_based_on_reaction(added_reaction: nextcord.Reaction):
         return False
 
     try:
+        subscriptions = data.get_subscriptions()
+        if not subscriptions.get(str(added_reaction.guild_id)):
+            return
+
         guild = client.get_guild(added_reaction.guild_id)
         member = added_reaction.member
-        reaction_name = added_reaction.emoji.name
+        emoji_key = added_reaction.emoji.name
+        if added_reaction.emoji.id:
+            emoji_key = str(added_reaction.emoji.id)
 
-        reaction_role_dic = data.get_role_emoji(guild.id)
-        set_role_message_id = data.get_role_message_id(guild.id)
-
-        if not reaction_name or not set_role_message_id:
-            return
-
-        if (
-            reaction_name not in reaction_role_dic.keys()
-            or added_reaction.message_id != set_role_message_id
-        ):
-            return
-
-        role = nextcord.utils.get(
-            guild.roles, name=reaction_role_dic.get(reaction_name)
+        setrole_messages = data.get_setrole_messages(guild.id)
+        target_message_key = (
+            str(added_reaction.channel_id) + "/" + str(added_reaction.message_id)
         )
+
+        if not setrole_messages.get(target_message_key):
+            return
+
+        emoji_role_dict = setrole_messages[target_message_key].get("emoji_role_dict")
+        if not emoji_role_dict:
+            return
+
+        if not emoji_role_dict.get(emoji_key):
+            return
+
+        role = nextcord.utils.get(guild.roles, id=emoji_role_dict[emoji_key])
         if not role or not member:
             return
 
@@ -68,22 +75,32 @@ async def unset_role_based_on_reaction(removed_reaction: nextcord.Reaction):
         return False
 
     try:
-        guild = client.get_guild(removed_reaction.guild_id)
-        member = guild.get_member(removed_reaction.user_id)
-        reaction_name = removed_reaction.emoji.name
-
-        reaction_role_dic = data.get_role_emoji(guild.id)
-        set_role_message_id = data.get_role_message_id(guild.id)
-
-        if (
-            reaction_name not in reaction_role_dic.keys()
-            or removed_reaction.message_id != set_role_message_id
-        ):
+        subscriptions = data.get_subscriptions()
+        if not subscriptions.get(str(removed_reaction.guild_id)):
             return
 
-        role = nextcord.utils.get(
-            guild.roles, name=reaction_role_dic.get(reaction_name)
+        guild = client.get_guild(removed_reaction.guild_id)
+        member = guild.get_member(removed_reaction.user_id)
+        emoji_key = removed_reaction.emoji.name
+        if removed_reaction.emoji.id:
+            emoji_key = str(removed_reaction.emoji.id)
+
+        setrole_messages = data.get_setrole_messages(guild.id)
+        target_message_key = (
+            str(removed_reaction.channel_id) + "/" + str(removed_reaction.message_id)
         )
+
+        if not setrole_messages.get(target_message_key):
+            return
+
+        emoji_role_dict = setrole_messages[target_message_key].get("emoji_role_dict")
+        if not emoji_role_dict:
+            return
+
+        if not emoji_role_dict.get(emoji_key):
+            return
+
+        role = nextcord.utils.get(guild.roles, id=emoji_role_dict[emoji_key])
         if not role or not member:
             return
 

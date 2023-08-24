@@ -1,6 +1,7 @@
 import data
 import features
 import logging
+import nextcord
 import pytube
 import webcolors
 from .helper import handle_command_exception
@@ -274,13 +275,12 @@ async def settings(
         name="setting",
         required=True,
         choices=[
-            "Set welcome channel id",
-            "Set role message id",
-            "Set epic games channel id",
-            "Set klei links channel id",
-            "Set free game role id",
             "Set DST role id",
+            "Set epic games channel id",
+            "Set free game role id",
+            "Set klei links channel id",
             "Set member count channel id",
+            "Set welcome channel id",
         ],
     ),
     id: str = SlashOption(required=True),
@@ -538,108 +538,200 @@ async def settings(
                     + f"in guild ({interaction.guild_id})"
                 )
                 await interaction_response.edit("Operation failed.")
-
-        if setting == "Set role message id":
-            try:
-                if id.lower() in ["none", "null", "0", "-"]:
-                    result = data.set_role_message_id(interaction.guild_id, None)
-                    if result == None:
-                        _logger.info(
-                            "commands/management: Set role message id has been unset "
-                            + f"in '{interaction.guild.name}' ({interaction.guild_id})"
-                        )
-                        await interaction_response.edit("Role message has been unset."),
-                    else:
-                        await interaction_response.edit(str(result))
-                    return
-
-                message_id = int(id)
-                channel = interaction.channel
-                message = None
-                try:
-                    message = await channel.fetch_message(message_id)
-                except Exception as e:
-                    pass
-
-                if not message:
-                    _logger.debug(f"commands/management: Message id ({id}) is invalid.")
-                    await interaction_response.edit(
-                        "Invalid message id. Make sure to run this command "
-                        + "in the same channel as the target message.",
-                    )
-                    return
-
-                result = data.set_role_message_id(interaction.guild_id, message_id)
-                if result == message_id:
-                    _logger.info(
-                        f"commands/management: Set role message id has been set to {id} "
-                        + f"in '{interaction.guild.name}' ({interaction.guild_id})"
-                    )
-                    await interaction_response.edit(
-                        "Role message has been set.",
-                    )
-                else:
-                    await interaction_response.edit(str(result))
-            except:
-                _logger.exception(
-                    f"commands/management: Failed to set role message id ({id}) "
-                    + f"in guild ({interaction.guild_id})"
-                )
-                await interaction_response.edit("Operation failed.")
     except:
         await handle_command_exception("settings", interaction, interaction_response)
 
 
-# set roles by emojis
+def process_discord_message_link(link: str):
+    message_guild_id = None
+    message_channel_id = None
+    message_id = None
+    try:
+        link_parts = link.removeprefix("https://discord.com/channels/").split("/")
+        if len(link_parts) == 3:
+            message_guild_id = int(link_parts[0])
+            message_channel_id = int(link_parts[1])
+            message_id = int(link_parts[2])
+
+        if not message_guild_id or not message_channel_id or not message_id:
+            return None
+
+        return {
+            "guild_id": message_guild_id,
+            "channel_id": message_channel_id,
+            "message_id": message_id,
+        }
+    except:
+        return None
+
+
 @client.slash_command(
     name="set_role_emoji",
-    description="Choose an emoji to assign a roll",
+    description="Choose an emoji to assign a role",
     default_member_permissions=Permissions(administrator=True),
     dm_permission=False,
 )
 async def set_role_emoji(
     interaction: Interaction,
+    message_link: str = SlashOption(name="message_link", required=True),
     emoji_name: str = SlashOption(
         name="emoji_name",
         description="CaSe sEnSiTiVe!",
         required=True,
     ),
     role_name: str = SlashOption(
-        name="role_name", description="CaSe sEnSiTiVe!", required=True
+        name="role_name", description="CaSe sEnSiTiVe!", required=False
     ),
 ):
     try:
         _logger.info(
             "commands/management: Command 'set_role_emoji' was called by "
             + f"'{interaction.user.name}' ({interaction.user.id}) "
-            + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: emoji_name:{emoji_name} "
-            + f"role_name:{role_name}"
+            + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: "
+            + f"message_link:{message_link} emoji_name:{emoji_name} role_name:{role_name}"
         )
         interaction_response = await interaction.send(
             f"Please wait ...", ephemeral=True
         )
 
-        get_roles = data.get_role_emoji(interaction.guild_id)
-        if get_roles == None:
-            get_roles = {}
-        if role_name.lower() in ["none", "null", "0", "-"]:
-            get_roles.pop(emoji_name)
-            _logger.info(
-                f"commands/management: Emoji ({emoji_name}) and role ({role_name}) unpaired "
-                + f"in '{interaction.guild.name}' ({interaction.guild_id})"
-            )
-            await interaction_response.edit("Emoji and role unpaired!")
+        link_parts = process_discord_message_link(message_link)
+        if not link_parts:
+            await interaction_response.edit("Please enter a valid link of a message.")
+            return
+
+        if interaction.guild_id != link_parts["guild_id"]:
+            await interaction_response.edit("Message link must be from this server!")
+            return
+
+        target_message = None
+        try:
+            target_message = await client.get_channel(
+                link_parts["channel_id"]
+            ).fetch_message(link_parts["message_id"])
+        except:
+            pass
+        if not target_message:
+            await interaction_response.edit("Please enter a valid link of a message.")
+            return
+
+        target_emoji_id = None
+        if ":" in emoji_name:  # handle custom emojis <:custom_emoji:123456123456>
+            emoji_name = emoji_name.split(":")[1]
+            target_emoji = nextcord.utils.get(interaction.guild.emojis, name=emoji_name)
+            if not target_emoji:
+                await interaction_response.edit("Invalid emoji.")
+                return
+            target_emoji_id = target_emoji.id
         else:
-            get_roles[emoji_name] = role_name
-            _logger.info(
-                f"commands/management: Emoji ({emoji_name}) and role ({role_name}) paired "
-                + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+            target_emoji_id = emoji_name
+
+        if not role_name:  # remove emoji-role pair
+            result = data.remove_setrole_emoji_role_pair(
+                interaction.guild_id,
+                link_parts["channel_id"],
+                link_parts["message_id"],
+                target_emoji_id,
             )
-            await interaction_response.edit("Emoji and role paired!")
-        data.set_role_emoji(interaction.guild_id, get_roles)
+            if result == target_emoji_id:
+                _logger.info(
+                    f"commands/management: Emoji ({emoji_name}) and role ({role_name}) unpaired "
+                    + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                )
+                await interaction_response.edit(
+                    "Emoji-role pair was removed from this message."
+                )
+                return
+            else:
+                await interaction_response.edit(result)
+                return
+
+        else:  # set emoji-role
+            target_role = None
+            if "<@&" in role_name:
+                role_id = role_name.split("&")[1].replace(">", "")
+                target_role = nextcord.utils.get(
+                    interaction.guild.roles, id=int(role_id)
+                )
+            else:
+                target_role = nextcord.utils.get(
+                    interaction.guild.roles, name=role_name
+                )
+            
+            if not target_role:
+                await interaction_response.edit("Invalid role.")
+                return
+
+            result = data.set_setrole_emoji_role_pair(
+                interaction.guild_id,
+                link_parts["channel_id"],
+                link_parts["message_id"],
+                target_emoji_id,
+                target_role.id,
+            )
+            if result == target_emoji_id:
+                _logger.info(
+                    f"commands/management: Emoji ({emoji_name}) and role ({role_name}) paired "
+                    + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                )
+                await interaction_response.edit(
+                    "Emoji and role have been paired for this message."
+                )
+                return
+            else:
+                await interaction_response.edit(result)
+                return
     except:
         await handle_command_exception(
             "set_role_emoji", interaction, interaction_response
+        )
+
+
+@client.slash_command(
+    name="remove_role_message",
+    description="Unmark a message as a 'set role by reaction' message",
+    default_member_permissions=Permissions(administrator=True),
+    dm_permission=False,
+)
+async def remove_role_message(
+    interaction: Interaction,
+    message_link: str = SlashOption(name="message_link", required=True),
+):
+    try:
+        _logger.info(
+            "commands/management: Command 'remove_role_message' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
+            + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: message_link:{message_link}"
+        )
+        interaction_response = await interaction.send(
+            f"Please wait ...", ephemeral=True
+        )
+
+        link_parts = process_discord_message_link(message_link)
+        if not link_parts:
+            await interaction_response.edit("Please enter a valid link of a message.")
+            return
+
+        if interaction.guild_id != link_parts["guild_id"]:
+            await interaction_response.edit("Message link must be from this server!")
+            return
+
+        result = data.remove_setrole_message_id(
+            interaction.guild_id, link_parts["channel_id"], link_parts["message_id"]
+        )
+
+        if result == link_parts["message_id"]:
+            _logger.info(
+                f"commands/management: Message ({link_parts['message_id']}) has been unset as set-role message "
+                + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+            )
+            await interaction_response.edit(
+                "Done. This message is no longer a 'set role by reaction' message"
+            )
+            return
+        await interaction_response.edit(result)
+    except:
+        await handle_command_exception(
+            "remove_role_message", interaction, interaction_response
         )
 
 

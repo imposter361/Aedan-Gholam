@@ -306,51 +306,104 @@ def get_member_count_channel_id(guild_id):
     return server.get("member_count_channel_id")
 
 
-def set_role_message_id(guild_id, message_id):
+def set_setrole_emoji_role_pair(guild_id, channel_id, message_id, emoji_id, role_id):
     try:
         server = get_server(guild_id)
         if not server:
             return "No server found with this id."
 
-        server["set_role_message_id"] = message_id
-        _save()
-        return message_id
-    except Exception as e:
-        _logger.exception(
-            "data_interface: Failed to set set-role message id "
-            + f"({message_id}) for guild ({guild_id})"
-        )
-        return f"Error happened: {str(e)}"
+        if not server.get("set_role_by_reaction_messages"):
+            server["set_role_by_reaction_messages"] = {}
 
+        setrole_messages = server["set_role_by_reaction_messages"]
+        target_message_key = str(channel_id) + "/" + str(message_id)
 
-def get_role_message_id(guild_id):
-    server = get_server(guild_id)
-    if not server:
-        return None
-    return server.get("set_role_message_id")
+        if not setrole_messages.get(target_message_key):
+            setrole_messages[target_message_key] = {}
 
+        if not setrole_messages[target_message_key].get("emoji_role_dict"):
+            setrole_messages[target_message_key]["emoji_role_dict"] = {}
 
-def set_role_emoji(guild_id, emoji_id):
-    try:
-        server = get_server(guild_id)
-        if not server:
-            return "No server found with this id."
+        emoji_role_dict = setrole_messages[target_message_key]["emoji_role_dict"]
+        if emoji_role_dict.get(str(emoji_id)):
+            if emoji_role_dict[str(emoji_id)] == role_id:
+                return "This emoji-role pair already exists."
 
-        server["set_role_emoji"] = emoji_id
+        emoji_role_dict[str(emoji_id)] = role_id
         _save()
         return emoji_id
     except Exception as e:
         _logger.exception(
-            f"data_interface: Failed to set role emoji id ({emoji_id}) for guild ({guild_id})"
+            f"data_interface: Failed to pair emoji ({emoji_id}) and role ({role_id}) "
+            + f"for message ({message_id}) in guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
 
 
-def get_role_emoji(guild_id):
+def remove_setrole_emoji_role_pair(guild_id, channel_id, message_id, emoji_id):
+    try:
+        server = get_server(guild_id)
+        if not server:
+            return "No server found with this id."
+
+        if not server.get("set_role_by_reaction_messages"):
+            return 'This message is not marked as a "set role by reaction" message.'
+
+        setrole_messages = server["set_role_by_reaction_messages"]
+        target_message_key = str(channel_id) + "/" + str(message_id)
+
+        if not setrole_messages.get(target_message_key):
+            return 'This message is not marked as a "set role by reaction" message.'
+
+        if not setrole_messages[target_message_key].get("emoji_role_dict"):
+            return "This emoji-role pair does not exist."
+
+        emoji_role_dict = setrole_messages[target_message_key]["emoji_role_dict"]
+        if not emoji_role_dict.get(str(emoji_id)):
+            return "This emoji-role pair does not exist."
+
+        emoji_role_dict.pop(str(emoji_id))
+        _save()
+        return emoji_id
+    except Exception as e:
+        _logger.exception(
+            f"data_interface: Failed to remove emoji-role pair with emoji id of "
+            + f"({emoji_role_dict}) for message ({message_id}) in guild ({guild_id})"
+        )
+        return f"Error happened: {str(e)}"
+
+
+def get_setrole_messages(guild_id):
     server = get_server(guild_id)
     if not server:
         return None
-    return server.get("set_role_emoji")
+    return server.get("set_role_by_reaction_messages")
+
+
+def remove_setrole_message_id(guild_id, channel_id, message_id):
+    try:
+        server = get_server(guild_id)
+        if not server:
+            return "No server found with this id."
+
+        if not server.get("set_role_by_reaction_messages"):
+            return 'This message is not marked as a "set role by reaction" message.'
+
+        setrole_messages = server["set_role_by_reaction_messages"]
+        target_message_key = str(channel_id) + "/" + str(message_id)
+
+        if not setrole_messages.get(target_message_key):
+            return 'This message is not marked as a "set role by reaction" message.'
+
+        setrole_messages.pop(target_message_key)
+        _save()
+        return message_id
+    except Exception as e:
+        _logger.exception(
+            "data_interface: Failed to remove set-role message id "
+            + f"({message_id}) in channel ({channel_id}) for guild ({guild_id})"
+        )
+        return f"Error happened: {str(e)}"
 
 
 def add_yt_notif_rule(
