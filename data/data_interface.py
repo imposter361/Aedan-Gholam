@@ -1,3 +1,4 @@
+import data.migrations as migrations
 import json
 import logging
 import os
@@ -5,8 +6,15 @@ import os
 _logger = logging.getLogger("main")
 
 
+_DATA_VERSION = 1
 _DATA_FILE = "data/data.json"
-_data = {}
+
+_data = {"data-version": _DATA_VERSION}
+
+
+if "_data_migration_checked" not in dir():  # Run once
+    global _data_migration_checked
+    _data_migration_checked = False
 
 
 def _init():
@@ -32,10 +40,23 @@ def _save():
 
 
 _init()
-_load()
+
+
+async def check_for_data_migrations():
+    await migrations.apply_available_migrations(_DATA_FILE, _DATA_VERSION)
+    _load()
+    global _data_migration_checked
+    _data_migration_checked = True
+
+
+def is_ready():
+    return _data_migration_checked
 
 
 def get_subscriptions():
+    if not is_ready():
+        return {}
+    
     subscriptions = {}
     servers: dict = _data.get("servers")
     if not servers:
@@ -46,6 +67,9 @@ def get_subscriptions():
 
 
 def get_server(guild_id):
+    if not is_ready():
+        return "Please try again later."
+    
     servers: dict = _data.get("servers")
     if not servers:
         return None
@@ -53,6 +77,9 @@ def get_server(guild_id):
 
 
 def add_server(name, id):
+    if not is_ready():
+        return "Please try again later."
+    
     server = get_server(id)
     if server:
         return "The server is already registered."
@@ -69,6 +96,9 @@ def add_server(name, id):
 
 
 def edit_server(id, active):
+    if not is_ready():
+        return "Please try again later."
+    
     server = get_server(id)
     if not server:
         return "No server found with this id."
@@ -79,6 +109,9 @@ def edit_server(id, active):
 
 
 def remove_server(id):
+    if not is_ready():
+        return "Please try again later."
+    
     server = get_server(id)
     if not server:
         return "No server found with this id."
@@ -89,6 +122,9 @@ def remove_server(id):
 
 
 def set_welcome_channel_id(guild_id, channel_id):
+    if not is_ready():
+        return "Please try again later."
+    
     try:
         server = get_server(guild_id)
         if not server:
@@ -106,6 +142,9 @@ def set_welcome_channel_id(guild_id, channel_id):
 
 
 def get_welcome_channel_id(guild_id):
+    if not is_ready():
+        return "Please try again later."
+    
     server = get_server(guild_id)
     if not server:
         return None
@@ -113,6 +152,9 @@ def get_welcome_channel_id(guild_id):
 
 
 def set_welcome_message(guild_id, message):
+    if not is_ready():
+        return "Please try again later."
+    
     try:
         server = get_server(guild_id)
         if not server:
@@ -130,6 +172,9 @@ def set_welcome_message(guild_id, message):
 
 
 def get_welcome_message(guild_id):
+    if not is_ready():
+        return "Please try again later."
+    
     server = get_server(guild_id)
     if not server:
         return None
@@ -137,6 +182,9 @@ def get_welcome_message(guild_id):
 
 
 def set_epic_games_channel_id(guild_id, channel_id):
+    if not is_ready():
+        return "Please try again later."
+    
     try:
         server = get_server(guild_id)
         if not server:
@@ -154,6 +202,9 @@ def set_epic_games_channel_id(guild_id, channel_id):
 
 
 def get_epic_games_channel_id(guild_id):
+    if not is_ready():
+        return "Please try again later."
+    
     server = get_server(guild_id)
     if not server:
         return None
@@ -161,6 +212,9 @@ def get_epic_games_channel_id(guild_id):
 
 
 def set_klei_links_channel_id(guild_id, channel_id):
+    if not is_ready():
+        return "Please try again later."
+    
     try:
         server = get_server(guild_id)
         if not server:
@@ -178,6 +232,9 @@ def set_klei_links_channel_id(guild_id, channel_id):
 
 
 def get_klei_links_channel_id(guild_id):
+    if not is_ready():
+        return "Please try again later."
+    
     server = get_server(guild_id)
     if not server:
         return None
@@ -185,6 +242,9 @@ def get_klei_links_channel_id(guild_id):
 
 
 def set_free_games_role_id(guild_id, role_id):
+    if not is_ready():
+        return "Please try again later."
+    
     try:
         server = get_server(guild_id)
         if not server:
@@ -201,6 +261,9 @@ def set_free_games_role_id(guild_id, role_id):
 
 
 def get_free_games_role_id(guild_id):
+    if not is_ready():
+        return "Please try again later."
+    
     server = get_server(guild_id)
     if not server:
         return None
@@ -208,6 +271,9 @@ def get_free_games_role_id(guild_id):
 
 
 def set_dst_role_id(guild_id, role_id):
+    if not is_ready():
+        return "Please try again later."
+    
     try:
         server = get_server(guild_id)
         if not server:
@@ -224,6 +290,9 @@ def set_dst_role_id(guild_id, role_id):
 
 
 def get_dst_role_id(guild_id):
+    if not is_ready():
+        return "Please try again later."
+    
     server = get_server(guild_id)
     if not server:
         return None
@@ -231,6 +300,9 @@ def get_dst_role_id(guild_id):
 
 
 def set_epic_games_names(guild_id, games):
+    if not is_ready():
+        return "Please try again later."
+    
     try:
         server = get_server(guild_id)
         if not server:
@@ -247,6 +319,9 @@ def set_epic_games_names(guild_id, games):
 
 
 def get_epic_games_names(guild_id):
+    if not is_ready():
+        return "Please try again later."
+    
     server = get_server(guild_id)
     if not server:
         return None
@@ -257,6 +332,9 @@ def get_epic_games_names(guild_id):
 
 
 def set_klei_links(guild_id, links):
+    if not is_ready():
+        return "Please try again later."
+    
     try:
         server = get_server(guild_id)
         if not server:
@@ -273,6 +351,9 @@ def set_klei_links(guild_id, links):
 
 
 def get_klei_links(guild_id):
+    if not is_ready():
+        return "Please try again later."
+    
     server = get_server(guild_id)
     if not server:
         return None
@@ -283,6 +364,9 @@ def get_klei_links(guild_id):
 
 
 def set_member_count_channel_id(guild_id, channel_id):
+    if not is_ready():
+        return "Please try again later."
+    
     try:
         server = get_server(guild_id)
         if not server:
@@ -300,6 +384,9 @@ def set_member_count_channel_id(guild_id, channel_id):
 
 
 def get_member_count_channel_id(guild_id):
+    if not is_ready():
+        return "Please try again later."
+    
     server = get_server(guild_id)
     if not server:
         return None
@@ -307,6 +394,9 @@ def get_member_count_channel_id(guild_id):
 
 
 def set_setrole_emoji_role_pair(guild_id, channel_id, message_id, emoji_id, role_id):
+    if not is_ready():
+        return "Please try again later."
+    
     try:
         server = get_server(guild_id)
         if not server:
@@ -341,6 +431,9 @@ def set_setrole_emoji_role_pair(guild_id, channel_id, message_id, emoji_id, role
 
 
 def remove_setrole_emoji_role_pair(guild_id, channel_id, message_id, emoji_id):
+    if not is_ready():
+        return "Please try again later."
+    
     try:
         server = get_server(guild_id)
         if not server:
@@ -374,6 +467,9 @@ def remove_setrole_emoji_role_pair(guild_id, channel_id, message_id, emoji_id):
 
 
 def get_setrole_messages(guild_id):
+    if not is_ready():
+        return "Please try again later."
+    
     server = get_server(guild_id)
     if not server:
         return None
@@ -381,6 +477,9 @@ def get_setrole_messages(guild_id):
 
 
 def remove_setrole_message_id(guild_id, channel_id, message_id):
+    if not is_ready():
+        return "Please try again later."
+    
     try:
         server = get_server(guild_id)
         if not server:
@@ -414,6 +513,9 @@ def add_yt_notif_rule(
     last_video_id,
     custom_message=None,
 ):
+    if not is_ready():
+        return "Please try again later."
+    
     try:
         server = get_server(guild_id)
         if not server:
@@ -460,6 +562,9 @@ def add_yt_notif_rule(
 
 
 def get_yt_notif_rules(guild_id):
+    if not is_ready():
+        return "Please try again later."
+    
     server = get_server(guild_id)
     if not server:
         return None
@@ -467,6 +572,9 @@ def get_yt_notif_rules(guild_id):
 
 
 def set_yt_last_video_id(guild_id, yt_channel_id, yt_channel_name, video_id):
+    if not is_ready():
+        return "Please try again later."
+    
     try:
         server = get_server(guild_id)
         if not server:
@@ -501,6 +609,9 @@ def set_yt_last_video_id(guild_id, yt_channel_id, yt_channel_name, video_id):
 
 
 def remove_yt_notif_rule(guild_id, yt_channel_id):
+    if not is_ready():
+        return "Please try again later."
+    
     try:
         server = get_server(guild_id)
         if not server:

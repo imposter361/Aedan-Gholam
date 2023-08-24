@@ -1,0 +1,1 @@
+from .migrate import apply_available_migrations
