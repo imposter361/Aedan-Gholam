@@ -548,7 +548,7 @@ def add_yt_notif_rule(
                 _save()
             if (
                 rules[yt_channel_id]["discord_channel_id"] == discord_channel_id
-                and rules[yt_channel_id]["custom_text_message"] == custom_message
+                and rules[yt_channel_id].get("custom_text_message") == custom_message
             ):
                 return "This rule already exists."
             else:
