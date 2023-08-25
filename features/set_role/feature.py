@@ -38,7 +38,7 @@ async def set_role_based_on_reaction(added_reaction: nextcord.Reaction):
         if added_reaction.emoji.id:
             emoji_key = str(added_reaction.emoji.id)
 
-        setrole_messages = data.get_setrole_messages(guild.id)
+        setrole_messages = data.setrole_messages_get(guild.id)
         target_message_key = (
             str(added_reaction.channel_id) + "/" + str(added_reaction.message_id)
         )
@@ -85,7 +85,7 @@ async def unset_role_based_on_reaction(removed_reaction: nextcord.Reaction):
         if removed_reaction.emoji.id:
             emoji_key = str(removed_reaction.emoji.id)
 
-        setrole_messages = data.get_setrole_messages(guild.id)
+        setrole_messages = data.setrole_messages_get(guild.id)
         target_message_key = (
             str(removed_reaction.channel_id) + "/" + str(removed_reaction.message_id)
         )

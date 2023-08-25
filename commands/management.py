@@ -71,7 +71,7 @@ async def add_server(interaction: Interaction, id: str = SlashOption(required=Tr
             await interaction_response.edit("Server with this id does not exist.")
             return
 
-        result = data.add_server(str(target_guild), server_id)
+        result = data.server_add(str(target_guild), server_id)
         if result == server_id:
             _logger.info(
                 f"commands/management: Server '{target_guild.name}' ({target_guild.id}) "
@@ -124,7 +124,7 @@ async def edit_server(
             await interaction_response.edit("Server with this id does not exist.")
             return
 
-        result = data.edit_server(server_id, active)
+        result = data.server_edit(server_id, active)
         if result == server_id:
             active_status = "activated" if active else "deactivated"
             _logger.info(
@@ -174,7 +174,7 @@ async def remove_server(interaction: Interaction, id: str = SlashOption(required
             await interaction_response.edit("Server with this id does not exist.")
             return
 
-        result = data.remove_server(server_id)
+        result = data.server_remove(server_id)
         if result == server_id:
             _logger.info(
                 f"commands/management: Server '{target_guild.name}' ({target_guild.id}) "
@@ -222,7 +222,7 @@ async def customize(
     if customize == "welcome message":
         try:
             if message != None:
-                result = data.set_welcome_message(interaction.guild_id, message)
+                result = data.welcome_message_set(interaction.guild_id, message)
                 if result == None:
                     _logger.info(
                         "commands/management: Welcome message has been unset "
@@ -244,7 +244,7 @@ async def customize(
                 )
                 return
 
-            result = data.set_welcome_message(interaction.guild_id, channel_id)
+            result = data.welcome_message_set(interaction.guild_id, channel_id)
             if result == channel_id:
                 _logger.info(
                     f"commands/management: Welcome message has been set to {id} "
@@ -295,7 +295,7 @@ async def settings(
         if setting == "Set welcome channel id":
             try:
                 if id.lower() in ["none", "null", "0", "-"]:
-                    result = data.set_welcome_channel_id(interaction.guild_id, None)
+                    result = data.welcome_channel_id_set(interaction.guild_id, None)
                     if result == None:
                         _logger.info(
                             "commands/management: Welcome channel id has been unset "
@@ -317,7 +317,7 @@ async def settings(
                     )
                     return
 
-                result = data.set_welcome_channel_id(interaction.guild_id, channel_id)
+                result = data.welcome_channel_id_set(interaction.guild_id, channel_id)
                 if result == channel_id:
                     _logger.info(
                         f"commands/management: Welcome channel id has been set to {id} "
@@ -338,7 +338,7 @@ async def settings(
         if setting == "Set epic games channel id":
             try:
                 if id.lower() in ["none", "null", "0", "-"]:
-                    result = data.set_epic_games_channel_id(interaction.guild_id, None)
+                    result = data.epic_games_channel_id_set(interaction.guild_id, None)
                     if result == None:
                         _logger.info(
                             "commands/management: epic games channel id has been unset "
@@ -359,7 +359,7 @@ async def settings(
                         "Invalid channel ID.",
                     )
                     return
-                result = data.set_epic_games_channel_id(
+                result = data.epic_games_channel_id_set(
                     interaction.guild_id, channel_id
                 )
                 if result == channel_id:
@@ -382,7 +382,7 @@ async def settings(
         if setting == "Set klei links channel id":
             try:
                 if id.lower() in ["none", "null", "0", "-"]:
-                    result = data.set_klei_links_channel_id(interaction.guild_id, None)
+                    result = data.klei_links_channel_id_set(interaction.guild_id, None)
                     if result == None:
                         _logger.info(
                             "commands/management: klei links channel id has been unset "
@@ -403,7 +403,7 @@ async def settings(
                         "Invalid channel ID.",
                     )
                     return
-                result = data.set_klei_links_channel_id(
+                result = data.klei_links_channel_id_set(
                     interaction.guild_id, channel_id
                 )
                 if result == channel_id:
@@ -426,7 +426,7 @@ async def settings(
         if setting == "Set free game role id":
             try:
                 if id.lower() in ["none", "null", "0", "-"]:
-                    result = data.set_free_games_role_id(interaction.guild_id, None)
+                    result = data.free_games_role_id_set(interaction.guild_id, None)
                     if result == None:
                         _logger.info(
                             "commands/management: Free game role id has been unset "
@@ -440,7 +440,7 @@ async def settings(
                     return
 
                 role_id = int(id)
-                result = data.set_free_games_role_id(interaction.guild_id, role_id)
+                result = data.free_games_role_id_set(interaction.guild_id, role_id)
                 if result == role_id:
                     _logger.info(
                         f"commands/management: Free game role id has been set to {id} "
@@ -461,7 +461,7 @@ async def settings(
         if setting == "Set DST role id":
             try:
                 if id.lower() in ["none", "null", "0", "-"]:
-                    result = data.set_dst_role_id(interaction.guild_id, None)
+                    result = data.dst_role_id_set(interaction.guild_id, None)
                     if result == None:
                         _logger.info(
                             "commands/management: DST role id has been unset "
@@ -475,7 +475,7 @@ async def settings(
                     return
 
                 role_id = int(id)
-                result = data.set_dst_role_id(interaction.guild_id, role_id)
+                result = data.dst_role_id_set(interaction.guild_id, role_id)
                 if result == role_id:
                     _logger.info(
                         f"commands/management: DST role id has been set to {id} "
@@ -496,7 +496,7 @@ async def settings(
         if setting == "Set member count channel id":
             try:
                 if id.lower() in ["none", "null", "0", "-"]:
-                    result = data.set_member_count_channel_id(
+                    result = data.member_count_channel_id_set(
                         interaction.guild_id, None
                     )
                     if result == None:
@@ -519,7 +519,7 @@ async def settings(
                         "Invalid channel ID.",
                     )
                     return
-                result = data.set_member_count_channel_id(
+                result = data.member_count_channel_id_set(
                     interaction.guild_id, channel_id
                 )
                 if result == channel_id:
@@ -626,7 +626,7 @@ async def set_role_emoji(
             target_emoji_id = emoji_name
 
         if not role_name:  # remove emoji-role pair
-            result = data.remove_setrole_emoji_role_pair(
+            result = data.setrole_emoji_role_pair_remove(
                 interaction.guild_id,
                 link_parts["channel_id"],
                 link_parts["message_id"],
@@ -661,7 +661,7 @@ async def set_role_emoji(
                 await interaction_response.edit("Invalid role.")
                 return
 
-            result = data.set_setrole_emoji_role_pair(
+            result = data.setrole_emoji_role_pair_set(
                 interaction.guild_id,
                 link_parts["channel_id"],
                 link_parts["message_id"],
@@ -715,7 +715,7 @@ async def remove_role_message(
             await interaction_response.edit("Message link must be from this server!")
             return
 
-        result = data.remove_setrole_message_id(
+        result = data.setrole_message_id_remove(
             interaction.guild_id, link_parts["channel_id"], link_parts["message_id"]
         )
 
@@ -877,7 +877,7 @@ async def youtube_notification_set(
             video.channel_id
         )
 
-        result = data.add_yt_notif_rule(
+        result = data.yt_notif_rule_add(
             interaction.guild_id,
             video.channel_id,
             video.author,
@@ -927,7 +927,7 @@ async def youtube_notification_remove(
 
         video = pytube.YouTube(link)
 
-        result = data.remove_yt_notif_rule(interaction.guild_id, video.channel_id)
+        result = data.yt_notif_rule_remove(interaction.guild_id, video.channel_id)
         if result == video.channel_id:
             _logger.info(
                 f"commands/management: {video.author}'s new youtube videos will no longer "

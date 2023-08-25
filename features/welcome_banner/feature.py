@@ -34,7 +34,7 @@ async def send_welcome_banner(member: nextcord.Member):
         if guild.id not in subscriptions or not subscriptions[guild.id]:
             return
 
-        welcome_channel_id = data.get_welcome_channel_id(guild.id)
+        welcome_channel_id = data.welcome_channel_id_get(guild.id)
         if welcome_channel_id is None:
             return
 
@@ -49,7 +49,7 @@ async def send_welcome_banner(member: nextcord.Member):
             is_home = True
         file = _create_welcome_banner(member, is_home)
         message: str = f"Salam {member.mention} be **{guild}** khosh oomadi!\n"
-        custom_message = data.get_welcome_message(guild.id)
+        custom_message = data.welcome_message_get(guild.id)
         
         if custom_message:
             message = custom_message

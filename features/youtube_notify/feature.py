@@ -35,7 +35,7 @@ async def check_for_new_youtube_video():
         if not subscriptions[guild_id]:
             continue
 
-        rules = data.get_yt_notif_rules(guild_id)
+        rules = data.yt_notif_rules_get(guild_id)
         if not rules:
             continue
 
@@ -68,7 +68,7 @@ async def check_for_new_youtube_video():
                         + f" guild: '{discord_channel.guild.name}' ({discord_channel.guild.id}) "
                     )
                     # update stored last video id
-                    data.set_yt_last_video_id(
+                    data.yt_last_video_id_set(
                         guild_id,
                         yt_channel_id,
                         last_video["channel_name"],

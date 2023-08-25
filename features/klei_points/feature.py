@@ -37,7 +37,7 @@ async def check_klei_points():
         if not subscriptions[guild_id]:
             continue
 
-        channel_id = data.get_klei_links_channel_id(guild_id)
+        channel_id = data.klei_links_channel_id_get(guild_id)
         if not channel_id:
             continue
 
@@ -113,7 +113,7 @@ def _get_klei_points():
 async def _send_klei_points_for_guild(guild_id, channel_id, klei_points):
     try:
         channel = client.get_channel(channel_id)
-        sent_links = data.get_klei_links(guild_id)
+        sent_links = data.klei_links_get(guild_id)
         valid_sent_links = []
 
         for klei_point in klei_points:
@@ -121,7 +121,7 @@ async def _send_klei_points_for_guild(guild_id, channel_id, klei_points):
                 valid_sent_links.append(klei_point["url"])
                 continue
 
-            role_id = data.get_dst_role_id(guild_id)
+            role_id = data.dst_role_id_get(guild_id)
             message_header = "🇳 🇪 🇼  🥹  🇱 🇮 🇳 🇰\n+---------------------------------------------------------+\n"
             if role_id:
                 message_header = f"🇳 🇪 🇼  🥹  🇱 🇮 🇳 🇰 <@&{role_id}>\n+---------------------------------------------------------+\n"
@@ -134,7 +134,7 @@ async def _send_klei_points_for_guild(guild_id, channel_id, klei_points):
                 )
                 valid_sent_links.append(klei_point["url"])
                 sent_links.append(klei_point["url"])
-                data.set_klei_links(guild_id, sent_links)
+                data.klei_links_set(guild_id, sent_links)
             except:
                 _logger.exception(
                     f"features/klei_points: Failed to send klei points ({klei_point}) "
@@ -142,7 +142,7 @@ async def _send_klei_points_for_guild(guild_id, channel_id, klei_points):
                 )
 
         # Cleanup expired links (only keep valid sent links in the data storage)
-        data.set_klei_links(guild_id, valid_sent_links)
+        data.klei_links_set(guild_id, valid_sent_links)
     except:
         _logger.exception(
             f"features/klei_points: Failed to send klei points ({klei_points}) "

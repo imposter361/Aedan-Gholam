@@ -37,7 +37,7 @@ async def check_free_games():
         if not subscriptions[guild_id]:
             continue
 
-        channel_id = data.get_epic_games_channel_id(guild_id)
+        channel_id = data.epic_games_channel_id_get(guild_id)
         if not channel_id:
             continue
 
@@ -117,14 +117,14 @@ def _get_free_games_links():
 async def _send_free_games_for_guild(guild_id, channel_id, free_games):
     try:
         channel = client.get_channel(channel_id)
-        sent_games = data.get_epic_games_names(guild_id)
+        sent_games = data.epic_games_names_get(guild_id)
 
         for game in free_games:
             if game["name"] in sent_games:
                 continue
 
             message = "The following game is currently available for free on the Epic Games Store:\n"
-            role_id = data.get_free_games_role_id(guild_id)
+            role_id = data.free_games_role_id_get(guild_id)
             role_mention = ""
             if role_id:
                 role_mention = f"<@&{role_id}>\n"
@@ -132,7 +132,7 @@ async def _send_free_games_for_guild(guild_id, channel_id, free_games):
                 f"{role_mention}{message}\n<:epic_icon:1101097658153713774> **{game['name']}** - (ends {game['end_date']})\n{game['url']}\n"
             )
             sent_games.append(game["name"])
-            data.set_epic_games_names(guild_id, sent_games)
+            data.epic_games_names_set(guild_id, sent_games)
     except:
         _logger.exception(
             f"features/epic_games: Failed to send free Epic games ({free_games}) "

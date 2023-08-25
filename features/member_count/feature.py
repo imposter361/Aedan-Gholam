@@ -1,6 +1,6 @@
+import data
 import logging
 from bot import client
-from data import get_member_count_channel_id, get_subscriptions
 
 _logger = logging.getLogger("main")
 
@@ -27,16 +27,16 @@ async def update_member_count():
 
     _logger.debug("features/member_count: Running member count updater task...")
 
-    subscriptions = get_subscriptions()
+    subscriptions = data.get_subscriptions()
     for guild_id in subscriptions:
         if subscriptions[guild_id] == False:
             continue
-        if get_member_count_channel_id(guild_id) == None:
+        if data.member_count_channel_id_get(guild_id) == None:
             continue
 
         try:
             members_count_channel = client.get_channel(
-                get_member_count_channel_id(guild_id)
+                data.member_count_channel_id_get(guild_id)
             )
             guild = members_count_channel.guild
             name = "Total members: " + str(guild.member_count)
