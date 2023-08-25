@@ -48,7 +48,7 @@ async def gholametam(message: Message):
     if "gholam" in lower_message or "غلام" in lower_message:
         if message.author != client.user:
             index = random.randrange(0, len(responses))
-            responses = responses[index]
-            await message.reply(responses)
+            response = responses[index]
+            await message.reply(response)
             return True
     return False
