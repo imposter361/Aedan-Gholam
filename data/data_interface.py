@@ -20,21 +20,21 @@ if "_data_migration_checked" not in dir():  # Run once
 def _init():
     if not os.path.exists(_DATA_FILE):
         _logger.debug(
-            f"data_interface: Data file does not exist. Creating {_DATA_FILE}"
+            f"data: Data file does not exist. Creating {_DATA_FILE}"
         )
         with open(_DATA_FILE, "w") as file:
             file.write(json.dumps(_data))
 
 
 def _load():
-    _logger.debug(f"data_interface: Loading data from {_DATA_FILE}")
+    _logger.debug(f"data: Loading data from {_DATA_FILE}")
     with open(_DATA_FILE) as file:
         global _data
         _data = json.load(file)
 
 
 def _save():
-    _logger.debug(f"data_interface: Saving data to {_DATA_FILE}")
+    _logger.debug(f"data: Saving data to {_DATA_FILE}")
     with open(_DATA_FILE, "w") as file:
         file.write(json.dumps(_data, indent=4, sort_keys=True))
 
@@ -43,9 +43,9 @@ _init()
 
 
 async def check_for_data_migrations():
-    _logger.debug("data_interface: Checking for available data migrations.")
+    _logger.debug("data: Checking for available data migrations.")
     await migrations.apply_available_migrations(_DATA_FILE, _DATA_VERSION)
-    _logger.debug("data_interface: Data migration check has finished.")
+    _logger.debug("data: Data migration check has finished.")
     _load()
     global _data_migration_checked
     _data_migration_checked = True
@@ -137,7 +137,7 @@ def set_welcome_channel_id(guild_id, channel_id):
         return channel_id
     except Exception as e:
         _logger.exception(
-            "data_interface: Failed to set welcome_channel_id "
+            "data: Failed to set welcome_channel_id "
             + f"({channel_id}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
@@ -167,7 +167,7 @@ def set_welcome_message(guild_id, message):
         return message
     except Exception as e:
         _logger.exception(
-            "data_interface: Failed to set welcome_message "
+            "data: Failed to set welcome_message "
             + f"({message}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
@@ -197,7 +197,7 @@ def set_epic_games_channel_id(guild_id, channel_id):
         return channel_id
     except Exception as e:
         _logger.exception(
-            "data_interface: Failed to set epic_games_channel_id"
+            "data: Failed to set epic_games_channel_id"
             + f"channel id ({channel_id}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
@@ -227,7 +227,7 @@ def set_klei_links_channel_id(guild_id, channel_id):
         return channel_id
     except Exception as e:
         _logger.exception(
-            "data_interface: Failed to set klei_links_channel_id"
+            "data: Failed to set klei_links_channel_id"
             + f"channel id ({channel_id}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
@@ -257,7 +257,7 @@ def set_free_games_role_id(guild_id, role_id):
         return role_id
     except Exception as e:
         _logger.exception(
-            f"data_interface: Failed to set free games role id ({role_id}) for guild ({guild_id})"
+            f"data: Failed to set free games role id ({role_id}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
 
@@ -286,7 +286,7 @@ def set_dst_role_id(guild_id, role_id):
         return role_id
     except Exception as e:
         _logger.exception(
-            f"data_interface: Failed to set DST role id ({role_id}) for guild ({guild_id})"
+            f"data: Failed to set DST role id ({role_id}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
 
@@ -315,7 +315,7 @@ def set_epic_games_names(guild_id, games):
         return games
     except Exception as e:
         _logger.exception(
-            f"data_interface: Failed to set free games names ({games}) for guild ({guild_id})"
+            f"data: Failed to set free games names ({games}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
 
@@ -347,7 +347,7 @@ def set_klei_links(guild_id, links):
         return links
     except Exception as e:
         _logger.exception(
-            f"data_interface: Failed to set klei links ({links}) for guild ({guild_id})"
+            f"data: Failed to set klei links ({links}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
 
@@ -379,7 +379,7 @@ def set_member_count_channel_id(guild_id, channel_id):
         return channel_id
     except Exception as e:
         _logger.exception(
-            "data_interface: Failed to set member count channel id "
+            "data: Failed to set member count channel id "
             + f"({channel_id}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
@@ -426,7 +426,7 @@ def set_setrole_emoji_role_pair(guild_id, channel_id, message_id, emoji_id, role
         return emoji_id
     except Exception as e:
         _logger.exception(
-            f"data_interface: Failed to pair emoji ({emoji_id}) and role ({role_id}) "
+            f"data: Failed to pair emoji ({emoji_id}) and role ({role_id}) "
             + f"for message ({message_id}) in guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
@@ -462,7 +462,7 @@ def remove_setrole_emoji_role_pair(guild_id, channel_id, message_id, emoji_id):
         return emoji_id
     except Exception as e:
         _logger.exception(
-            f"data_interface: Failed to remove emoji-role pair with emoji id of "
+            f"data: Failed to remove emoji-role pair with emoji id of "
             + f"({emoji_role_dict}) for message ({message_id}) in guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
@@ -501,7 +501,7 @@ def remove_setrole_message_id(guild_id, channel_id, message_id):
         return message_id
     except Exception as e:
         _logger.exception(
-            "data_interface: Failed to remove set-role message id "
+            "data: Failed to remove set-role message id "
             + f"({message_id}) in channel ({channel_id}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
@@ -554,7 +554,7 @@ def add_yt_notif_rule(
         return yt_channel_id
     except Exception as e:
         _logger.exception(
-            "data_interface: Failed to add youtube notification rule with these parameters: "
+            "data: Failed to add youtube notification rule with these parameters: "
             + f"yt_channel_id ({yt_channel_id}), yt_channel_name ({yt_channel_name}), "
             + f"discord_channel_id ({discord_channel_id}), last_video_id ({last_video_id}), "
             + f"custom_message ({custom_message}) "
@@ -603,7 +603,7 @@ def set_yt_last_video_id(guild_id, yt_channel_id, yt_channel_name, video_id):
 
     except Exception as e:
         _logger.exception(
-            f"data_interface: Failed to set last youtube video id ({video_id}) "
+            f"data: Failed to set last youtube video id ({video_id}) "
             + f"for yt_channel_id ({yt_channel_id}), yt_channel_name ({yt_channel_name}), "
             + f"in guild ({guild_id})"
         )
@@ -633,7 +633,7 @@ def remove_yt_notif_rule(guild_id, yt_channel_id):
         return yt_channel_id
     except Exception as e:
         _logger.exception(
-            "data_interface: Failed to remove youtube notification rule of yt_channel_id "
+            "data: Failed to remove youtube notification rule of yt_channel_id "
             + f"({yt_channel_id}) from guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
