@@ -1,4 +1,5 @@
 import logging
+import random
 from bot import client
 from nextcord import Message
 from version import VERSION
@@ -21,6 +22,21 @@ def activate():
     _logger.debug("features: Feature has been activated: 'gholametam'")
 
 
+responses = [
+    f"Yes sir! v{VERSION}",
+    f"Jooooon?! v{VERSION}",
+    f"ما الأمر؟! v{VERSION}",
+    f"Gholametam v{VERSION}",
+    f"Command me! v{VERSION}",
+    f"Amri basheh? v{VERSION}",
+    f"أنا بخدمتکم! v{VERSION}",
+    f"Keyli nokarim v{VERSION}",
+    f"Dar khedmatam v{VERSION}",
+    f"Kheyli chakeram v{VERSION}",
+    f"در خدمت‌گزاری حاضرم! v{VERSION}",
+]
+
+
 async def gholametam(message: Message):
     if not _active:
         return False
@@ -31,6 +47,8 @@ async def gholametam(message: Message):
     lower_message = str(message.content).lower()
     if "gholam" in lower_message or "غلام" in lower_message:
         if message.author != client.user:
-            await message.reply(f"Gholametam v{VERSION}")
+            index = random.randrange(0, len(responses))
+            responses = responses[index]
+            await message.reply(responses)
             return True
     return False
