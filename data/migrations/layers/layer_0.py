@@ -149,7 +149,7 @@ async def apply_layer_0(data_file):
                 )
                 continue
 
-            new_emoji_role_dict[emoji_id] = role.id
+            new_emoji_role_dict[str(emoji_id)] = role.id
 
     # update the file
     with open(data_file, "w") as file:
