@@ -26,8 +26,9 @@ async def hafez(interaction: Interaction):
         m1 = xml.split(b"<m1>")[1].split(b"</m1>")[0].decode("utf-8")
         m2 = xml.split(b"<m2>")[1].split(b"</m2>")[0].decode("utf-8")
         poet = xml.split(b"<poet>")[1].split(b"</poet>")[0].decode("utf-8")
+        total_poem = xml.split(b"<url>")[1].split(b"</url>")[0].decode("utf-8")
         up = "🖊️"
-        poem = f"{m1}\n{m2}\n\n{up} {poet}"
+        poem = f"{m1}\n{m2}\n\n{up} [{poet}]({total_poem})"
         await interaction_response.edit(poem)
 
     except:
