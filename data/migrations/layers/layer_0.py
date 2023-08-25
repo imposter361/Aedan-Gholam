@@ -1,24 +1,31 @@
 import json
+import logging
 import nextcord
 from bot import client
 
+_logger = logging.getLogger("main")
+
 
 async def apply_layer_0(data_file):
+    _logger.info("data/migrations/layer_0: Applying migration.")
+
     with open(data_file, "r") as file:
         data = json.load(file)
 
     # Base form
     new_data = {"data-version": 1, "servers": {}}
 
-    # Populate servers fixed properties (IDs, names and active status)
     for server in data:
+        _logger.info(
+            f"data/migrations/layer_0: Migrating guild {server['server_id']} '{server['name']}'"
+        )
+        # Populate servers fixed properties (IDs, names and active status)
         new_data["servers"][str(server["server_id"])] = {
             "name": server["name"],
             "active": server["active"],
         }
 
-    # Bring unmodified parts of servers' data
-    for server in data:
+        # Bring unmodified parts of servers' data
         new_server = new_data["servers"][str(server["server_id"])]
 
         if server.get("dst_role_id"):
@@ -51,10 +58,7 @@ async def apply_layer_0(data_file):
         if server.get("yt_notif_rules"):
             new_server["yt_notif_rules"] = server["yt_notif_rules"]
 
-    # Populate modified parts of servers' data
-    for server in data:
-        new_server = new_data["servers"][str(server["server_id"])]
-
+        # Populate modified parts of servers' data
         # set-role messages
         if not server.get("set_role_message_id") or not server.get("set_role_emoji"):
             continue
@@ -68,8 +72,14 @@ async def apply_layer_0(data_file):
         except:
             pass
         if not guild:
+            _logger.warning(
+                f"data/migrations/layer_0: Migrating guild {server['server_id']} "
+                + "-> Unable to migrate set-role message."
+            )
             continue
 
+        # Find channel id of the set-role message (look channels one by one)
+        setrole_message_key = None
         for channel in guild.channels:
             message = None
             try:
@@ -78,19 +88,23 @@ async def apply_layer_0(data_file):
                 pass
             if not message:
                 continue
-            message_key = str(channel.id) + "/" + str(message_id)
+            setrole_message_key = str(channel.id) + "/" + str(message_id)
             new_server["set_role_by_reaction_messages"] = {
-                message_key: {"emoji_role_dict": {}}
+                setrole_message_key: {"emoji_role_dict": {}}
             }
             break
 
-        if not new_server["set_role_by_reaction_messages"].get(message_key):
+        if not setrole_message_key:
+            _logger.warning(
+                f"data/migrations/layer_0: Migrating guild {server['server_id']} "
+                + "-> Unable to migrate set-role message."
+            )
             continue
 
         # emoji-role pairs
-        new_emoji_role_dict = new_server["set_role_by_reaction_messages"][message_key][
-            "emoji_role_dict"
-        ]
+        new_emoji_role_dict = new_server["set_role_by_reaction_messages"][
+            setrole_message_key
+        ]["emoji_role_dict"]
         for key in server["set_role_emoji"]:
             emoji_id = None
             if len(key) <= 2:
@@ -102,6 +116,10 @@ async def apply_layer_0(data_file):
                 except:
                     pass
                 if not emoji:
+                    _logger.warning(
+                        f"data/migrations/layer_0: Migrating guild {server['server_id']} "
+                        + f"-> Unable to migrate emoji-role pair with emoji '{key}'"
+                    )
                     continue
                 emoji_id = emoji.id
 
@@ -113,6 +131,10 @@ async def apply_layer_0(data_file):
             except:
                 pass
             if not role:
+                _logger.warning(
+                        f"data/migrations/layer_0: Migrating guild {server['server_id']} "
+                        + f"-> Unable to migrate emoji-role pair with role '{server['set_role_emoji'][key]}'"
+                    )
                 continue
 
             new_emoji_role_dict[emoji_id] = role.id
@@ -120,3 +142,5 @@ async def apply_layer_0(data_file):
     # update the file
     with open(data_file, "w") as file:
         file.write(json.dumps(new_data, indent=4, sort_keys=True))
+
+    _logger.info("data/migrations/layer_0: Migration has been applied.")
