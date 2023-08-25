@@ -25,6 +25,9 @@ async def gholametam(message: Message):
     if not _active:
         return False
 
+    if message.author.bot:
+        return
+
     lower_message = str(message.content).lower()
     if "gholam" in lower_message or "غلام" in lower_message:
         if message.author != client.user:
