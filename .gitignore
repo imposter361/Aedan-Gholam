@@ -2,6 +2,7 @@
 .venv
 .vscode
 __pycache__
+data/backups/
 data/data*.json*
 DiscordBot.log
 logs/

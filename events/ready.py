@@ -1,6 +1,6 @@
+import data
 import logging
 from bot import client
-from data import check_for_data_migrations
 from features.epic_games.task import epic_games_task
 from features.klei_points.task import klei_points_task
 from features.member_count.task import member_count_task
@@ -15,7 +15,8 @@ async def on_ready():
     bot_username = str(client.user).split("#")[0]
     _logger.info(f"events/ready: Logged in as {bot_username} v{VERSION}")
 
-    await check_for_data_migrations()
+    await data.check_for_data_migrations()
+    data.backup()
 
     # Features' first run:
     epic_games_task.start()

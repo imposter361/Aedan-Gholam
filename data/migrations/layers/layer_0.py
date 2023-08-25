@@ -1,7 +1,9 @@
 import json
 import logging
 import nextcord
+import os
 from bot import client
+from datetime import datetime
 
 _logger = logging.getLogger("main")
 
@@ -9,8 +11,18 @@ _logger = logging.getLogger("main")
 async def apply_layer_0(data_file):
     _logger.info("data/migrations/layer_0: Applying migration.")
 
+    # Read original data file
+    data = None
     with open(data_file, "r") as file:
         data = json.load(file)
+
+    # Save a backup
+    if not os.path.exists("./data/backups/"):
+        os.makedirs("./data/backups/")
+    datetime_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    path = f"data/backups/data_{datetime_str}_layer_0.json"
+    with open(path, "w") as file:
+        file.write(json.dumps(data, indent=4, sort_keys=True))
 
     # Base form
     new_data = {"data-version": 1, "servers": {}}
@@ -132,9 +144,9 @@ async def apply_layer_0(data_file):
                 pass
             if not role:
                 _logger.warning(
-                        f"data/migrations/layer_0: Migrating guild {server['server_id']} "
-                        + f"-> Unable to migrate emoji-role pair with role '{server['set_role_emoji'][key]}'"
-                    )
+                    f"data/migrations/layer_0: Migrating guild {server['server_id']} "
+                    + f"-> Unable to migrate emoji-role pair with role '{server['set_role_emoji'][key]}'"
+                )
                 continue
 
             new_emoji_role_dict[emoji_id] = role.id

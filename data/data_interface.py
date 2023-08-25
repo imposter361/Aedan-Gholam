@@ -2,6 +2,7 @@ import data.migrations as migrations
 import json
 import logging
 import os
+from datetime import datetime
 
 _logger = logging.getLogger("main")
 
@@ -19,9 +20,7 @@ if "_data_migration_checked" not in dir():  # Run once
 
 def _init():
     if not os.path.exists(_DATA_FILE):
-        _logger.debug(
-            f"data: Data file does not exist. Creating {_DATA_FILE}"
-        )
+        _logger.debug(f"data: Data file does not exist. Creating {_DATA_FILE}")
         with open(_DATA_FILE, "w") as file:
             file.write(json.dumps(_data))
 
@@ -45,10 +44,24 @@ _init()
 async def check_for_data_migrations():
     _logger.debug("data: Checking for available data migrations.")
     await migrations.apply_available_migrations(_DATA_FILE, _DATA_VERSION)
-    _logger.debug("data: Data migration check has finished.")
+    _logger.debug("data: Data migration check has been finished.")
     _load()
     global _data_migration_checked
     _data_migration_checked = True
+
+
+def backup():
+    if not is_ready():
+        return
+
+    _logger.info("data: Backing up data file...")
+    if not os.path.exists("./data/backups/"):
+        os.makedirs("./data/backups/")
+    datetime_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    path = f"data/backups/data_{datetime_str}_layer_{_DATA_VERSION}.json"
+    with open(path, "w") as file:
+        file.write(json.dumps(_data, indent=4, sort_keys=True))
+    _logger.info(f"data: Backup is ready. Saved to: {path}")
 
 
 def is_ready():
