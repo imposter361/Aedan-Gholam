@@ -9,7 +9,7 @@ async def handle_command_exception(
     interaction: Interaction,
     interaction_response: PartialInteractionMessage = None,
 ):
-    _logger.exception(f"Exception occurred in the '{command_name}' command.")
+    _logger.exception(f"commands: Exception occurred in the '{command_name}' command.")
     try:
         if interaction_response:
             await interaction_response.edit(content=f"Operation failed.")
@@ -17,5 +17,5 @@ async def handle_command_exception(
             await interaction.send(content=f"Operation failed.")
     except:
         _logger.exception(
-            "Exception occurred when sending an error message to the user."
+            "commands/helper: Exception occurred while sending an error message to the user."
         )

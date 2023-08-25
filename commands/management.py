@@ -1,6 +1,7 @@
 import data
 import features
 import logging
+import nextcord
 import pytube
 import webcolors
 from .helper import handle_command_exception
@@ -21,7 +22,8 @@ _logger = logging.getLogger("main")
 async def help(interaction: Interaction):
     try:
         _logger.info(
-            f"Command 'help' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            "commands/management: Command 'help' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
         )
         help_message = (
@@ -45,12 +47,13 @@ async def help(interaction: Interaction):
 async def add_server(interaction: Interaction, id: str = SlashOption(required=True)):
     try:
         _logger.info(
-            f"Command 'add_server' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            "commands/management: Command 'add_server' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: id:{id}"
         )
         if interaction.user.id not in ADMINS:
             _logger.debug(
-                "User does not have permission to use command 'add_server' "
+                "commands/management: User does not have permission to use command 'add_server' "
                 + f"user: '{interaction.user.name}' ({interaction.user.id}) "
                 + f"guild: '{interaction.guild.name}' ({interaction.guild_id})"
             )
@@ -64,14 +67,14 @@ async def add_server(interaction: Interaction, id: str = SlashOption(required=Tr
         server_id = int(id)
         target_guild = client.get_guild(server_id)
         if target_guild is None:
-            _logger.debug(f"Server with id: {id} does not exist.")
+            _logger.debug(f"commands/management: Server with id: {id} does not exist.")
             await interaction_response.edit("Server with this id does not exist.")
             return
 
-        result = data.add_server(str(target_guild), server_id)
+        result = data.server_add(str(target_guild), server_id)
         if result == server_id:
             _logger.info(
-                f"Server '{target_guild.name}' ({target_guild.id}) "
+                f"commands/management: Server '{target_guild.name}' ({target_guild.id}) "
                 + "has been registered and activated."
             )
             await interaction_response.edit(
@@ -97,12 +100,13 @@ async def edit_server(
 ):
     try:
         _logger.info(
-            f"Command 'edit_server' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            "commands/management: Command 'edit_server' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: id:{id} active:{active}"
         )
         if interaction.user.id not in ADMINS:
             _logger.debug(
-                "User does not have permission to use command 'edit_server' "
+                "commands/management: User does not have permission to use command 'edit_server' "
                 + f"user: '{interaction.user.name}' ({interaction.user.id}) "
                 + f"guild: '{interaction.guild.name}' ({interaction.guild_id})"
             )
@@ -116,15 +120,15 @@ async def edit_server(
         server_id = int(id)
         target_guild = client.get_guild(server_id)
         if target_guild is None:
-            _logger.debug(f"Server with id: {id} does not exist.")
+            _logger.debug(f"commands/management: Server with id: {id} does not exist.")
             await interaction_response.edit("Server with this id does not exist.")
             return
 
-        result = data.edit_server(server_id, active)
+        result = data.server_edit(server_id, active)
         if result == server_id:
             active_status = "activated" if active else "deactivated"
             _logger.info(
-                f"Server '{target_guild.name}' ({target_guild.id}) "
+                f"commands/management: Server '{target_guild.name}' ({target_guild.id}) "
                 + f"has been {active_status}."
             )
             await interaction_response.edit(
@@ -146,12 +150,13 @@ async def edit_server(
 async def remove_server(interaction: Interaction, id: str = SlashOption(required=True)):
     try:
         _logger.info(
-            f"Command 'remove_server' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            "commands/management: Command 'remove_server' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: id:{id}"
         )
         if interaction.user.id not in ADMINS:
             _logger.debug(
-                "User does not have permission to use command 'remove_server' "
+                "commands/management: User does not have permission to use command 'remove_server' "
                 + f"user: '{interaction.user.name}' ({interaction.user.id}) "
                 + f"guild: '{interaction.guild.name}' ({interaction.guild_id})"
             )
@@ -165,15 +170,15 @@ async def remove_server(interaction: Interaction, id: str = SlashOption(required
         server_id = int(id)
         target_guild = client.get_guild(server_id)
         if target_guild is None:
-            _logger.debug(f"Server with id: {id} does not exist.")
+            _logger.debug(f"commands/management: Server with id: {id} does not exist.")
             await interaction_response.edit("Server with this id does not exist.")
             return
 
-        result = data.remove_server(server_id)
+        result = data.server_remove(server_id)
         if result == server_id:
             _logger.info(
-                f"Server '{target_guild.name}' ({target_guild.id}) "
-                + f"has been removed."
+                f"commands/management: Server '{target_guild.name}' ({target_guild.id}) "
+                + "has been removed."
             )
             await interaction_response.edit(
                 f"Server **{target_guild}** has been removed.",
@@ -184,6 +189,78 @@ async def remove_server(interaction: Interaction, id: str = SlashOption(required
         await handle_command_exception(
             "remove_server", interaction, interaction_response
         )
+
+
+@client.slash_command(
+    name="customize",
+    description="customize bot settings.",
+    default_member_permissions=Permissions(administrator=True),
+    dm_permission=False,
+)
+async def customize(
+    interaction: Interaction,
+    customize: str = SlashOption(
+        name="customize",
+        required=True,
+        choices=[
+            "welcome message",
+        ],
+    ),
+    message: str = SlashOption(
+        required=True,
+        description="Available variables: {username} and {servername}, **Bold**",
+    ),
+):
+    print(message)
+    # try:
+    _logger.info(
+        "commands/management: Command 'customize' was called by "
+        + f"'{interaction.user.name}' ({interaction.user.id}) "
+        + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: customize:{customize} message:{message}"
+    )
+    interaction_response = await interaction.send("Please wait...", ephemeral=True)
+    if customize == "welcome message":
+        try:
+            if message != None:
+                result = data.welcome_message_set(interaction.guild_id, message)
+                if result == None:
+                    _logger.info(
+                        "commands/management: Welcome message has been unset "
+                        + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                    )
+                    await interaction_response.edit(
+                        "Welcome message has been unset.",
+                    )
+                else:
+                    await interaction_response.edit("Welcome message has been set.")
+                return
+
+            channel_id = int(id)
+            channel = client.get_channel(channel_id)
+            if interaction.guild_id != channel.guild.id:
+                _logger.debug(f"commands/management: Channel id ({id}) is invalid.")
+                await interaction_response.edit(
+                    "Invalid channel ID.",
+                )
+                return
+
+            result = data.welcome_message_set(interaction.guild_id, channel_id)
+            if result == channel_id:
+                _logger.info(
+                    f"commands/management: Welcome message has been set to {id} "
+                    + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                )
+                await interaction_response.edit(
+                    "Welcome channel has been set.",
+                )
+            else:
+                await interaction_response.edit(str(result))
+        except:
+            _logger.exception(
+                f"commands/management: Failed to set welcome message ({id}) "
+                + f"in guild ({interaction.guild_id})"
+            )
+            await interaction_response.edit("Operation failed.")
 
 
 @client.slash_command(
@@ -198,29 +275,30 @@ async def settings(
         name="setting",
         required=True,
         choices=[
-            "Set welcome channel id",
-            "Set role message id",
-            "Set free game channel id",
-            "Set free game role id",
             "Set DST role id",
+            "Set epic games channel id",
+            "Set free game role id",
+            "Set klei links channel id",
             "Set member count channel id",
+            "Set welcome channel id",
         ],
     ),
     id: str = SlashOption(required=True),
 ):
     try:
         _logger.info(
-            f"Command 'settings' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            "commands/management: Command 'settings' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: setting:{setting} id:{id}"
         )
         interaction_response = await interaction.send("Please wait...", ephemeral=True)
         if setting == "Set welcome channel id":
             try:
                 if id.lower() in ["none", "null", "0", "-"]:
-                    result = data.set_welcome_channel_id(interaction.guild_id, None)
+                    result = data.welcome_channel_id_set(interaction.guild_id, None)
                     if result == None:
                         _logger.info(
-                            f"Welcome channel id has been unset "
+                            "commands/management: Welcome channel id has been unset "
                             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                         )
                         await interaction_response.edit(
@@ -233,16 +311,16 @@ async def settings(
                 channel_id = int(id)
                 channel = client.get_channel(channel_id)
                 if interaction.guild_id != channel.guild.id:
-                    _logger.debug(f"Channel id ({id}) is invalid.")
+                    _logger.debug(f"commands/management: Channel id ({id}) is invalid.")
                     await interaction_response.edit(
                         "Invalid channel ID.",
                     )
                     return
 
-                result = data.set_welcome_channel_id(interaction.guild_id, channel_id)
+                result = data.welcome_channel_id_set(interaction.guild_id, channel_id)
                 if result == channel_id:
                     _logger.info(
-                        f"Welcome channel id has been set to {id} "
+                        f"commands/management: Welcome channel id has been set to {id} "
                         + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                     )
                     await interaction_response.edit(
@@ -251,20 +329,23 @@ async def settings(
                 else:
                     await interaction_response.edit(str(result))
             except:
-                _logger.exception()
+                _logger.exception(
+                    f"commands/management: Failed to set welcome channel id ({id}) "
+                    + f"in guild ({interaction.guild_id})"
+                )
                 await interaction_response.edit("Operation failed.")
 
-        if setting == "Set free game channel id":
+        if setting == "Set epic games channel id":
             try:
                 if id.lower() in ["none", "null", "0", "-"]:
-                    result = data.set_free_games_channel_id(interaction.guild_id, None)
+                    result = data.epic_games_channel_id_set(interaction.guild_id, None)
                     if result == None:
                         _logger.info(
-                            f"Free games channel id has been unset "
+                            "commands/management: epic games channel id has been unset "
                             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                         )
                         await interaction_response.edit(
-                            "free game channel has been unset.",
+                            "epic games channel has been unset.",
                         )
                     else:
                         await interaction_response.edit(str(result))
@@ -273,35 +354,82 @@ async def settings(
                 channel_id = int(id)
                 channel = client.get_channel(channel_id)
                 if interaction.guild_id != channel.guild.id:
-                    _logger.debug(f"Channel id ({id}) is invalid.")
+                    _logger.debug(f"commands/management: Channel id ({id}) is invalid.")
                     await interaction_response.edit(
                         "Invalid channel ID.",
                     )
                     return
-                result = data.set_free_games_channel_id(
+                result = data.epic_games_channel_id_set(
                     interaction.guild_id, channel_id
                 )
                 if result == channel_id:
                     _logger.info(
-                        f"Free games channel id has been set to {id} "
+                        f"commands/management: epic games channel id has been set to {id} "
                         + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                     )
                     await interaction_response.edit(
-                        "free game channel has been set.",
+                        "epic games channel has been set.",
                     )
                 else:
                     await interaction_response.edit(str(result))
             except:
-                _logger.exception()
+                _logger.exception(
+                    f"commands/management: Failed to set epic games channel id ({id}) "
+                    + f"in guild ({interaction.guild_id})"
+                )
+                await interaction_response.edit("Operation failed.")
+
+        if setting == "Set klei links channel id":
+            try:
+                if id.lower() in ["none", "null", "0", "-"]:
+                    result = data.klei_links_channel_id_set(interaction.guild_id, None)
+                    if result == None:
+                        _logger.info(
+                            "commands/management: klei links channel id has been unset "
+                            + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                        )
+                        await interaction_response.edit(
+                            "klei links channel has been unset.",
+                        )
+                    else:
+                        await interaction_response.edit(str(result))
+                    return
+
+                channel_id = int(id)
+                channel = client.get_channel(channel_id)
+                if interaction.guild_id != channel.guild.id:
+                    _logger.debug(f"commands/management: Channel id ({id}) is invalid.")
+                    await interaction_response.edit(
+                        "Invalid channel ID.",
+                    )
+                    return
+                result = data.klei_links_channel_id_set(
+                    interaction.guild_id, channel_id
+                )
+                if result == channel_id:
+                    _logger.info(
+                        f"commands/management: klei links channel id has been set to {id} "
+                        + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                    )
+                    await interaction_response.edit(
+                        "klei links channel has been set.",
+                    )
+                else:
+                    await interaction_response.edit(str(result))
+            except:
+                _logger.exception(
+                    f"commands/management: Failed to set klei links channel id ({id}) "
+                    + f"in guild ({interaction.guild_id})"
+                )
                 await interaction_response.edit("Operation failed.")
 
         if setting == "Set free game role id":
             try:
                 if id.lower() in ["none", "null", "0", "-"]:
-                    result = data.set_free_games_role_id(interaction.guild_id, None)
+                    result = data.free_games_role_id_set(interaction.guild_id, None)
                     if result == None:
                         _logger.info(
-                            f"Free game role id has been unset "
+                            "commands/management: Free game role id has been unset "
                             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                         )
                         await interaction_response.edit(
@@ -312,10 +440,10 @@ async def settings(
                     return
 
                 role_id = int(id)
-                result = data.set_free_games_role_id(interaction.guild_id, role_id)
+                result = data.free_games_role_id_set(interaction.guild_id, role_id)
                 if result == role_id:
                     _logger.info(
-                        f"Free game role id has been set to {id} "
+                        f"commands/management: Free game role id has been set to {id} "
                         + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                     )
                     await interaction_response.edit(
@@ -324,16 +452,19 @@ async def settings(
                 else:
                     await interaction_response.edit(str(result))
             except:
-                _logger.exception()
+                _logger.exception(
+                    f"commands/management: Failed to set free game role id ({id}) "
+                    + f"in guild ({interaction.guild_id})"
+                )
                 await interaction_response.edit("Operation failed.")
 
         if setting == "Set DST role id":
             try:
                 if id.lower() in ["none", "null", "0", "-"]:
-                    result = data.set_dst_role_id(interaction.guild_id, None)
+                    result = data.dst_role_id_set(interaction.guild_id, None)
                     if result == None:
                         _logger.info(
-                            f"DST role id has been unset "
+                            "commands/management: DST role id has been unset "
                             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                         )
                         await interaction_response.edit(
@@ -344,10 +475,10 @@ async def settings(
                     return
 
                 role_id = int(id)
-                result = data.set_dst_role_id(interaction.guild_id, role_id)
+                result = data.dst_role_id_set(interaction.guild_id, role_id)
                 if result == role_id:
                     _logger.info(
-                        f"DST role id has been set to {id} "
+                        f"commands/management: DST role id has been set to {id} "
                         + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                     )
                     await interaction_response.edit(
@@ -356,18 +487,21 @@ async def settings(
                 else:
                     await interaction_response.edit(str(result))
             except:
-                _logger.exception()
+                _logger.exception(
+                    f"commands/management: Failed to set DST role id ({id}) "
+                    + f"in guild ({interaction.guild_id})"
+                )
                 await interaction_response.edit("Operation failed.")
 
         if setting == "Set member count channel id":
             try:
                 if id.lower() in ["none", "null", "0", "-"]:
-                    result = data.set_member_count_channel_id(
+                    result = data.member_count_channel_id_set(
                         interaction.guild_id, None
                     )
                     if result == None:
                         _logger.info(
-                            f"Member count channel id has been unset "
+                            "commands/management: Member count channel id has been unset "
                             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                         )
                         await interaction_response.edit(
@@ -380,17 +514,17 @@ async def settings(
                 channel_id = int(id)
                 channel = client.get_channel(channel_id)
                 if interaction.guild_id != channel.guild.id:
-                    _logger.debug(f"Channel id ({id}) is invalid.")
+                    _logger.debug(f"commands/management: Channel id ({id}) is invalid.")
                     await interaction_response.edit(
                         "Invalid channel ID.",
                     )
                     return
-                result = data.set_member_count_channel_id(
+                result = data.member_count_channel_id_set(
                     interaction.guild_id, channel_id
                 )
                 if result == channel_id:
                     _logger.info(
-                        f"Member count channel id has been set to {id} "
+                        f"commands/management: Member count channel id has been set to {id} "
                         + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                     )
                     await interaction_response.edit(
@@ -399,106 +533,205 @@ async def settings(
                 else:
                     await interaction_response.edit(str(result))
             except:
-                _logger.exception()
-                await interaction_response.edit("Operation failed.")
-
-        if setting == "Set role message id":
-            try:
-                if id.lower() in ["none", "null", "0", "-"]:
-                    result = data.set_role_message_id(interaction.guild_id, None)
-                    if result == None:
-                        _logger.info(
-                            f"Set role message id has been unset "
-                            + f"in '{interaction.guild.name}' ({interaction.guild_id})"
-                        )
-                        await interaction_response.edit("Role message has been unset."),
-                    else:
-                        await interaction_response.edit(str(result))
-                    return
-
-                message_id = int(id)
-                channel = interaction.channel
-                message = None
-                try:
-                    message = await channel.fetch_message(message_id)
-                except Exception as e:
-                    pass
-
-                if not message:
-                    _logger.debug(f"Message id ({id}) is invalid.")
-                    await interaction_response.edit(
-                        "Invalid message id. Make sure to run this command "
-                        + "in the same channel as the target message.",
-                    )
-                    return
-
-                result = data.set_role_message_id(interaction.guild_id, message_id)
-                if result == message_id:
-                    _logger.info(
-                        f"Set role message id has been set to {id} "
-                        + f"in '{interaction.guild.name}' ({interaction.guild_id})"
-                    )
-                    await interaction_response.edit(
-                        "Role message has been set.",
-                    )
-                else:
-                    await interaction_response.edit(str(result))
-            except:
-                _logger.exception()
+                _logger.exception(
+                    f"commands/management: Failed to set member count channel id ({id}) "
+                    + f"in guild ({interaction.guild_id})"
+                )
                 await interaction_response.edit("Operation failed.")
     except:
         await handle_command_exception("settings", interaction, interaction_response)
 
 
-# set roles by emojis
+def process_discord_message_link(link: str):
+    message_guild_id = None
+    message_channel_id = None
+    message_id = None
+    try:
+        link_parts = link.removeprefix("https://discord.com/channels/").split("/")
+        if len(link_parts) == 3:
+            message_guild_id = int(link_parts[0])
+            message_channel_id = int(link_parts[1])
+            message_id = int(link_parts[2])
+
+        if not message_guild_id or not message_channel_id or not message_id:
+            return None
+
+        return {
+            "guild_id": message_guild_id,
+            "channel_id": message_channel_id,
+            "message_id": message_id,
+        }
+    except:
+        return None
+
+
 @client.slash_command(
     name="set_role_emoji",
-    description="Choose an emoji to assign a roll",
+    description="Choose an emoji to assign a role",
     default_member_permissions=Permissions(administrator=True),
     dm_permission=False,
 )
 async def set_role_emoji(
     interaction: Interaction,
+    message_link: str = SlashOption(name="message_link", required=True),
     emoji_name: str = SlashOption(
         name="emoji_name",
         description="CaSe sEnSiTiVe!",
         required=True,
     ),
     role_name: str = SlashOption(
-        name="role_name", description="CaSe sEnSiTiVe!", required=True
+        name="role_name", description="CaSe sEnSiTiVe!", required=False
     ),
 ):
     try:
         _logger.info(
-            f"Command 'set_role_emoji' was called by '{interaction.user.name}' ({interaction.user.id}) "
-            + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: emoji_name:{emoji_name} "
-            + f"role_name:{role_name}"
+            "commands/management: Command 'set_role_emoji' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
+            + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: "
+            + f"message_link:{message_link} emoji_name:{emoji_name} role_name:{role_name}"
         )
         interaction_response = await interaction.send(
             f"Please wait ...", ephemeral=True
         )
 
-        get_roles = data.get_role_emoji(interaction.guild_id)
-        if get_roles == None:
-            get_roles = {}
-        if role_name.lower() in ["none", "null", "0", "-"]:
-            get_roles.pop(emoji_name)
-            _logger.info(
-                f"Emoji ({emoji_name}) and role ({role_name}) unpaired "
-                + f"in '{interaction.guild.name}' ({interaction.guild_id})"
-            )
-            await interaction_response.edit("Emoji and role unpaired!")
+        link_parts = process_discord_message_link(message_link)
+        if not link_parts:
+            await interaction_response.edit("Please enter a valid link of a message.")
+            return
+
+        if interaction.guild_id != link_parts["guild_id"]:
+            await interaction_response.edit("Message link must be from this server!")
+            return
+
+        target_message = None
+        try:
+            target_message = await client.get_channel(
+                link_parts["channel_id"]
+            ).fetch_message(link_parts["message_id"])
+        except:
+            pass
+        if not target_message:
+            await interaction_response.edit("Please enter a valid link of a message.")
+            return
+
+        target_emoji_id = None
+        if ":" in emoji_name:  # handle custom emojis like: <:custom_emoji:123456123456>
+            emoji_name = emoji_name.split(":")[1]
+            target_emoji = nextcord.utils.get(interaction.guild.emojis, name=emoji_name)
+            if not target_emoji:
+                await interaction_response.edit("Invalid emoji.")
+                return
+            target_emoji_id = target_emoji.id
         else:
-            get_roles[emoji_name] = role_name
-            _logger.info(
-                f"Emoji ({emoji_name}) and role ({role_name}) paired "
-                + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+            target_emoji_id = emoji_name
+
+        if not role_name:  # remove emoji-role pair
+            result = data.setrole_emoji_role_pair_remove(
+                interaction.guild_id,
+                link_parts["channel_id"],
+                link_parts["message_id"],
+                target_emoji_id,
             )
-            await interaction_response.edit("Emoji and role paired!")
-        data.set_role_emoji(interaction.guild_id, get_roles)
+            if result == target_emoji_id:
+                _logger.info(
+                    f"commands/management: Emoji ({emoji_name}) and role ({role_name}) unpaired "
+                    + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                )
+                await interaction_response.edit(
+                    "Emoji-role pair was removed from this message."
+                )
+                return
+            else:
+                await interaction_response.edit(result)
+                return
+
+        else:  # set emoji-role
+            target_role = None
+            if "<@&" in role_name:
+                role_id = role_name.split("&")[1].replace(">", "")
+                target_role = nextcord.utils.get(
+                    interaction.guild.roles, id=int(role_id)
+                )
+            else:
+                target_role = nextcord.utils.get(
+                    interaction.guild.roles, name=role_name
+                )
+
+            if not target_role:
+                await interaction_response.edit("Invalid role.")
+                return
+
+            result = data.setrole_emoji_role_pair_set(
+                interaction.guild_id,
+                link_parts["channel_id"],
+                link_parts["message_id"],
+                target_emoji_id,
+                target_role.id,
+            )
+            if result == target_emoji_id:
+                _logger.info(
+                    f"commands/management: Emoji ({emoji_name}) and role ({role_name}) paired "
+                    + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                )
+                await interaction_response.edit(
+                    "Emoji and role have been paired for this message."
+                )
+                return
+            else:
+                await interaction_response.edit(result)
+                return
     except:
         await handle_command_exception(
             "set_role_emoji", interaction, interaction_response
+        )
+
+
+@client.slash_command(
+    name="remove_role_message",
+    description="Unmark a message as a 'set role by reaction' message",
+    default_member_permissions=Permissions(administrator=True),
+    dm_permission=False,
+)
+async def remove_role_message(
+    interaction: Interaction,
+    message_link: str = SlashOption(name="message_link", required=True),
+):
+    try:
+        _logger.info(
+            "commands/management: Command 'remove_role_message' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
+            + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: message_link:{message_link}"
+        )
+        interaction_response = await interaction.send(
+            f"Please wait ...", ephemeral=True
+        )
+
+        link_parts = process_discord_message_link(message_link)
+        if not link_parts:
+            await interaction_response.edit("Please enter a valid link of a message.")
+            return
+
+        if interaction.guild_id != link_parts["guild_id"]:
+            await interaction_response.edit("Message link must be from this server!")
+            return
+
+        result = data.setrole_message_id_remove(
+            interaction.guild_id, link_parts["channel_id"], link_parts["message_id"]
+        )
+
+        if result == link_parts["message_id"]:
+            _logger.info(
+                f"commands/management: Message ({link_parts['message_id']}) has been unset as set-role message "
+                + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+            )
+            await interaction_response.edit(
+                "Done. This message is no longer a 'set role by reaction' message"
+            )
+            return
+        await interaction_response.edit(result)
+    except:
+        await handle_command_exception(
+            "remove_role_message", interaction, interaction_response
         )
 
 
@@ -513,7 +746,8 @@ async def delete(
 ):
     try:
         _logger.info(
-            f"Command 'delete' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            "commands/management: Command 'delete' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: number:{number}"
         )
         interaction_response = await interaction.send("Please wait...", ephemeral=True)
@@ -525,12 +759,12 @@ async def delete(
 
         report = ""
         if number == 1:
-            report = "{number} message has been deleted."
+            report = f"{number} message has been deleted."
         else:
-            report = "{number} messages have been deleted."
+            report = f"{number} messages have been deleted."
 
         _logger.info(
-            f"{report} Guild: '{interaction.guild.name}' ({interaction.guild_id})"
+            f"commands/management: {report} Guild: '{interaction.guild.name}' ({interaction.guild_id})"
             + f"Channel: '{interaction.channel.name}' ({interaction.channel_id})"
         )
         await interaction_response.edit(f"{report}")
@@ -555,7 +789,8 @@ async def embed(
 ):
     try:
         _logger.info(
-            f"Command 'embed' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            "commands/management: Command 'embed' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: text:{text} color:{color}"
         )
         default_color = "cyan"
@@ -568,7 +803,7 @@ async def embed(
             embed_color = hex_value.replace("#", "0x")
             embed_color = int(embed_color, base=16)
         except:
-            _logger.debug(f"Invalid color '{color}'")
+            _logger.debug(f"commands/management: Invalid color '{color}'")
             await interaction.send("Invalid color.", ephemeral=True)
             return
 
@@ -576,7 +811,7 @@ async def embed(
             try:
                 embed_color = int(f"0x{color}", base=16)
             except:
-                _logger.debug(f"Invalid color '{color}'")
+                _logger.debug(f"commands/management: Invalid color '{color}'")
                 await interaction.send("Invalid color.", ephemeral=True)
                 return
 
@@ -601,10 +836,15 @@ async def youtube_notification_set(
         required=False,
         description="Target Discord channel id to publish new youtube videos.",
     ),
+    custom_message: str = SlashOption(
+        required=False,
+        description="Use '\\n' for new line. Leave empty to use the default message.",
+    ),
 ):
     try:
         _logger.info(
-            f"Command 'youtube' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            "commands/management: Command 'youtube' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) "
             + f"args: link:{link} channel_id:{channel_id}"
         )
@@ -623,7 +863,8 @@ async def youtube_notification_set(
         channel = client.get_channel(channel_id)
         if interaction.guild_id != channel.guild.id:
             _logger.debug(
-                f"Invalid discord channel or the specified channel belongs to another guild "
+                "commands/management: Invalid discord channel "
+                + "or the specified channel belongs to another guild "
                 + f"channel_id: {channel_id}"
             )
             await interaction_response.edit(
@@ -636,17 +877,18 @@ async def youtube_notification_set(
             video.channel_id
         )
 
-        result = data.add_yt_notif_rule(
+        result = data.yt_notif_rule_add(
             interaction.guild_id,
             video.channel_id,
             video.author,
             channel_id,
             last_channel_video["id"],
+            custom_message,
         )
         if result == video.channel_id or result == "Updated.":
             _logger.info(
-                f"{video.author}'s new youtube videos will be posted on '{channel.name}' "
-                + f"({channel.id})"
+                f"commands/management: {video.author}'s new youtube videos "
+                + f"will be posted on '{channel.name}' ({channel.id})"
             )
             await interaction_response.edit(
                 f"Done. **{video.author}** new videos will be posted on **{channel.name}**.",
@@ -671,7 +913,8 @@ async def youtube_notification_remove(
 ):
     try:
         _logger.info(
-            f"Command 'youtube_remove' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            "commands/management: Command 'youtube_remove' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: link:{link}"
         )
         interaction_response = await interaction.send("Please wait...", ephemeral=True)
@@ -684,11 +927,11 @@ async def youtube_notification_remove(
 
         video = pytube.YouTube(link)
 
-        result = data.remove_yt_notif_rule(interaction.guild_id, video.channel_id)
+        result = data.yt_notif_rule_remove(interaction.guild_id, video.channel_id)
         if result == video.channel_id:
             _logger.info(
-                f"{video.author}'s new youtube videos will no longer be posted on "
-                + f"'{interaction.guild.name}' ({interaction.guild_id})"
+                f"commands/management: {video.author}'s new youtube videos will no longer "
+                + f"be posted on '{interaction.guild.name}' ({interaction.guild_id})"
             )
             await interaction_response.edit(
                 f"You will no longer receive new videos from **{video.author}**.",

@@ -15,7 +15,8 @@ _logger = logging.getLogger("main")
 async def hafez(interaction: Interaction):
     try:
         _logger.info(
-            f"Command 'hafez' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            "commands/general: Command 'hafez' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
         )
         interaction_response = await interaction.send(f"Please wait ...")
@@ -25,8 +26,9 @@ async def hafez(interaction: Interaction):
         m1 = xml.split(b"<m1>")[1].split(b"</m1>")[0].decode("utf-8")
         m2 = xml.split(b"<m2>")[1].split(b"</m2>")[0].decode("utf-8")
         poet = xml.split(b"<poet>")[1].split(b"</poet>")[0].decode("utf-8")
+        total_poem = xml.split(b"<url>")[1].split(b"</url>")[0].decode("utf-8")
         up = "🖊️"
-        poem = f"{m1}\n{m2}\n\n{up} {poet}"
+        poem = f"{m1}\n{m2}\n\n{up} [{poet}]({total_poem})"
         await interaction_response.edit(poem)
 
     except:
@@ -43,7 +45,8 @@ async def hekmat(
 ):
     try:
         _logger.info(
-            f"Command 'hekmat' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            "commands/general: Command 'hekmat' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: number:{number}"
         )
         if number is None:
@@ -82,11 +85,14 @@ async def hekmat(
 async def team(interaction: Interaction):
     try:
         _logger.info(
-            f"Command 'team' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            "commands/general: Command 'team' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
         )
-        team = "<:Aedan_logo:1103676392606007356> Bunch of friends gathered together "
-        +"as a team:\n\nEhsan 👨‍💻\nHossein(Moz) 💃\nBagher 🫰\nHossein(Defalcator) 🪡\nAli 🪃\nSina 🧻"
+        team = (
+            "<:Aedan_logo:1103676392606007356> Bunch of friends gathered together "
+            + "as a team:\n\nEhsan 👨‍💻\nHossein(Moz) 💃\nBagher 🫰\nHossein(Defalcator) 🪡\nAli 🪃\nSina 🧻"
+        )
         await interaction.response.send_message(team)
     except:
         await handle_command_exception("team", interaction)
@@ -97,7 +103,8 @@ async def team(interaction: Interaction):
 async def about(interaction: Interaction):
     try:
         _logger.info(
-            f"Command 'about' was called by '{interaction.user.name}' ({interaction.user.id}) "
+            "commands/general: Command 'about' was called by "
+            + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
         )
         Ali = client.get_user(620593942559326265)

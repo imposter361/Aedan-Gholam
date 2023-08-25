@@ -1,7 +1,6 @@
 import logging
 import os
 from datetime import datetime
-from logging.handlers import TimedRotatingFileHandler
 
 
 # Setup logging
@@ -23,9 +22,7 @@ main_console_handler.setFormatter(log_formatter)
 main_logger.addHandler(main_console_handler)
 
 ### log to file
-main_file_handler = TimedRotatingFileHandler(
-    f"logs/{date_str}_main.log", when="midnight", backupCount=30, encoding="utf-8"
-)
+main_file_handler = logging.FileHandler(f"logs/{date_str}_main.log", encoding="utf-8")
 main_file_handler.setLevel(logging.DEBUG)
 main_file_handler.setFormatter(log_formatter)
 main_logger.addHandler(main_file_handler)
@@ -39,16 +36,8 @@ root_logger = logging.getLogger()
 root_logger.setLevel(logging.INFO)
 root_logger.handlers.clear()
 
-### log to console
-root_console_handler = logging.StreamHandler()
-root_console_handler.setLevel(logging.WARNING)
-root_console_handler.setFormatter(log_formatter_with_name)
-root_logger.addHandler(root_console_handler)
-
 ### log to file
-root_file_handler = TimedRotatingFileHandler(
-    f"logs/{date_str}_root.log", when="midnight", backupCount=30, encoding="utf-8"
-)
+root_file_handler = logging.FileHandler(f"logs/{date_str}_root.log", encoding="utf-8")
 root_file_handler.setLevel(logging.INFO)
 root_file_handler.setFormatter(log_formatter_with_name)
 root_logger.addHandler(root_file_handler)

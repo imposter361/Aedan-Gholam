@@ -1,3 +1,4 @@
+import data
 import logging
 from bot import client
 from features.epic_games.task import epic_games_task
@@ -12,7 +13,10 @@ _logger = logging.getLogger("main")
 @client.event
 async def on_ready():
     bot_username = str(client.user).split("#")[0]
-    _logger.info(f"Logged in as {bot_username} v{VERSION}")
+    _logger.info(f"events/ready: Logged in as {bot_username} v{VERSION}")
+
+    await data.check_for_data_migrations()
+    data.backup()
 
     # Features' first run:
     epic_games_task.start()
@@ -20,4 +24,4 @@ async def on_ready():
     member_count_task.start()
     youtube_notify_task.start()
 
-    _logger.info("Initial tasks have been started!")
+    _logger.info("events/ready: Initial tasks have been started!")
