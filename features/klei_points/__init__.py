@@ -43,6 +43,11 @@ async def check_klei_points():
 
         if not klei_points:
             klei_points = _get_klei_points()
+            if len(klei_points) == 0:
+                _logger.warning(
+                    "features/klei_points: No valid klei points link was found."
+                )
+                break
 
         await _send_klei_points_for_guild(guild_id, channel_id, klei_points)
 
@@ -61,6 +66,9 @@ def _get_klei_points():
         row_elements = soup.select(row_selector)
 
         if not row_elements:
+            _logger.warning(
+                "features/klei_points: Web request did not have the expected result format."
+            )
             return klei_points
 
         try:
