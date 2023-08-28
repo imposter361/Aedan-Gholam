@@ -109,7 +109,12 @@ async def about(interaction: Interaction):
         )
         Ali = client.get_user(620593942559326265)
         guild_name = client.get_guild(899023632204980324)
-        about = f"Gholamam v{VERSION} az **{guild_name}**\nSaakhte daste aghamoon {Ali.mention} kheyli chakerim."
+        about = (
+            f"Gholamam v{VERSION} az [**{guild_name}**](https://discord.gg/ZJVhgBCw3Q)\n"
+            + f"Saakhte daste aghamoon {Ali.mention}\n"
+            + f"kheyli chakerim.<:blobheart:995573025795747900>\n"
+            + f"Also add my twin brother [**Radio gholam**](https://discord.com/api/oauth2/authorize?client_id=1107647185111224420&permissions=0&scope=bot) to your server!"
+        )
         await interaction.response.send_message(about)
     except:
         await handle_command_exception("about", interaction)
