@@ -679,9 +679,12 @@ async def set_role_emoji(
                 )
                 await target_message.add_reaction(target_emoji)
                 return
+            elif result == "This emoji-role pair already exists.":
+                await interaction_response.edit(result)
+                await target_message.add_reaction(target_emoji)
+                return
             else:
                 await interaction_response.edit(result)
-                return
     except:
         await handle_command_exception(
             "set_role_emoji", interaction, interaction_response
