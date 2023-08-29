@@ -640,6 +640,7 @@ async def set_role_emoji(
                 await interaction_response.edit(
                     "Emoji-role pair was removed from this message."
                 )
+                await target_message.clear_reaction(target_emoji)
                 return
             else:
                 await interaction_response.edit(result)
@@ -676,6 +677,7 @@ async def set_role_emoji(
                 await interaction_response.edit(
                     "Emoji and role have been paired for this message."
                 )
+                await target_message.add_reaction(target_emoji)
                 return
             else:
                 await interaction_response.edit(result)
