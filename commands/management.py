@@ -649,6 +649,10 @@ async def set_role_emoji(
                     "Emoji-role pair was removed from this message."
                 )
                 await target_message.clear_reaction(target_emoji)
+                _logger.debug(
+                    f"commands/management: All reactions of Emoji ({emoji_name}) have been removed "
+                    + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                )
                 return
             else:
                 await interaction_response.edit(result)
@@ -686,10 +690,18 @@ async def set_role_emoji(
                     "Emoji and role have been paired for this message."
                 )
                 await target_message.add_reaction(target_emoji)
+                _logger.debug(
+                    f"commands/management: Added a reaction with Emoji ({emoji_name}) to the target message "
+                    + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                )
                 return
             elif result == "This emoji-role pair already exists.":
                 await interaction_response.edit(result)
                 await target_message.add_reaction(target_emoji)
+                _logger.debug(
+                    f"commands/management: Added a reaction with Emoji ({emoji_name}) to the target message "
+                    + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                )
                 return
             else:
                 await interaction_response.edit(result)
@@ -737,6 +749,18 @@ async def remove_role_message(
                 f"commands/management: Message ({link_parts['message_id']}) has been unset as set-role message "
                 + f"in '{interaction.guild.name}' ({interaction.guild_id})"
             )
+            try:
+                target_channel = client.get_channel(link_parts["channel_id"])
+                target_message = await target_channel.fetch_message(
+                    link_parts["message_id"]
+                )
+                await target_message.clear_reactions()
+                _logger.debug(
+                    f"commands/management: All emojis related to the message ({link_parts['message_id']}) "
+                    + f"have been removed in '{interaction.guild.name}' ({interaction.guild_id})"
+                )
+            except:
+                pass
             await interaction_response.edit(
                 "Done. This message is no longer a 'set role by reaction' message"
             )
