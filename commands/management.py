@@ -614,6 +614,7 @@ async def set_role_emoji(
             await interaction_response.edit("Please enter a valid link of a message.")
             return
 
+        target_emoji = None
         target_emoji_id = None
         if ":" in emoji_name:  # handle custom emojis like: <:custom_emoji:123456123456>
             emoji_name = emoji_name.split(":")[1]
@@ -622,8 +623,15 @@ async def set_role_emoji(
                 await interaction_response.edit("Invalid emoji.")
                 return
             target_emoji_id = target_emoji.id
+        elif len(emoji_name) > 2:  # handle custom emojis like: 'custom_emoji'
+            target_emoji = nextcord.utils.get(interaction.guild.emojis, name=emoji_name)
+            if not target_emoji:
+                await interaction_response.edit("Invalid emoji.")
+                return
+            target_emoji_id = target_emoji.id
         else:
             target_emoji_id = emoji_name
+            target_emoji = target_emoji_id
 
         if not role_name:  # remove emoji-role pair
             result = data.setrole_emoji_role_pair_remove(
