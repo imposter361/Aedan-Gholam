@@ -1,12 +1,14 @@
 import nextcord
 from bot import client
+from datetime import datetime
 
 
 def generate_refined_config_text(input, guild_id):
     guild = client.get_guild(guild_id)
+    time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 
-    result = "Here is your server configs:\n\n"
-    result = result + f"Name: {input['name']}\n\n"
+    result = f"{input['name']}\n"
+    result = result + time + "\n\n"
 
     if input.get("welcome_channel_id"):
         welcome_channel = client.get_channel(input["welcome_channel_id"])
