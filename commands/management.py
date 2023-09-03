@@ -530,6 +530,10 @@ async def settings(
                     await interaction_response.edit(
                         "member count channel has been set.",
                     )
+                    # Update member count for the first time
+                    await features.member_count.update_member_count_for_guild(
+                        interaction.guild_id
+                    )
                 else:
                     await interaction_response.edit(str(result))
             except:
