@@ -27,7 +27,7 @@ async def update_all_member_counts():
 
     subscriptions = data.get_subscriptions()
     for guild_id in subscriptions:
-        if subscriptions[guild_id] == False:
+        if not subscriptions[guild_id]:
             continue
 
         await _update_member_count_for_guild(guild_id)
@@ -38,7 +38,7 @@ async def update_member_count_for_guild(target_guild_id: int):
         return False
 
     subscriptions = data.get_subscriptions()
-    if not subscriptions[target_guild_id]:
+    if not subscriptions.get(target_guild_id):
         return
 
     await _update_member_count_for_guild(target_guild_id)
