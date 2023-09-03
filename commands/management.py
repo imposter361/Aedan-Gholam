@@ -818,7 +818,9 @@ async def delete(
 )
 async def embed(
     interaction: Interaction,
-    text: str = SlashOption(required=True, description="Write a text in embed"),
+    text: str = SlashOption(
+        required=True, description="Enter your text. (Use \\n for new-line)"
+    ),
     color: str = SlashOption(
         required=False,
         description="Color name or HEX e.g: red/ff0000, default color is cyan.",
@@ -852,6 +854,7 @@ async def embed(
                 await interaction.send("Invalid color.", ephemeral=True)
                 return
 
+        text = text.replace("\\n", "\n")
         embed = Embed(title=text, color=embed_color)
         await interaction.send(embed=embed)
     except:
