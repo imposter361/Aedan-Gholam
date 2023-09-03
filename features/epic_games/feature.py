@@ -28,8 +28,6 @@ async def check_free_games():
     if not _active:
         return False
 
-    _logger.debug("features/epic_games: Running free Epic Games task...")
-
     free_games = None
 
     subscriptions = data.get_subscriptions()

@@ -25,8 +25,6 @@ async def update_all_member_counts():
     if not _active:
         return False
 
-    _logger.debug("features/member_count: Running member count updater task...")
-
     subscriptions = data.get_subscriptions()
     for guild_id in subscriptions:
         if subscriptions[guild_id] == False:

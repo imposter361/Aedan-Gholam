@@ -28,8 +28,6 @@ async def check_klei_points():
     if not _active:
         return False
 
-    _logger.debug("features/klei_points: Running free Klei points task...")
-
     klei_points = None
 
     subscriptions = data.get_subscriptions()
