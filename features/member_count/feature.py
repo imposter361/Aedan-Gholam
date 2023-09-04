@@ -21,32 +21,46 @@ def activate():
     from . import task
 
 
-async def update_member_count():
+async def update_all_member_counts():
     if not _active:
         return False
 
-    _logger.debug("features/member_count: Running member count updater task...")
-
     subscriptions = data.get_subscriptions()
     for guild_id in subscriptions:
-        if subscriptions[guild_id] == False:
-            continue
-        if data.member_count_channel_id_get(guild_id) == None:
+        if not subscriptions[guild_id]:
             continue
 
-        try:
-            members_count_channel = client.get_channel(
-                data.member_count_channel_id_get(guild_id)
-            )
-            guild = members_count_channel.guild
-            name = "Total members: " + str(guild.member_count)
-            await members_count_channel.edit(name=name)
+        await _update_member_count_for_guild(guild_id)
+
+
+async def update_member_count_for_guild(target_guild_id: int):
+    if not _active:
+        return False
+
+    subscriptions = data.get_subscriptions()
+    if not subscriptions.get(target_guild_id):
+        return
+
+    await _update_member_count_for_guild(target_guild_id)
+
+
+async def _update_member_count_for_guild(target_guild_id: int):
+    member_count_channel_id = data.member_count_channel_id_get(target_guild_id)
+    if not member_count_channel_id:
+        return
+
+    try:
+        member_count_channel = client.get_channel(member_count_channel_id)
+        guild = member_count_channel.guild
+        updated_name = "Total members: " + str(guild.member_count)
+        if member_count_channel.name != updated_name:
+            await member_count_channel.edit(name=updated_name)
             _logger.debug(
-                f"features/member_count: « {guild.member_count} » "
+                f"features/member_count: Updated: « {guild.member_count} » "
                 + f"members are in '{str(guild)}' ({guild.id})"
             )
-        except:
-            _logger.exception(
-                "features/member_count: Failed to update member count for "
-                + f"guild ({guild_id})"
-            )
+    except:
+        _logger.exception(
+            "features/member_count: Failed to update member count for "
+            + f"guild ({target_guild_id})"
+        )

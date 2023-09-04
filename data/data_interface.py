@@ -81,6 +81,12 @@ def get_subscriptions():
     return subscriptions
 
 
+def configs_get(guild_id):
+    if not is_ready():
+        return "Please try again later."
+    return server_get(guild_id)
+
+
 def dst_role_id_get(guild_id):
     if not is_ready():
         return "Please try again later."

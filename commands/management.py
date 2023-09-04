@@ -29,7 +29,7 @@ async def help(interaction: Interaction):
         help_message = (
             "Salam, AedanGholam dar khedmate shomast.\n\n"
             "`/settings`: Baraye set kardan tanzimate bot az in command estefade konid.\n"
-            "`set welcome channel id`: in option baraye set kardane id text channel marboot be payam haye khosh amad gooyi mibashad.\n"
+            "`/set welcome channel id`: in option baraye set kardane id text channel marboot be payam haye khosh amad gooyi mibashad.\n"
             "`/embed`: baraye neveshtan yek payam dar embed ast ke mitavan az rang haye mokhtalef estefade kard."
         )
         await interaction.send(help_message)
@@ -530,6 +530,10 @@ async def settings(
                     await interaction_response.edit(
                         "member count channel has been set.",
                     )
+                    # Update member count for the first time
+                    await features.member_count.update_member_count_for_guild(
+                        interaction.guild_id
+                    )
                 else:
                     await interaction_response.edit(str(result))
             except:
@@ -614,6 +618,7 @@ async def set_role_emoji(
             await interaction_response.edit("Please enter a valid link of a message.")
             return
 
+        target_emoji = None
         target_emoji_id = None
         if ":" in emoji_name:  # handle custom emojis like: <:custom_emoji:123456123456>
             emoji_name = emoji_name.split(":")[1]
@@ -622,8 +627,15 @@ async def set_role_emoji(
                 await interaction_response.edit("Invalid emoji.")
                 return
             target_emoji_id = target_emoji.id
+        elif len(emoji_name) > 2:  # handle custom emojis like: 'custom_emoji'
+            target_emoji = nextcord.utils.get(interaction.guild.emojis, name=emoji_name)
+            if not target_emoji:
+                await interaction_response.edit("Invalid emoji.")
+                return
+            target_emoji_id = target_emoji.id
         else:
             target_emoji_id = emoji_name
+            target_emoji = target_emoji_id
 
         if not role_name:  # remove emoji-role pair
             result = data.setrole_emoji_role_pair_remove(
@@ -639,6 +651,11 @@ async def set_role_emoji(
                 )
                 await interaction_response.edit(
                     "Emoji-role pair was removed from this message."
+                )
+                await target_message.clear_reaction(target_emoji)
+                _logger.debug(
+                    f"commands/management: All reactions of Emoji ({emoji_name}) have been removed "
+                    + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                 )
                 return
             else:
@@ -676,10 +693,22 @@ async def set_role_emoji(
                 await interaction_response.edit(
                     "Emoji and role have been paired for this message."
                 )
+                await target_message.add_reaction(target_emoji)
+                _logger.debug(
+                    f"commands/management: Added a reaction with Emoji ({emoji_name}) to the target message "
+                    + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                )
+                return
+            elif result == "This emoji-role pair already exists.":
+                await interaction_response.edit(result)
+                await target_message.add_reaction(target_emoji)
+                _logger.debug(
+                    f"commands/management: Added a reaction with Emoji ({emoji_name}) to the target message "
+                    + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                )
                 return
             else:
                 await interaction_response.edit(result)
-                return
     except:
         await handle_command_exception(
             "set_role_emoji", interaction, interaction_response
@@ -724,6 +753,18 @@ async def remove_role_message(
                 f"commands/management: Message ({link_parts['message_id']}) has been unset as set-role message "
                 + f"in '{interaction.guild.name}' ({interaction.guild_id})"
             )
+            try:
+                target_channel = client.get_channel(link_parts["channel_id"])
+                target_message = await target_channel.fetch_message(
+                    link_parts["message_id"]
+                )
+                await target_message.clear_reactions()
+                _logger.debug(
+                    f"commands/management: All emojis related to the message ({link_parts['message_id']}) "
+                    + f"have been removed in '{interaction.guild.name}' ({interaction.guild_id})"
+                )
+            except:
+                pass
             await interaction_response.edit(
                 "Done. This message is no longer a 'set role by reaction' message"
             )
@@ -781,7 +822,9 @@ async def delete(
 )
 async def embed(
     interaction: Interaction,
-    text: str = SlashOption(required=True, description="Write a text in embed"),
+    text: str = SlashOption(
+        required=True, description="Enter your text. (Use \\n for new-line)"
+    ),
     color: str = SlashOption(
         required=False,
         description="Color name or HEX e.g: red/ff0000, default color is cyan.",
@@ -815,6 +858,7 @@ async def embed(
                 await interaction.send("Invalid color.", ephemeral=True)
                 return
 
+        text = text.replace("\\n", "\n")
         embed = Embed(title=text, color=embed_color)
         await interaction.send(embed=embed)
     except:

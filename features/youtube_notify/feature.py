@@ -26,8 +26,6 @@ async def check_for_new_youtube_video():
     if not _active:
         return False
 
-    _logger.debug("features/youtube_notify: Running Youtube notify task...")
-
     channels_last_videos = {}
 
     subscriptions = data.get_subscriptions()

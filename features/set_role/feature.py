@@ -32,19 +32,19 @@ async def set_role_based_on_reaction(added_reaction: nextcord.Reaction):
         if not subscriptions.get(added_reaction.guild_id):
             return
 
+        setrole_messages = data.setrole_messages_get(added_reaction.guild_id)
+        if not setrole_messages:
+            return
+
+        target_message_key = f"{added_reaction.channel_id}/{added_reaction.message_id}"
+        if not setrole_messages.get(target_message_key):
+            return
+
         guild = client.get_guild(added_reaction.guild_id)
         member = added_reaction.member
         emoji_key = added_reaction.emoji.name
         if added_reaction.emoji.id:
             emoji_key = str(added_reaction.emoji.id)
-
-        setrole_messages = data.setrole_messages_get(guild.id)
-        target_message_key = (
-            str(added_reaction.channel_id) + "/" + str(added_reaction.message_id)
-        )
-
-        if not setrole_messages.get(target_message_key):
-            return
 
         emoji_role_dict = setrole_messages[target_message_key].get("emoji_role_dict")
         if not emoji_role_dict:
@@ -79,19 +79,21 @@ async def unset_role_based_on_reaction(removed_reaction: nextcord.Reaction):
         if not subscriptions.get(removed_reaction.guild_id):
             return
 
+        setrole_messages = data.setrole_messages_get(removed_reaction.guild_id)
+        if not setrole_messages:
+            return
+
+        target_message_key = (
+            f"{removed_reaction.channel_id}/{removed_reaction.message_id}"
+        )
+        if not setrole_messages.get(target_message_key):
+            return
+
         guild = client.get_guild(removed_reaction.guild_id)
         member = guild.get_member(removed_reaction.user_id)
         emoji_key = removed_reaction.emoji.name
         if removed_reaction.emoji.id:
             emoji_key = str(removed_reaction.emoji.id)
-
-        setrole_messages = data.setrole_messages_get(guild.id)
-        target_message_key = (
-            str(removed_reaction.channel_id) + "/" + str(removed_reaction.message_id)
-        )
-
-        if not setrole_messages.get(target_message_key):
-            return
 
         emoji_role_dict = setrole_messages[target_message_key].get("emoji_role_dict")
         if not emoji_role_dict:

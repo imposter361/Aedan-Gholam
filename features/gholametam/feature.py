@@ -30,8 +30,8 @@ responses = [
     f"Command me! v{VERSION}",
     f"Amri basheh? v{VERSION}",
     f"أنا بخدمتکم! v{VERSION}",
-    f"Keyli nokarim v{VERSION}",
     f"Dar khedmatam v{VERSION}",
+    f"Kheyli nokarim v{VERSION}",
     f"Kheyli chakeram v{VERSION}",
     f"در خدمت‌گزاری حاضرم! v{VERSION}",
 ]
