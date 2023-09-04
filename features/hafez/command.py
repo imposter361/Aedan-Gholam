@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from .feature import is_active, get_hafez_poem_text
 from bot import client
@@ -24,8 +25,9 @@ async def hafez(interaction: Interaction):
             )
             return
 
-        interaction_response = await interaction.send(f"Please wait ...")
-        poem = await get_hafez_poem_text()
+        task1 = interaction.send("Please wait...")
+        task2 = get_hafez_poem_text()
+        interaction_response, poem = await asyncio.gather(task1, task2)
         if not poem:
             await interaction_response.edit("Something went wrong...")
         else:

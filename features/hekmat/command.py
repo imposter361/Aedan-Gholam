@@ -38,7 +38,8 @@ async def hekmat(
                 "Yek adad beyne 1 ta 480 vared konid!", ephemeral=True
             )
             return
-        task1 = interaction.send(f"Please wait ...")
+
+        task1 = interaction.send("Please wait...")
         task2 = get_hekmat_text(number)
         interaction_response, hekmat_text = await asyncio.gather(task1, task2)
         if not hekmat_text:
