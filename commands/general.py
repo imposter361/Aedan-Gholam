@@ -10,31 +10,6 @@ from version import VERSION
 _logger = logging.getLogger("main")
 
 
-# Hafez
-@client.slash_command(name="hafez", description="Fall Migholi ?!")
-async def hafez(interaction: Interaction):
-    try:
-        _logger.info(
-            "commands/general: Command 'hafez' was called by "
-            + f"'{interaction.user.name}' ({interaction.user.id}) "
-            + f"in '{interaction.guild.name}' ({interaction.guild_id})"
-        )
-        interaction_response = await interaction.send(f"Please wait ...")
-        url = "https://c.ganjoor.net/beyt-xml.php?n=1&a=1&p=2"
-        response = requests.get(url)
-        xml = response.content
-        m1 = xml.split(b"<m1>")[1].split(b"</m1>")[0].decode("utf-8")
-        m2 = xml.split(b"<m2>")[1].split(b"</m2>")[0].decode("utf-8")
-        poet = xml.split(b"<poet>")[1].split(b"</poet>")[0].decode("utf-8")
-        total_poem = xml.split(b"<url>")[1].split(b"</url>")[0].decode("utf-8")
-        up = "🖊️"
-        poem = f"{m1}\n{m2}\n\n{up} [{poet}]({total_poem})"
-        await interaction_response.edit(poem)
-
-    except:
-        await handle_command_exception("hafez", interaction, interaction_response)
-
-
 # Hekmat
 @client.slash_command(name="hekmat", description="Yek Hekmat az Nahj al-balagha")
 async def hekmat(
