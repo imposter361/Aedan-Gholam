@@ -1,3 +1,4 @@
+from . import about
 from . import epic_games
 from . import gholametam
 from . import hafez
@@ -13,6 +14,7 @@ from . import youtube_notify
 
 # Enabled features:
 
+about.activate()
 epic_games.activate()
 gholametam.activate()
 hafez.activate()
