@@ -40,6 +40,9 @@ async def set_role_based_on_reaction(added_reaction: nextcord.Reaction):
         if not setrole_messages.get(target_message_key):
             return
 
+        if added_reaction.user_id == client.user.id:  # Bot itself
+            return
+
         guild = client.get_guild(added_reaction.guild_id)
         member = added_reaction.member
         emoji_key = added_reaction.emoji.name
@@ -87,6 +90,9 @@ async def unset_role_based_on_reaction(removed_reaction: nextcord.Reaction):
             f"{removed_reaction.channel_id}/{removed_reaction.message_id}"
         )
         if not setrole_messages.get(target_message_key):
+            return
+
+        if removed_reaction.user_id == client.user.id:  # Bot itself
             return
 
         guild = client.get_guild(removed_reaction.guild_id)
