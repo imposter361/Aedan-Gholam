@@ -1,6 +1,7 @@
 from . import epic_games
 from . import gholametam
 from . import hafez
+from . import hekmat
 from . import klei_points
 from . import management
 from . import member_count
@@ -15,6 +16,7 @@ from . import youtube_notify
 epic_games.activate()
 gholametam.activate()
 hafez.activate()
+hekmat.activate()
 klei_points.activate()
 management.activate()
 member_count.activate()

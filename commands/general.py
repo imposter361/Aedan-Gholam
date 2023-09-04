@@ -1,58 +1,10 @@
 import logging
-import random
-import re
-import requests
 from .helper import handle_command_exception
 from bot import client
-from nextcord import Interaction, SlashOption
+from nextcord import Interaction
 from version import VERSION
 
 _logger = logging.getLogger("main")
-
-
-# Hekmat
-@client.slash_command(name="hekmat", description="Yek Hekmat az Nahj al-balagha")
-async def hekmat(
-    interaction: Interaction,
-    number: int = SlashOption(
-        required=False, description="Yek adad beyne 1 ta 480 vared konid"
-    ),
-):
-    try:
-        _logger.info(
-            "commands/general: Command 'hekmat' was called by "
-            + f"'{interaction.user.name}' ({interaction.user.id}) "
-            + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: number:{number}"
-        )
-        if number is None:
-            number = random.randrange(1, 481)
-        if number > 480 or number < 1:
-            await interaction.response.send_message(
-                "Yek adad beyne 1 ta 480 vared konid!", ephemeral=True
-            )
-            return
-        interaction_response = await interaction.send(f"Please wait ...")
-        url = f"https://alimaktab.ir/json/wisdom/?n={number}"
-        response = requests.get(url)
-        response_json = response.json()
-
-        arabic = response_json["main"]
-        farsi = response_json["ansarian"]
-        hekmat = "حکمت " + str(number) + ": " + arabic + "\n\n" + farsi
-        new_string = hekmat.replace("[", "").replace("]", "")
-
-        def remove_html(text):
-            clean = re.compile("<.*?>")
-            return re.sub(clean, "", text)
-
-        clean_text = remove_html(new_string)
-        clean_text = clean_text.replace("&raquo;", "»")
-        clean_text = clean_text.replace("&laquo;", "«")
-
-        await interaction_response.edit(clean_text)
-
-    except:
-        await handle_command_exception("hekmat", interaction, interaction_response)
 
 
 # About Aedan Team
