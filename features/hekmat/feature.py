@@ -22,29 +22,32 @@ def activate():
 
 
 async def get_hekmat_text(number: int):
-    hekmat = None
-    raw_response = None
+    result = None
+    try:
+        raw_response = None
+        async with aiohttp.ClientSession() as session:
+            url = f"https://alimaktab.ir/json/wisdom/?n={number}"
+            async with session.get(url) as response:
+                if response.status != 200:
+                    return None
+                raw_response = await response.content.read()
 
-    async with aiohttp.ClientSession() as session:
-        url = f"https://alimaktab.ir/json/wisdom/?n={number}"
-        async with session.get(url) as response:
-            if response.status != 200:
-                return None
-            raw_response = await response.content.read()
+        response_json = json.loads(str(raw_response, encoding="utf-8"))
 
-    response_json = json.loads(str(raw_response, encoding="utf-8"))
+        arabic = response_json["main"]
+        farsi = response_json["ansarian"]
+        hekmat = "حکمت " + str(number) + ": " + arabic + "\n\n" + farsi
+        hekmat = hekmat.replace("[", "").replace("]", "")
 
-    arabic = response_json["main"]
-    farsi = response_json["ansarian"]
-    hekmat = "حکمت " + str(number) + ": " + arabic + "\n\n" + farsi
-    hekmat = hekmat.replace("[", "").replace("]", "")
+        def remove_html(text):
+            clean = re.compile("<.*?>")
+            return re.sub(clean, "", text)
 
-    def remove_html(text):
-        clean = re.compile("<.*?>")
-        return re.sub(clean, "", text)
+        hekmat = remove_html(hekmat)
+        hekmat = hekmat.replace("&raquo;", "»")
+        hekmat = hekmat.replace("&laquo;", "«")
+        result = hekmat
+    except:
+        _logger.exception("features/hekmat: Failed to get a hekmat.")
 
-    hekmat = remove_html(hekmat)
-    hekmat = hekmat.replace("&raquo;", "»")
-    hekmat = hekmat.replace("&laquo;", "«")
-
-    return hekmat
+    return result
