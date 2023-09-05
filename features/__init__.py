@@ -1,4 +1,5 @@
 from . import about
+from . import delete
 from . import embed
 from . import epic_games
 from . import gholametam
@@ -17,6 +18,7 @@ from . import youtube_notify
 # Enabled features:
 
 about.activate()
+delete.activate()
 embed.activate()
 epic_games.activate()
 gholametam.activate()
