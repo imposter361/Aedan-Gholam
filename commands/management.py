@@ -3,7 +3,6 @@ import features
 import logging
 import nextcord
 import pytube
-import webcolors
 from .helper import handle_command_exception
 from bot import client, ADMINS, HOME_GUILDS
 from nextcord import Interaction, Permissions, SlashOption, Embed
@@ -812,57 +811,6 @@ async def delete(
 
     except:
         await handle_command_exception("delete", interaction, interaction_response)
-
-
-@client.slash_command(
-    name="embed",
-    description=" Send an embed message",
-    default_member_permissions=Permissions(administrator=True),
-    dm_permission=False,
-)
-async def embed(
-    interaction: Interaction,
-    text: str = SlashOption(
-        required=True, description="Enter your text. (Use \\n for new-line)"
-    ),
-    color: str = SlashOption(
-        required=False,
-        description="Color name or HEX e.g: red/ff0000, default color is cyan.",
-    ),
-):
-    try:
-        _logger.info(
-            "commands/management: Command 'embed' was called by "
-            + f"'{interaction.user.name}' ({interaction.user.id}) "
-            + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: text:{text} color:{color}"
-        )
-        default_color = "cyan"
-        if color is None:
-            color = default_color
-
-        try:
-            rgb = webcolors.name_to_rgb(color)
-            hex_value = webcolors.rgb_to_hex(rgb)
-            embed_color = hex_value.replace("#", "0x")
-            embed_color = int(embed_color, base=16)
-        except:
-            _logger.debug(f"commands/management: Invalid color '{color}'")
-            await interaction.send("Invalid color.", ephemeral=True)
-            return
-
-        if hex_value is None:
-            try:
-                embed_color = int(f"0x{color}", base=16)
-            except:
-                _logger.debug(f"commands/management: Invalid color '{color}'")
-                await interaction.send("Invalid color.", ephemeral=True)
-                return
-
-        text = text.replace("\\n", "\n")
-        embed = Embed(title=text, color=embed_color)
-        await interaction.send(embed=embed)
-    except:
-        await handle_command_exception("embed", interaction)
 
 
 @client.slash_command(
