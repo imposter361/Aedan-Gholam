@@ -15,4 +15,4 @@ def is_active():
 def activate():
     global _active
     _active = True
-    _logger.debug("features: Feature has been activated: 'hafez'")
+    _logger.debug("features: Feature has been activated: 'embed'")
