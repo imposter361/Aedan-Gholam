@@ -5,7 +5,7 @@ import nextcord
 import pytube
 from .helper import handle_command_exception
 from bot import client, ADMINS, HOME_GUILDS
-from nextcord import Interaction, Permissions, SlashOption, Embed
+from nextcord import Interaction, Permissions, SlashOption
 from typing import Optional
 
 _logger = logging.getLogger("main")
