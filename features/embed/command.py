@@ -1,5 +1,6 @@
 import logging
 import webcolors
+from .feature import is_active
 from bot import client
 from commands.helper import handle_command_exception
 from nextcord import Interaction, SlashOption, Permissions, Embed
@@ -29,6 +30,15 @@ async def embed(
             + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: text:{text} color:{color}"
         )
+        if not is_active():
+            _logger.info(
+                "features/embed: This feature is not active. Command dismissed."
+            )
+            await interaction.send(
+                f"Sorry! This feature is unavailable at the moment...", ephemeral=True
+            )
+            return
+
         default_color = "cyan"
         if color is None:
             color = default_color

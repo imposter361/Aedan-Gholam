@@ -1,4 +1,5 @@
 import logging
+from .feature import is_active
 from bot import client
 from commands.helper import handle_command_exception
 from nextcord import Interaction, Permissions
@@ -19,6 +20,15 @@ async def help(interaction: Interaction):
             + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
         )
+        if not is_active():
+            _logger.info(
+                "features/about: This feature is not active. Command dismissed."
+            )
+            await interaction.send(
+                f"Sorry! This feature is unavailable at the moment...", ephemeral=True
+            )
+            return
+
         help_message = (
             "Salam\n**AedanGholam** dar khedmate shomast.\n\n"
             "`/settings`: Baraye set kardan tanzimate bot az in command estefade konid.\n"
