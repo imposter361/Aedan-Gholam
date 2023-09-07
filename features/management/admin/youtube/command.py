@@ -29,6 +29,11 @@ async def youtube_notification_set(
         required=False,
         description="Use '\\n' for new line. Leave empty to use the default message.",
     ),
+    send_latest_video: bool = SlashOption(
+        required=False,
+        default=False,
+        description="Choose true if you want to get the current latest video from this Youtube channel.",
+    ),
 ):
     try:
         _logger.info(
@@ -65,16 +70,24 @@ async def youtube_notification_set(
             return
 
         video = pytube.YouTube(link)
-        last_channel_video = features.youtube_notify.get_last_video_of_youtube_channel(
-            video.channel_id
-        )
+        last_channel_video_id = None
+        if not send_latest_video:
+            # If user wants to get the current latest video,
+            # leave last_channel_video_id = null so the latest video
+            # will be processed in the near future
+            last_channel_video = (
+                features.youtube_notify.get_last_video_of_youtube_channel(
+                    video.channel_id
+                )
+            )
+            last_channel_video_id = last_channel_video["id"]
 
         result = data.yt_notif_rule_add(
             interaction.guild_id,
             video.channel_id,
             video.author,
             channel_id,
-            last_channel_video["id"],
+            last_channel_video_id,
             custom_message,
         )
         if result == video.channel_id or result == "Updated.":
