@@ -1,5 +1,5 @@
 import logging
-from . import owner
+from . import subscription
 
 _logger = logging.getLogger("main")
 
@@ -16,5 +16,5 @@ def is_active():
 def activate():
     global _active
     _active = True
-    _logger.debug("features: Feature has been activated: 'management'")
-    owner.activate()
+    _logger.debug("features: Feature has been activated: 'management/owner'")
+    subscription.activate()
