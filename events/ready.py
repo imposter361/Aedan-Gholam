@@ -17,7 +17,6 @@ async def on_ready():
     _logger.info(f"events/ready: Logged in as {bot_username} v{VERSION}")
 
     await data.check_for_data_migrations()
-    data.backup()
 
     # Start tasks:
     backup_data_task.start()
