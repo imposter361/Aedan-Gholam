@@ -1,4 +1,5 @@
 import data
+import features
 import logging
 import nextcord
 from .feature import is_active
@@ -57,7 +58,7 @@ async def set_role_emoji(
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: "
             + f"message_link:{message_link} emoji_name:{emoji_name} role_name:{role_name}"
         )
-        if not is_active():
+        if not is_active() or not features.set_role.is_active():
             _logger.info(
                 "features/management: This feature is not active. Command dismissed."
             )
@@ -201,7 +202,7 @@ async def remove_role_message(
             + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: message_link:{message_link}"
         )
-        if not is_active():
+        if not is_active() or not features.set_role.is_active():
             _logger.info(
                 "features/management: This feature is not active. Command dismissed."
             )

@@ -1,10 +1,10 @@
 import data
+import features
 import logging
 import pytube
 from .feature import is_active
 from commands.helper import handle_command_exception
 from bot import client
-from features import youtube_notify
 from nextcord import Interaction, Permissions, SlashOption
 
 _logger = logging.getLogger("main")
@@ -37,7 +37,7 @@ async def youtube_notification_set(
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) "
             + f"args: link:{link} channel_id:{channel_id}"
         )
-        if not is_active() or not youtube_notify.is_active():
+        if not is_active() or not features.youtube_notify.is_active():
             _logger.info(
                 "features/management: This feature is not active. Command dismissed."
             )
@@ -65,7 +65,7 @@ async def youtube_notification_set(
             return
 
         video = pytube.YouTube(link)
-        last_channel_video = youtube_notify.get_last_video_of_youtube_channel(
+        last_channel_video = features.youtube_notify.get_last_video_of_youtube_channel(
             video.channel_id
         )
 
@@ -109,7 +109,7 @@ async def youtube_notification_remove(
             + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: link:{link}"
         )
-        if not is_active() or not youtube_notify.is_active():
+        if not is_active() or not features.youtube_notify.is_active():
             _logger.info(
                 "features/management: This feature is not active. Command dismissed."
             )
