@@ -26,7 +26,7 @@ async def embed(
 ):
     try:
         _logger.info(
-            "commands/management: Command 'embed' was called by "
+            "features/embed: Command 'embed' was called by "
             + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: text:{text} color:{color}"
         )
@@ -49,7 +49,7 @@ async def embed(
             embed_color = hex_value.replace("#", "0x")
             embed_color = int(embed_color, base=16)
         except:
-            _logger.debug(f"commands/management: Invalid color '{color}'")
+            _logger.debug(f"features/embed: Invalid color '{color}'")
             await interaction.send("Invalid color.", ephemeral=True)
             return
 
@@ -57,7 +57,7 @@ async def embed(
             try:
                 embed_color = int(f"0x{color}", base=16)
             except:
-                _logger.debug(f"commands/management: Invalid color '{color}'")
+                _logger.debug(f"features/embed: Invalid color '{color}'")
                 await interaction.send("Invalid color.", ephemeral=True)
                 return
 

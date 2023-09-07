@@ -22,7 +22,7 @@ async def configs_get(
     date = datetime.now().strftime("%Y_%m_%d")
     try:
         _logger.info(
-            "commands/management: Command 'get_config' was called by "
+            "features/management: Command 'get_config' was called by "
             + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}"
         )

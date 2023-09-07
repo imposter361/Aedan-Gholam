@@ -16,13 +16,13 @@ _logger = logging.getLogger("main")
 async def help(interaction: Interaction):
     try:
         _logger.info(
-            "commands/management: Command 'help' was called by "
+            "features/help: Command 'help' was called by "
             + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
         )
         if not is_active():
             _logger.info(
-                "features/about: This feature is not active. Command dismissed."
+                "features/help: This feature is not active. Command dismissed."
             )
             await interaction.send(
                 f"Sorry! This feature is unavailable at the moment...", ephemeral=True

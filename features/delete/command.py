@@ -18,7 +18,7 @@ async def delete(
 ):
     try:
         _logger.info(
-            "commands/management: Command 'delete' was called by "
+            "features/delete: Command 'delete' was called by "
             + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: number:{number}"
         )
@@ -45,7 +45,7 @@ async def delete(
             report = f"{number} messages have been deleted."
 
         _logger.info(
-            f"commands/management: {report} Guild: '{interaction.guild.name}' ({interaction.guild_id})"
+            f"features/delete: {report} Guild: '{interaction.guild.name}' ({interaction.guild_id})"
             + f"Channel: '{interaction.channel.name}' ({interaction.channel_id})"
         )
         await interaction_response.edit(f"{report}")
