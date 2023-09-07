@@ -1,6 +1,24 @@
+import logging
 import nextcord
 from bot import client
 from datetime import datetime
+
+_logger = logging.getLogger("main")
+
+
+if "_acive" not in dir():  # Run once
+    global _active
+    _active = False
+
+
+def is_active():
+    return _active
+
+
+def activate():
+    global _active
+    _active = True
+    _logger.debug("features: Feature has been activated: 'management/admin/config_report'")
 
 
 def generate_refined_config_text(input, guild_id):

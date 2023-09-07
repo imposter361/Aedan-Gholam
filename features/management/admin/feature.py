@@ -1,4 +1,5 @@
 import logging
+from . import config_report
 from . import set_role
 
 _logger = logging.getLogger("main")
@@ -17,4 +18,5 @@ def activate():
     global _active
     _active = True
     _logger.debug("features: Feature has been activated: 'management/admin'")
+    config_report.activate()
     set_role.activate()

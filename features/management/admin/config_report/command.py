@@ -2,6 +2,7 @@ import data
 import io
 import logging
 from . import feature
+from .feature import is_active
 from bot import client
 from datetime import datetime
 from commands.helper import handle_command_exception
@@ -26,6 +27,15 @@ async def configs_get(
             + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}"
         )
+        if not is_active():
+            _logger.info(
+                "features/management: This feature is not active. Command dismissed."
+            )
+            await interaction.send(
+                f"Sorry! This feature is unavailable at the moment...", ephemeral=True
+            )
+            return
+
         interaction_response = await interaction.send("Please wait...", ephemeral=True)
 
         result = data.configs_get(interaction.guild_id)
