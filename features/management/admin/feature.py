@@ -1,6 +1,5 @@
 import logging
-from . import admin
-from . import owner
+from . import set_role
 
 _logger = logging.getLogger("main")
 
@@ -17,6 +16,5 @@ def is_active():
 def activate():
     global _active
     _active = True
-    _logger.debug("features: Feature has been activated: 'management'")
-    admin.activate()
-    owner.activate()
+    _logger.debug("features: Feature has been activated: 'management/admin'")
+    set_role.activate()
