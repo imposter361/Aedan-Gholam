@@ -1,6 +1,7 @@
 import data
 import features
 import logging
+import nextcord
 from .feature import is_active
 from features._shared.helper import handle_command_exception
 from bot import client
@@ -288,6 +289,17 @@ async def settings(
                     return
 
                 role_id = int(id)
+                role = nextcord.utils.get(interaction.guild.roles, id=role_id)
+                if not role:
+                    _logger.debug(
+                        "features/management: Failed to get role with id of: "
+                        + f"{role_id} in guild: {interaction.guild_id}"
+                    )
+                    await interaction_response.edit(
+                        "Invalid role ID.",
+                    )
+                    return
+
                 result = data.free_games_role_id_set(interaction.guild_id, role_id)
                 if result == role_id:
                     _logger.info(
@@ -323,6 +335,17 @@ async def settings(
                     return
 
                 role_id = int(id)
+                role = nextcord.utils.get(interaction.guild.roles, id=role_id)
+                if not role:
+                    _logger.debug(
+                        "features/management: Failed to get role with id of: "
+                        + f"{role_id} in guild: {interaction.guild_id}"
+                    )
+                    await interaction_response.edit(
+                        "Invalid role ID.",
+                    )
+                    return
+
                 result = data.dst_role_id_set(interaction.guild_id, role_id)
                 if result == role_id:
                     _logger.info(
