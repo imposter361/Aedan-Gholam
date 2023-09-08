@@ -1,6 +1,7 @@
 import logging
 from . import config_report
 from . import set_role
+from . import settings
 from . import youtube
 
 _logger = logging.getLogger("main")
@@ -21,4 +22,5 @@ def activate():
     _logger.debug("features: Feature has been activated: 'management/admin'")
     config_report.activate()
     set_role.activate()
+    settings.activate()
     youtube.activate()

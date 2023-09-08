@@ -1,7 +1,8 @@
 import data
 import features
 import logging
-from .helper import handle_command_exception
+from .feature import is_active
+from commands.helper import handle_command_exception
 from bot import client
 from nextcord import Interaction, Permissions, SlashOption
 
@@ -31,10 +32,19 @@ async def customize(
     print(message)
     # try:
     _logger.info(
-        "commands/management: Command 'customize' was called by "
+        "features/management: Command 'customize' was called by "
         + f"'{interaction.user.name}' ({interaction.user.id}) "
         + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: customize:{customize} message:{message}"
     )
+    if not is_active():
+        _logger.info(
+            "features/management: This feature is not active. Command dismissed."
+        )
+        await interaction.send(
+            f"Sorry! This feature is unavailable at the moment...", ephemeral=True
+        )
+        return
+
     interaction_response = await interaction.send("Please wait...", ephemeral=True)
     if customize == "welcome message":
         try:
@@ -42,7 +52,7 @@ async def customize(
                 result = data.welcome_message_set(interaction.guild_id, message)
                 if result == None:
                     _logger.info(
-                        "commands/management: Welcome message has been unset "
+                        "features/management: Welcome message has been unset "
                         + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                     )
                     await interaction_response.edit(
@@ -55,7 +65,7 @@ async def customize(
             channel_id = int(id)
             channel = client.get_channel(channel_id)
             if interaction.guild_id != channel.guild.id:
-                _logger.debug(f"commands/management: Channel id ({id}) is invalid.")
+                _logger.debug(f"features/management: Channel id ({id}) is invalid.")
                 await interaction_response.edit(
                     "Invalid channel ID.",
                 )
@@ -64,7 +74,7 @@ async def customize(
             result = data.welcome_message_set(interaction.guild_id, channel_id)
             if result == channel_id:
                 _logger.info(
-                    f"commands/management: Welcome message has been set to {id} "
+                    f"features/management: Welcome message has been set to {id} "
                     + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                 )
                 await interaction_response.edit(
@@ -74,7 +84,7 @@ async def customize(
                 await interaction_response.edit(str(result))
         except:
             _logger.exception(
-                f"commands/management: Failed to set welcome message ({id}) "
+                f"features/management: Failed to set welcome message ({id}) "
                 + f"in guild ({interaction.guild_id})"
             )
             await interaction_response.edit("Operation failed.")
@@ -104,10 +114,19 @@ async def settings(
 ):
     try:
         _logger.info(
-            "commands/management: Command 'settings' was called by "
+            "features/management: Command 'settings' was called by "
             + f"'{interaction.user.name}' ({interaction.user.id}) "
             + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: setting:{setting} id:{id}"
         )
+        if not is_active():
+            _logger.info(
+                "features/management: This feature is not active. Command dismissed."
+            )
+            await interaction.send(
+                f"Sorry! This feature is unavailable at the moment...", ephemeral=True
+            )
+            return
+
         interaction_response = await interaction.send("Please wait...", ephemeral=True)
         if setting == "Set welcome channel id":
             try:
@@ -115,7 +134,7 @@ async def settings(
                     result = data.welcome_channel_id_set(interaction.guild_id, None)
                     if result == None:
                         _logger.info(
-                            "commands/management: Welcome channel id has been unset "
+                            "features/management: Welcome channel id has been unset "
                             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                         )
                         await interaction_response.edit(
@@ -128,7 +147,7 @@ async def settings(
                 channel_id = int(id)
                 channel = client.get_channel(channel_id)
                 if interaction.guild_id != channel.guild.id:
-                    _logger.debug(f"commands/management: Channel id ({id}) is invalid.")
+                    _logger.debug(f"features/management: Channel id ({id}) is invalid.")
                     await interaction_response.edit(
                         "Invalid channel ID.",
                     )
@@ -137,7 +156,7 @@ async def settings(
                 result = data.welcome_channel_id_set(interaction.guild_id, channel_id)
                 if result == channel_id:
                     _logger.info(
-                        f"commands/management: Welcome channel id has been set to {id} "
+                        f"features/management: Welcome channel id has been set to {id} "
                         + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                     )
                     await interaction_response.edit(
@@ -147,7 +166,7 @@ async def settings(
                     await interaction_response.edit(str(result))
             except:
                 _logger.exception(
-                    f"commands/management: Failed to set welcome channel id ({id}) "
+                    f"features/management: Failed to set welcome channel id ({id}) "
                     + f"in guild ({interaction.guild_id})"
                 )
                 await interaction_response.edit("Operation failed.")
@@ -158,7 +177,7 @@ async def settings(
                     result = data.epic_games_channel_id_set(interaction.guild_id, None)
                     if result == None:
                         _logger.info(
-                            "commands/management: epic games channel id has been unset "
+                            "features/management: epic games channel id has been unset "
                             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                         )
                         await interaction_response.edit(
@@ -171,7 +190,7 @@ async def settings(
                 channel_id = int(id)
                 channel = client.get_channel(channel_id)
                 if interaction.guild_id != channel.guild.id:
-                    _logger.debug(f"commands/management: Channel id ({id}) is invalid.")
+                    _logger.debug(f"features/management: Channel id ({id}) is invalid.")
                     await interaction_response.edit(
                         "Invalid channel ID.",
                     )
@@ -181,7 +200,7 @@ async def settings(
                 )
                 if result == channel_id:
                     _logger.info(
-                        f"commands/management: epic games channel id has been set to {id} "
+                        f"features/management: epic games channel id has been set to {id} "
                         + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                     )
                     await interaction_response.edit(
@@ -191,7 +210,7 @@ async def settings(
                     await interaction_response.edit(str(result))
             except:
                 _logger.exception(
-                    f"commands/management: Failed to set epic games channel id ({id}) "
+                    f"features/management: Failed to set epic games channel id ({id}) "
                     + f"in guild ({interaction.guild_id})"
                 )
                 await interaction_response.edit("Operation failed.")
@@ -202,7 +221,7 @@ async def settings(
                     result = data.klei_links_channel_id_set(interaction.guild_id, None)
                     if result == None:
                         _logger.info(
-                            "commands/management: klei links channel id has been unset "
+                            "features/management: klei links channel id has been unset "
                             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                         )
                         await interaction_response.edit(
@@ -215,7 +234,7 @@ async def settings(
                 channel_id = int(id)
                 channel = client.get_channel(channel_id)
                 if interaction.guild_id != channel.guild.id:
-                    _logger.debug(f"commands/management: Channel id ({id}) is invalid.")
+                    _logger.debug(f"features/management: Channel id ({id}) is invalid.")
                     await interaction_response.edit(
                         "Invalid channel ID.",
                     )
@@ -225,7 +244,7 @@ async def settings(
                 )
                 if result == channel_id:
                     _logger.info(
-                        f"commands/management: klei links channel id has been set to {id} "
+                        f"features/management: klei links channel id has been set to {id} "
                         + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                     )
                     await interaction_response.edit(
@@ -235,7 +254,7 @@ async def settings(
                     await interaction_response.edit(str(result))
             except:
                 _logger.exception(
-                    f"commands/management: Failed to set klei links channel id ({id}) "
+                    f"features/management: Failed to set klei links channel id ({id}) "
                     + f"in guild ({interaction.guild_id})"
                 )
                 await interaction_response.edit("Operation failed.")
@@ -246,7 +265,7 @@ async def settings(
                     result = data.free_games_role_id_set(interaction.guild_id, None)
                     if result == None:
                         _logger.info(
-                            "commands/management: Free game role id has been unset "
+                            "features/management: Free game role id has been unset "
                             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                         )
                         await interaction_response.edit(
@@ -260,7 +279,7 @@ async def settings(
                 result = data.free_games_role_id_set(interaction.guild_id, role_id)
                 if result == role_id:
                     _logger.info(
-                        f"commands/management: Free game role id has been set to {id} "
+                        f"features/management: Free game role id has been set to {id} "
                         + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                     )
                     await interaction_response.edit(
@@ -270,7 +289,7 @@ async def settings(
                     await interaction_response.edit(str(result))
             except:
                 _logger.exception(
-                    f"commands/management: Failed to set free game role id ({id}) "
+                    f"features/management: Failed to set free game role id ({id}) "
                     + f"in guild ({interaction.guild_id})"
                 )
                 await interaction_response.edit("Operation failed.")
@@ -281,7 +300,7 @@ async def settings(
                     result = data.dst_role_id_set(interaction.guild_id, None)
                     if result == None:
                         _logger.info(
-                            "commands/management: DST role id has been unset "
+                            "features/management: DST role id has been unset "
                             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                         )
                         await interaction_response.edit(
@@ -295,7 +314,7 @@ async def settings(
                 result = data.dst_role_id_set(interaction.guild_id, role_id)
                 if result == role_id:
                     _logger.info(
-                        f"commands/management: DST role id has been set to {id} "
+                        f"features/management: DST role id has been set to {id} "
                         + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                     )
                     await interaction_response.edit(
@@ -305,7 +324,7 @@ async def settings(
                     await interaction_response.edit(str(result))
             except:
                 _logger.exception(
-                    f"commands/management: Failed to set DST role id ({id}) "
+                    f"features/management: Failed to set DST role id ({id}) "
                     + f"in guild ({interaction.guild_id})"
                 )
                 await interaction_response.edit("Operation failed.")
@@ -318,7 +337,7 @@ async def settings(
                     )
                     if result == None:
                         _logger.info(
-                            "commands/management: Member count channel id has been unset "
+                            "features/management: Member count channel id has been unset "
                             + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                         )
                         await interaction_response.edit(
@@ -331,7 +350,7 @@ async def settings(
                 channel_id = int(id)
                 channel = client.get_channel(channel_id)
                 if interaction.guild_id != channel.guild.id:
-                    _logger.debug(f"commands/management: Channel id ({id}) is invalid.")
+                    _logger.debug(f"features/management: Channel id ({id}) is invalid.")
                     await interaction_response.edit(
                         "Invalid channel ID.",
                     )
@@ -341,7 +360,7 @@ async def settings(
                 )
                 if result == channel_id:
                     _logger.info(
-                        f"commands/management: Member count channel id has been set to {id} "
+                        f"features/management: Member count channel id has been set to {id} "
                         + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                     )
                     await interaction_response.edit(
@@ -355,7 +374,7 @@ async def settings(
                     await interaction_response.edit(str(result))
             except:
                 _logger.exception(
-                    f"commands/management: Failed to set member count channel id ({id}) "
+                    f"features/management: Failed to set member count channel id ({id}) "
                     + f"in guild ({interaction.guild_id})"
                 )
                 await interaction_response.edit("Operation failed.")
