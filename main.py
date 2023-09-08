@@ -3,7 +3,6 @@ import logging
 
 import events
 import features
-import commands
 
 from bot import client, TOKEN
 

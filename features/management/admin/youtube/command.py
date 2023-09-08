@@ -3,7 +3,7 @@ import features
 import logging
 import pytube
 from .feature import is_active
-from commands.helper import handle_command_exception
+from features._shared.helper import handle_command_exception
 from bot import client
 from nextcord import Interaction, Permissions, SlashOption
 

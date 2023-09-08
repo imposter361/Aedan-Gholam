@@ -5,7 +5,7 @@ from . import feature
 from .feature import is_active
 from bot import client
 from datetime import datetime
-from commands.helper import handle_command_exception
+from features._shared.helper import handle_command_exception
 from nextcord import Interaction, Permissions, File
 
 _logger = logging.getLogger("main")

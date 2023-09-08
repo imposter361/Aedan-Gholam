@@ -1,7 +1,7 @@
 import logging
 from .feature import is_active
 from bot import client
-from commands.helper import handle_command_exception
+from features._shared.helper import handle_command_exception
 from nextcord import Interaction, SlashOption
 from typing import Optional
 

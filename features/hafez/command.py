@@ -2,7 +2,7 @@ import asyncio
 import logging
 from .feature import is_active, get_hafez_poem_text
 from bot import client
-from commands.helper import handle_command_exception
+from features._shared.helper import handle_command_exception
 from nextcord import Interaction
 
 _logger = logging.getLogger("main")
