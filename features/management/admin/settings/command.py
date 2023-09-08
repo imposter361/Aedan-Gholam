@@ -32,7 +32,8 @@ async def customize(
     _logger.info(
         "features/management: Command 'customize' was called by "
         + f"'{interaction.user.name}' ({interaction.user.id}) "
-        + f"in '{interaction.guild.name}' ({interaction.guild_id}) args: customize:{customize} message:{message}"
+        + f"in '{interaction.guild.name}' ({interaction.guild_id}) "
+        + f"args: customize: '{customize}' message: '{message}'"
     )
     if not is_active():
         _logger.info(
@@ -46,44 +47,26 @@ async def customize(
     interaction_response = await interaction.send("Please wait...", ephemeral=True)
     if customize == "welcome message":
         try:
-            if message != None:
-                message = message.replace("\\n", "\n")
-                result = data.welcome_message_set(interaction.guild_id, message)
-                if result == None:
-                    _logger.info(
-                        "features/management: Welcome message has been unset "
-                        + f"in '{interaction.guild.name}' ({interaction.guild_id})"
-                    )
-                    await interaction_response.edit(
-                        "Welcome message has been unset.",
-                    )
-                else:
-                    await interaction_response.edit("Welcome message has been set.")
-                return
-
-            channel_id = int(id)
-            channel = client.get_channel(channel_id)
-            if interaction.guild_id != channel.guild.id:
-                _logger.debug(f"features/management: Channel id ({id}) is invalid.")
-                await interaction_response.edit(
-                    "Invalid channel ID.",
-                )
-                return
-
-            result = data.welcome_message_set(interaction.guild_id, channel_id)
-            if result == channel_id:
+            message = message.replace("\\n", "\n")
+            result = data.welcome_message_set(interaction.guild_id, message)
+            if result == None:
                 _logger.info(
-                    f"features/management: Welcome message has been set to {id} "
+                    "features/management: Welcome message has been unset "
                     + f"in '{interaction.guild.name}' ({interaction.guild_id})"
                 )
                 await interaction_response.edit(
-                    "Welcome channel has been set.",
+                    "Welcome message has been unset.",
                 )
             else:
-                await interaction_response.edit(str(result))
+                _logger.info(
+                    "features/management: Welcome message has been set "
+                    + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                )
+                await interaction_response.edit("Welcome message has been set.")
+            return
         except:
             _logger.exception(
-                f"features/management: Failed to set welcome message ({id}) "
+                f"features/management: Failed to set welcome message "
                 + f"in guild ({interaction.guild_id})"
             )
             await interaction_response.edit("Operation failed.")
