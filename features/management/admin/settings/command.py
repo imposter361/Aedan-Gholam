@@ -128,6 +128,16 @@ async def settings(
 
                 channel_id = int(id)
                 channel = client.get_channel(channel_id)
+                if not channel:
+                    _logger.debug(
+                        "features/management: Failed to get channel with id of: "
+                        + f"{channel_id} in guild: {interaction.guild_id}"
+                    )
+                    await interaction_response.edit(
+                        "Could not access this Discord channel.",
+                    )
+                    return
+
                 if interaction.guild_id != channel.guild.id:
                     _logger.debug(f"features/management: Channel id ({id}) is invalid.")
                     await interaction_response.edit(
@@ -171,6 +181,16 @@ async def settings(
 
                 channel_id = int(id)
                 channel = client.get_channel(channel_id)
+                if not channel:
+                    _logger.debug(
+                        "features/management: Failed to get channel with id of: "
+                        + f"{channel_id} in guild: {interaction.guild_id}"
+                    )
+                    await interaction_response.edit(
+                        "Could not access this Discord channel.",
+                    )
+                    return
+
                 if interaction.guild_id != channel.guild.id:
                     _logger.debug(f"features/management: Channel id ({id}) is invalid.")
                     await interaction_response.edit(
@@ -215,6 +235,16 @@ async def settings(
 
                 channel_id = int(id)
                 channel = client.get_channel(channel_id)
+                if not channel:
+                    _logger.debug(
+                        "features/management: Failed to get channel with id of: "
+                        + f"{channel_id} in guild: {interaction.guild_id}"
+                    )
+                    await interaction_response.edit(
+                        "Could not access this Discord channel.",
+                    )
+                    return
+
                 if interaction.guild_id != channel.guild.id:
                     _logger.debug(f"features/management: Channel id ({id}) is invalid.")
                     await interaction_response.edit(
@@ -331,6 +361,16 @@ async def settings(
 
                 channel_id = int(id)
                 channel = client.get_channel(channel_id)
+                if not channel:
+                    _logger.debug(
+                        "features/management: Failed to get channel with id of: "
+                        + f"{channel_id} in guild: {interaction.guild_id}"
+                    )
+                    await interaction_response.edit(
+                        "Could not access this Discord channel.",
+                    )
+                    return
+
                 if interaction.guild_id != channel.guild.id:
                     _logger.debug(f"features/management: Channel id ({id}) is invalid.")
                     await interaction_response.edit(

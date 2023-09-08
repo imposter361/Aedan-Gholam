@@ -58,6 +58,16 @@ async def youtube_notification_set(
 
         channel_id = int(channel_id)
         channel = client.get_channel(channel_id)
+        if not channel:
+            _logger.debug(
+                "features/management: Failed to get channel with id of: "
+                + f"{channel_id} in guild: {interaction.guild_id}"
+            )
+            await interaction_response.edit(
+                "Could not access this Discord channel.",
+            )
+            return
+
         if interaction.guild_id != channel.guild.id:
             _logger.debug(
                 "features/management: Invalid discord channel "

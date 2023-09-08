@@ -18,7 +18,9 @@ def is_active():
 def activate():
     global _active
     _active = True
-    _logger.debug("features: Feature has been activated: 'management/admin/config_report'")
+    _logger.debug(
+        "features: Feature has been activated: 'management/admin/config_report'"
+    )
 
 
 def generate_refined_config_text(input, guild_id):
@@ -108,9 +110,12 @@ def generate_refined_config_text(input, guild_id):
         for key in input["yt_notif_rules"].keys():
             rule_number = rule_number + 1
             youtube_channel_name = input["yt_notif_rules"][key]["name"]
-            discord_channel_name = client.get_channel(
+            discord_channel_name = None
+            discord_channel = client.get_channel(
                 input["yt_notif_rules"][key]["discord_channel_id"]
-            ).name
+            )
+            if discord_channel:
+                discord_channel_name = discord_channel.name
 
             result = (
                 result

@@ -115,6 +115,13 @@ def _get_free_games_links():
 async def _send_free_games_for_guild(guild_id, channel_id, free_games):
     try:
         channel = client.get_channel(channel_id)
+        if not channel:
+            _logger.debug(
+                "features/epic_games: Failed to get channel with id of: "
+                + f"{channel_id} in guild: {guild_id}"
+            )
+            return
+
         sent_games = data.epic_games_names_get(guild_id)
 
         for game in free_games:

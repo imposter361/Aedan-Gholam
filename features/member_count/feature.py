@@ -51,6 +51,13 @@ async def _update_member_count_for_guild(target_guild_id: int):
 
     try:
         member_count_channel = client.get_channel(member_count_channel_id)
+        if not member_count_channel:
+            _logger.debug(
+                "features/member_count: Failed to get channel with id of: "
+                + f"{member_count_channel_id} in guild: {target_guild_id}"
+            )
+            return
+        
         guild = member_count_channel.guild
         updated_name = "Total members: " + str(guild.member_count)
         if member_count_channel.name != updated_name:

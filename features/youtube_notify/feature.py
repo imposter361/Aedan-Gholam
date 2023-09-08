@@ -49,6 +49,13 @@ async def check_for_new_youtube_video():
                     discord_channel = client.get_channel(
                         rules[yt_channel_id]["discord_channel_id"]
                     )
+                    if not discord_channel:
+                        _logger.debug(
+                            "features/youtube_notify: Failed to get channel with id of: "
+                            + f"{rules[yt_channel_id]['discord_channel_id']} in guild: {guild_id}"
+                        )
+                        return
+
                     message = f"A new video from **{last_video['channel_name']}**:point_down_tone1:"
                     if rules[yt_channel_id].get("custom_text_message"):
                         message = rules[yt_channel_id]["custom_text_message"]

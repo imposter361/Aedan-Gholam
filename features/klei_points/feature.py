@@ -111,6 +111,13 @@ def _get_klei_points():
 async def _send_klei_points_for_guild(guild_id, channel_id, klei_points):
     try:
         channel = client.get_channel(channel_id)
+        if not channel:
+            _logger.debug(
+                "features/klei_points: Failed to get channel with id of: "
+                + f"{channel_id} in guild: {guild_id}"
+            )
+            return
+
         sent_links = data.klei_links_get(guild_id)
         valid_sent_links = []
 

@@ -44,6 +44,13 @@ async def send_welcome_banner(member: nextcord.Member):
         )
 
         channel = client.get_channel(welcome_channel_id)
+        if not channel:
+            _logger.debug(
+                "features/welcome_banner: Failed to get channel with id of: "
+                + f"{welcome_channel_id} in guild: {guild.id}"
+            )
+            return
+        
         is_home = False
         if guild.id in HOME_GUILDS:  # Aedan Gaming server id
             is_home = True
