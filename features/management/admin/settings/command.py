@@ -26,11 +26,9 @@ async def customize(
     ),
     message: str = SlashOption(
         required=True,
-        description="Available variables: {username} and {servername}, **Bold**",
+        description="Available variables: {username} and {servername}. Markdown supported. \\n for new-line",
     ),
 ):
-    print(message)
-    # try:
     _logger.info(
         "features/management: Command 'customize' was called by "
         + f"'{interaction.user.name}' ({interaction.user.id}) "
@@ -49,6 +47,7 @@ async def customize(
     if customize == "welcome message":
         try:
             if message != None:
+                message = message.replace("\\n", "\n")
                 result = data.welcome_message_set(interaction.guild_id, message)
                 if result == None:
                     _logger.info(
