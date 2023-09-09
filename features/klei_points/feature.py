@@ -1,8 +1,8 @@
-import aiohttp
 import data
 import logging
 from bot import client
 from bs4 import BeautifulSoup
+from features._shared.helper import aiohttp_get
 
 _logger = logging.getLogger("main")
 
@@ -73,15 +73,9 @@ async def _get_klei_points():
     url = "https://steamcommunity.com/sharedfiles/filedetails/?id=2308653652&tscn=1639750749"
 
     try:
-        raw_response = None
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                if response.status != 200:
-                    raise Exception(f"Web request status is {response.status}.")
-                raw_response = await response.content.read()
-
+        response = await aiohttp_get(url)
         # parse the HTML content using BeautifulSoup
-        soup = BeautifulSoup(raw_response, "html.parser")
+        soup = BeautifulSoup(response, "html.parser")
         row_selector = "div.bb_table_tr"
         row_elements = soup.select(row_selector)
 

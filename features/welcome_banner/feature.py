@@ -1,9 +1,9 @@
-import aiohttp
 import data
 import logging
 import nextcord
 from bot import client, HOME_GUILDS
 from PIL import Image, ImageDraw, ImageFont
+from features._shared.helper import aiohttp_get
 
 _logger = logging.getLogger("main")
 
@@ -74,15 +74,9 @@ async def send_welcome_banner(member: nextcord.Member):
 
 async def _create_welcome_banner(member, is_home):
     if member.avatar:
-        raw_response = None
-        async with aiohttp.ClientSession() as session:
-            async with session.get(member.avatar.url) as response:
-                if response.status != 200:
-                    raise Exception(f"Web request status is {response.status}.")
-                raw_response = await response.content.read()
-
+        response = await aiohttp_get(member.avatar.url)
         with open("resources/p.png", "wb") as file:
-            file.write(raw_response)
+            file.write(response)
         profile_pic_path = "resources/p.png"
     else:
         profile_pic_path = "resources/NoPic.png"

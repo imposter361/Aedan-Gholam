@@ -1,7 +1,7 @@
-import aiohttp
 import json
 import logging
 import re
+from features._shared.helper import aiohttp_get
 
 _logger = logging.getLogger("main")
 
@@ -24,15 +24,9 @@ def activate():
 async def get_hekmat_text(number: int):
     result = None
     try:
-        raw_response = None
-        async with aiohttp.ClientSession() as session:
-            url = f"https://alimaktab.ir/json/wisdom/?n={number}"
-            async with session.get(url) as response:
-                if response.status != 200:
-                    return None
-                raw_response = await response.content.read()
-
-        response_json = json.loads(str(raw_response, encoding="utf-8"))
+        url = f"https://alimaktab.ir/json/wisdom/?n={number}"
+        response = await aiohttp_get(url)
+        response_json = json.loads(str(response, encoding="utf-8"))
 
         arabic = response_json["main"]
         farsi = response_json["ansarian"]

@@ -1,9 +1,9 @@
-import aiohttp
 import data
 import json
 import logging
 from bot import client
 from datetime import datetime
+from features._shared.helper import aiohttp_get
 
 _logger = logging.getLogger("main")
 
@@ -66,21 +66,15 @@ async def _get_free_games_links():
     _logger.debug("features/epic_games: Getting Epic Games' free games list...")
     free_games = []
     try:
-        raw_response = None
-        async with aiohttp.ClientSession() as session:
-            url = (
-                f"https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=US&allowCountries=US&"
-                f"spaceId=1af6c7f8a3624b1788eaf23175fdd16f&"
-                f"redirectUrl=https%3A%2F%2Fwww.epicgames.com%2Fstore%2Fen-US%2F&"
-                f"key=da1563f4abe7480fb43364b7d30d9a7b&"
-                f"promoId=freegames"
-            )
-            async with session.get(url) as response:
-                if response.status != 200:
-                    raise Exception(f"Web request status is {response.status}.")
-                raw_response = await response.content.read()
-
-        response_json = json.loads(raw_response)
+        url = (
+            f"https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=US&allowCountries=US&"
+            f"spaceId=1af6c7f8a3624b1788eaf23175fdd16f&"
+            f"redirectUrl=https%3A%2F%2Fwww.epicgames.com%2Fstore%2Fen-US%2F&"
+            f"key=da1563f4abe7480fb43364b7d30d9a7b&"
+            f"promoId=freegames"
+        )
+        response = await aiohttp_get(url)
+        response_json = json.loads(response)
 
         # Find all the games that are currently free
         for game in response_json["data"]["Catalog"]["searchStore"]["elements"]:

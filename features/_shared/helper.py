@@ -1,3 +1,4 @@
+import aiohttp
 import logging
 from nextcord import Interaction, PartialInteractionMessage
 
@@ -19,3 +20,14 @@ async def handle_command_exception(
         _logger.exception(
             "commands/helper: Exception occurred while sending an error message to the user."
         )
+
+
+async def aiohttp_get(url: str):
+    raw_response = None
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status != 200:
+                raise Exception(f"Get response status was {response.status}")
+            raw_response = await response.content.read()
+
+    return raw_response
