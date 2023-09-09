@@ -209,6 +209,10 @@ async def settings(
                     await interaction_response.edit(
                         "epic games channel has been set.",
                     )
+                    # Check epic games for this guild for the first time
+                    await features.epic_games.check_free_games_for_guild(
+                        interaction.guild_id
+                    )
                 else:
                     await interaction_response.edit(str(result))
             except:

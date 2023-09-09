@@ -24,7 +24,7 @@ def activate():
 
 
 # Check for free games on epic games then send them in the chat.
-async def check_free_games():
+async def check_free_games_for_all_guilds():
     if not _active:
         return False
 
@@ -43,6 +43,22 @@ async def check_free_games():
             free_games = _get_free_games_links()
 
         await _send_free_games_for_guild(guild_id, channel_id, free_games)
+
+
+async def check_free_games_for_guild(guild_id: int):
+    if not _active:
+        return
+
+    subscriptions = data.get_subscriptions()
+    if not subscriptions.get(guild_id):
+        return
+
+    channel_id = data.epic_games_channel_id_get(guild_id)
+    if not channel_id:
+        return
+
+    free_games = _get_free_games_links()
+    await _send_free_games_for_guild(guild_id, channel_id, free_games)
 
 
 def _get_free_games_links():
