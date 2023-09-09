@@ -1,6 +1,6 @@
+import aiohttp
 import data
 import logging
-import requests
 from bot import client
 from bs4 import BeautifulSoup
 
@@ -40,7 +40,7 @@ async def check_klei_points_for_all_guilds():
             continue
 
         if not klei_points:
-            klei_points = _get_klei_points()
+            klei_points = await _get_klei_points()
             if len(klei_points) == 0:
                 _logger.warning(
                     "features/klei_points: No valid klei points link was found."
@@ -62,20 +62,26 @@ async def check_klei_points_for_guild(guild_id: int):
     if not channel_id:
         return
 
-    klei_points = _get_klei_points()
+    klei_points = await _get_klei_points()
     await _send_klei_points_for_guild(guild_id, channel_id, klei_points)
 
 
-def _get_klei_points():
+async def _get_klei_points():
     _logger.debug("features/klei_points: Getting free Klei points list...")
     klei_points = []
     # get links just for the first time
     url = "https://steamcommunity.com/sharedfiles/filedetails/?id=2308653652&tscn=1639750749"
 
     try:
-        response = requests.get(url)
+        raw_response = None
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status != 200:
+                    raise Exception(f"Web request status is {response.status}.")
+                raw_response = await response.content.read()
+
         # parse the HTML content using BeautifulSoup
-        soup = BeautifulSoup(response.content, "html.parser")
+        soup = BeautifulSoup(raw_response, "html.parser")
         row_selector = "div.bb_table_tr"
         row_elements = soup.select(row_selector)
 
