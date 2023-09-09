@@ -24,7 +24,7 @@ def activate():
 
 
 # Check for free klei points then send them in the chat.
-async def check_klei_points():
+async def check_klei_points_for_all_guilds():
     if not _active:
         return False
 
@@ -48,6 +48,22 @@ async def check_klei_points():
                 break
 
         await _send_klei_points_for_guild(guild_id, channel_id, klei_points)
+
+
+async def check_klei_points_for_guild(guild_id: int):
+    if not _active:
+        return
+
+    subscriptions = data.get_subscriptions()
+    if not subscriptions.get(guild_id):
+        return
+
+    channel_id = data.klei_links_channel_id_get(guild_id)
+    if not channel_id:
+        return
+
+    klei_points = _get_klei_points()
+    await _send_klei_points_for_guild(guild_id, channel_id, klei_points)
 
 
 def _get_klei_points():

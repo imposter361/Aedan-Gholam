@@ -267,6 +267,10 @@ async def settings(
                     await interaction_response.edit(
                         "klei links channel has been set.",
                     )
+                    # Check klei links for this guild for the first time
+                    await features.klei_points.check_klei_points_for_guild(
+                        interaction.guild_id
+                    )
                 else:
                     await interaction_response.edit(str(result))
             except:
