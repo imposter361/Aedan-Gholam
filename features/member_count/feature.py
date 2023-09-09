@@ -21,7 +21,7 @@ def activate():
     from . import task
 
 
-async def update_all_member_counts():
+async def update_member_count_for_all_guilds():
     if not _active:
         return False
 
@@ -33,15 +33,15 @@ async def update_all_member_counts():
         await _update_member_count_for_guild(guild_id)
 
 
-async def update_member_count_for_guild(target_guild_id: int):
+async def update_member_count_for_guild(guild_id: int):
     if not _active:
         return False
 
     subscriptions = data.get_subscriptions()
-    if not subscriptions.get(target_guild_id):
+    if not subscriptions.get(guild_id):
         return
 
-    await _update_member_count_for_guild(target_guild_id)
+    await _update_member_count_for_guild(guild_id)
 
 
 async def _update_member_count_for_guild(target_guild_id: int):

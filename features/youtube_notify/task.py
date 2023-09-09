@@ -1,5 +1,5 @@
 import logging
-from . import is_active, check_for_new_youtube_video
+from . import is_active, check_new_youtube_videos_for_all_guilds
 from nextcord.ext import tasks
 
 _logger = logging.getLogger("main")
@@ -11,4 +11,4 @@ async def youtube_notify_task():
         return
 
     _logger.debug("features/youtube_notify: Running Youtube notify task...")
-    await check_for_new_youtube_video()
+    await check_new_youtube_videos_for_all_guilds()

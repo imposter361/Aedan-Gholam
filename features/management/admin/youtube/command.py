@@ -108,6 +108,11 @@ async def youtube_notification_set(
             await interaction_response.edit(
                 f"Done. **{video.author}** new videos will be posted on **{channel.name}**.",
             )
+            if send_latest_video:
+                # Check videos of this Youtube channel for the first time
+                await features.youtube_notify.check_new_youtube_videos_for_guild(
+                    interaction.guild_id, video.channel_id
+                )
         else:
             await interaction_response.edit(str(result))
     except:
