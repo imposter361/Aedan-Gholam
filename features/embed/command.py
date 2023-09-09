@@ -35,7 +35,7 @@ async def embed(
                 "features/embed: This feature is not active. Command dismissed."
             )
             await interaction.send(
-                f"Sorry! This feature is unavailable at the moment...", ephemeral=True
+                "Sorry! This feature is unavailable at the moment...", ephemeral=True
             )
             return
 

@@ -21,7 +21,7 @@ async def hafez(interaction: Interaction):
                 "features/hafez: This feature is not active. Command dismissed."
             )
             await interaction.send(
-                f"Sorry! This feature is unavailable at the moment...", ephemeral=True
+                "Sorry! This feature is unavailable at the moment...", ephemeral=True
             )
             return
 

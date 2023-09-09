@@ -27,7 +27,7 @@ async def add_server(interaction: Interaction, id: str = SlashOption(required=Tr
                 "features/management: This feature is not active. Command dismissed."
             )
             await interaction.send(
-                f"Sorry! This feature is unavailable at the moment...", ephemeral=True
+                "Sorry! This feature is unavailable at the moment...", ephemeral=True
             )
             return
 
@@ -89,7 +89,7 @@ async def edit_server(
                 "features/management: This feature is not active. Command dismissed."
             )
             await interaction.send(
-                f"Sorry! This feature is unavailable at the moment...", ephemeral=True
+                "Sorry! This feature is unavailable at the moment...", ephemeral=True
             )
             return
 
@@ -148,7 +148,7 @@ async def remove_server(interaction: Interaction, id: str = SlashOption(required
                 "features/management: This feature is not active. Command dismissed."
             )
             await interaction.send(
-                f"Sorry! This feature is unavailable at the moment...", ephemeral=True
+                "Sorry! This feature is unavailable at the moment...", ephemeral=True
             )
             return
 

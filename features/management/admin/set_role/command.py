@@ -63,7 +63,7 @@ async def set_role_emoji(
                 "features/management: This feature is not active. Command dismissed."
             )
             await interaction.send(
-                f"Sorry! This feature is unavailable at the moment...", ephemeral=True
+                "Sorry! This feature is unavailable at the moment...", ephemeral=True
             )
             return
 
@@ -207,7 +207,18 @@ async def remove_role_message(
                 "features/management: This feature is not active. Command dismissed."
             )
             await interaction.send(
-                f"Sorry! This feature is unavailable at the moment...", ephemeral=True
+                "Sorry! This feature is unavailable at the moment...", ephemeral=True
+            )
+            return
+
+        if not data.get_subscriptions().get(interaction.guild_id):
+            _logger.debug(
+                f"features/management: Guild ({interaction.guild_id}) "
+                + "is not active. Command dismissed."
+            )
+            await interaction.send(
+                "The server's subscription is not active. Please contact bot admin.",
+                ephemeral=True,
             )
             return
 
