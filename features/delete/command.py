@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from .feature import is_active
 from bot import client
@@ -31,18 +32,20 @@ async def delete(
             )
             return
 
-        interaction_response = await interaction.send("Please wait...", ephemeral=True)
         if number <= 0:
-            await interaction_response.edit(f"{number} is not allowed")
+            await interaction.send(f"{number} is not allowed", ephemeral=True)
             return
 
-        await interaction.channel.purge(limit=number)
+        task1 = interaction.send("Please wait...", ephemeral=True)
+        task2 = interaction.channel.purge(limit=number)
+        interaction_response, deleted_messages = await asyncio.gather(task1, task2)
 
         report = ""
-        if number == 1:
-            report = f"{number} message has been deleted."
+        deleted_count = len(deleted_messages)
+        if deleted_count == 1:
+            report = f"{deleted_count} message has been deleted."
         else:
-            report = f"{number} messages have been deleted."
+            report = f"{deleted_count} messages have been deleted."
 
         _logger.info(
             f"features/delete: {report} Guild: '{interaction.guild.name}' ({interaction.guild_id})"
