@@ -3,8 +3,8 @@ import logging
 from bot import client
 from youtubesearchpython import Playlist, playlist_from_channel_id
 
-
 _logger = logging.getLogger("main")
+
 
 if "_acive" not in dir():  # Run once
     global _active
@@ -20,6 +20,9 @@ def activate():
     _active = True
     _logger.debug("features: Feature has been activated: 'youtube_notify'")
     from . import task
+
+
+_MAX_RECENT_VIDEOS = 5
 
 
 async def check_new_youtube_videos_for_all_guilds():
@@ -40,15 +43,20 @@ async def check_new_youtube_videos_for_all_guilds():
         for yt_channel_id in rules:
             try:
                 if yt_channel_id not in channels_last_videos:
-                    last_video = get_last_video_of_youtube_channel(yt_channel_id)
-                    channels_last_videos[yt_channel_id] = last_video
+                    videos = _get_recent_videos_of_youtube_channel(
+                        yt_channel_id, _MAX_RECENT_VIDEOS
+                    )
+                    channels_last_videos[yt_channel_id] = videos
 
-                last_video = channels_last_videos[yt_channel_id]
-                if rules[yt_channel_id]["last_video_id"] != last_video["id"]:
+                recent_videos = channels_last_videos[yt_channel_id]
+                new_unsent_videos = _get_unsent_videos(
+                    recent_videos, rules[yt_channel_id]["last_video_id"]
+                )
+                for video in new_unsent_videos:
                     await _send_youtube_notification_for_guild(
                         guild_id,
                         rules[yt_channel_id]["discord_channel_id"],
-                        last_video,
+                        video,
                         rules[yt_channel_id].get("custom_text_message"),
                     )
             except:
@@ -78,19 +86,42 @@ async def check_new_youtube_videos_for_guild(guild_id: int, yt_channel_id: str):
         return
 
     try:
-        last_video = get_last_video_of_youtube_channel(yt_channel_id)
-        if rule["last_video_id"] != last_video["id"]:
+        recent_videos = _get_recent_videos_of_youtube_channel(
+            yt_channel_id, _MAX_RECENT_VIDEOS
+        )
+        new_unsent_videos = _get_unsent_videos(
+            recent_videos, rule["last_video_id"]
+        )
+        for video in new_unsent_videos:
             await _send_youtube_notification_for_guild(
                 guild_id,
-                rules[yt_channel_id]["discord_channel_id"],
-                last_video,
-                rules[yt_channel_id].get("custom_text_message"),
+                rule["discord_channel_id"],
+                video,
+                rule.get("custom_text_message"),
             )
     except:
         _logger.exception(
             "features/youtube_notify: Failed to check for new videos of "
             + f"Youtube channel: {yt_channel_id} in guild ({guild_id})"
         )
+
+
+def _get_unsent_videos(recent_videos, last_sent_video_id: str):
+    unsent_videos = []
+
+    if len(recent_videos) == 0:
+        return unsent_videos
+
+    if last_sent_video_id == None:
+        unsent_videos.append(recent_videos[0])
+        return unsent_videos
+
+    for video in recent_videos:  # Assuming recent_videos are sorted by date (desc)
+        if video["id"] == last_sent_video_id:
+            break
+        unsent_videos.insert(0, video)  # Sort unsent_video by date (asc)
+
+    return unsent_videos
 
 
 async def _send_youtube_notification_for_guild(
@@ -107,8 +138,7 @@ async def _send_youtube_notification_for_guild(
     message = f"A new video from **{video['channel_name']}**:point_down_tone1:"
     if custom_message:
         message = custom_message
-    if "\\n" in message:
-        message = message.replace("\\n", "\n")
+    message = message.replace("\\n", "\n")
     message = message + f"\nhttps://www.youtube.com/watch?v={video['id']}"
     await discord_channel.send(message)
     _logger.debug(
@@ -126,14 +156,25 @@ async def _send_youtube_notification_for_guild(
 
 
 def get_last_video_of_youtube_channel(yt_channel_id):
+    videos = _get_recent_videos_of_youtube_channel(yt_channel_id, max_videos=1)
+    if videos is None or len(videos) == 0:
+        return None
+    return videos[0]
+
+
+def _get_recent_videos_of_youtube_channel(yt_channel_id: str, max_videos: int):
     _logger.debug(
-        "features/youtube_notify: Getting the most recent Youtube video "
+        "features/youtube_notify: Getting recent Youtube videos "
         + f"with channel id of '{yt_channel_id}'"
     )
+    videos = []
     playlist = Playlist(playlist_from_channel_id(yt_channel_id))
-    video = playlist.videos[0]
-    return {
-        "id": video["id"],
-        "channel_name": video["channel"]["name"],
-        "channel_id": yt_channel_id,
-    }
+    for i in range(min(max_videos, len(playlist.videos))):
+        videos.append(
+            {
+                "id": playlist.videos[i]["id"],
+                "channel_name": playlist.videos[i]["channel"]["name"],
+                "channel_id": yt_channel_id,
+            },
+        )
+    return videos
