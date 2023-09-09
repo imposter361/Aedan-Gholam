@@ -1,6 +1,7 @@
+import aiohttp
 import data
+import json
 import logging
-import requests
 from bot import client
 from datetime import datetime
 
@@ -40,7 +41,7 @@ async def check_free_games_for_all_guilds():
             continue
 
         if not free_games:
-            free_games = _get_free_games_links()
+            free_games = await _get_free_games_links()
 
         await _send_free_games_for_guild(guild_id, channel_id, free_games)
 
@@ -57,23 +58,29 @@ async def check_free_games_for_guild(guild_id: int):
     if not channel_id:
         return
 
-    free_games = _get_free_games_links()
+    free_games = await _get_free_games_links()
     await _send_free_games_for_guild(guild_id, channel_id, free_games)
 
 
-def _get_free_games_links():
+async def _get_free_games_links():
     _logger.debug("features/epic_games: Getting Epic Games' free games list...")
     free_games = []
     try:
-        # Make a request to the Epic Games
-        response = requests.get(
-            f"https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=US&allowCountries=US&"
-            f"spaceId=1af6c7f8a3624b1788eaf23175fdd16f&"
-            f"redirectUrl=https%3A%2F%2Fwww.epicgames.com%2Fstore%2Fen-US%2F&"
-            f"key=da1563f4abe7480fb43364b7d30d9a7b&"
-            f"promoId=freegames"
-        )
-        response_json = response.json()
+        raw_response = None
+        async with aiohttp.ClientSession() as session:
+            url = (
+                f"https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=US&allowCountries=US&"
+                f"spaceId=1af6c7f8a3624b1788eaf23175fdd16f&"
+                f"redirectUrl=https%3A%2F%2Fwww.epicgames.com%2Fstore%2Fen-US%2F&"
+                f"key=da1563f4abe7480fb43364b7d30d9a7b&"
+                f"promoId=freegames"
+            )
+            async with session.get(url) as response:
+                if response.status != 200:
+                    raise Exception(f"Web request status is {response.status}.")
+                raw_response = await response.content.read()
+
+        response_json = json.loads(raw_response)
 
         # Find all the games that are currently free
         for game in response_json["data"]["Catalog"]["searchStore"]["elements"]:
