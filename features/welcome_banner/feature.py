@@ -1,7 +1,7 @@
+import aiohttp
 import data
 import logging
 import nextcord
-import requests
 from bot import client, HOME_GUILDS
 from PIL import Image, ImageDraw, ImageFont
 
@@ -50,14 +50,14 @@ async def send_welcome_banner(member: nextcord.Member):
                 + f"{welcome_channel_id} in guild: {guild.id}"
             )
             return
-        
+
         is_home = False
         if guild.id in HOME_GUILDS:  # Aedan Gaming server id
             is_home = True
-        file = _create_welcome_banner(member, is_home)
+        file = await _create_welcome_banner(member, is_home)
         message: str = f"Salam {member.mention} be **{guild}** khosh oomadi!\n"
         custom_message = data.welcome_message_get(guild.id)
-        
+
         if custom_message:
             message = custom_message
             message = message.replace("{username}", member.mention)
@@ -72,19 +72,20 @@ async def send_welcome_banner(member: nextcord.Member):
         _logger.exception(f"features/welcome_banner: Failed to send welcome banner")
 
 
-def _create_welcome_banner(member, is_home):
-    get_author_profile_pic = member.avatar
-    if get_author_profile_pic:
-        try:
-            response = requests.get(get_author_profile_pic)
-            with open("resources/p.png", "wb") as file:
-                file.write(response.content)
-            author_profile_pic = "resources/p.png"
-        except Exception as e:
-            print(e + " Request to get new member's profile picture failed")
+async def _create_welcome_banner(member, is_home):
+    if member.avatar:
+        raw_response = None
+        async with aiohttp.ClientSession() as session:
+            async with session.get(member.avatar.url) as response:
+                if response.status != 200:
+                    raise Exception(f"Web request status is {response.status}.")
+                raw_response = await response.content.read()
+
+        with open("resources/p.png", "wb") as file:
+            file.write(raw_response)
+        profile_pic_path = "resources/p.png"
     else:
-        get_author_profile_pic = Image.open("resources/NoPic.png").convert("RGBA")
-        author_profile_pic = "resources/NoPic.png"
+        profile_pic_path = "resources/NoPic.png"
 
     # get username and guild member count
     guild = member.guild
@@ -110,7 +111,7 @@ def _create_welcome_banner(member, is_home):
 
     # Open the original image
     size = (150, 150)  # profile pic size
-    img = Image.open(author_profile_pic).resize(size)
+    img = Image.open(profile_pic_path).resize(size)
     size2 = (158, 158)  # white circle
 
     # Create a new image with a circular mask
