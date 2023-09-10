@@ -1,8 +1,8 @@
 import data
 import logging
-import requests
 from bot import client
 from bs4 import BeautifulSoup
+from features._shared.helper import aiohttp_get
 
 _logger = logging.getLogger("main")
 
@@ -24,7 +24,7 @@ def activate():
 
 
 # Check for free klei points then send them in the chat.
-async def check_klei_points():
+async def check_klei_points_for_all_guilds():
     if not _active:
         return False
 
@@ -40,7 +40,7 @@ async def check_klei_points():
             continue
 
         if not klei_points:
-            klei_points = _get_klei_points()
+            klei_points = await _get_klei_points()
             if len(klei_points) == 0:
                 _logger.warning(
                     "features/klei_points: No valid klei points link was found."
@@ -50,16 +50,32 @@ async def check_klei_points():
         await _send_klei_points_for_guild(guild_id, channel_id, klei_points)
 
 
-def _get_klei_points():
+async def check_klei_points_for_guild(guild_id: int):
+    if not _active:
+        return
+
+    subscriptions = data.get_subscriptions()
+    if not subscriptions.get(guild_id):
+        return
+
+    channel_id = data.klei_links_channel_id_get(guild_id)
+    if not channel_id:
+        return
+
+    klei_points = await _get_klei_points()
+    await _send_klei_points_for_guild(guild_id, channel_id, klei_points)
+
+
+async def _get_klei_points():
     _logger.debug("features/klei_points: Getting free Klei points list...")
     klei_points = []
     # get links just for the first time
     url = "https://steamcommunity.com/sharedfiles/filedetails/?id=2308653652&tscn=1639750749"
 
     try:
-        response = requests.get(url)
+        response = await aiohttp_get(url)
         # parse the HTML content using BeautifulSoup
-        soup = BeautifulSoup(response.content, "html.parser")
+        soup = BeautifulSoup(response, "html.parser")
         row_selector = "div.bb_table_tr"
         row_elements = soup.select(row_selector)
 
@@ -111,6 +127,13 @@ def _get_klei_points():
 async def _send_klei_points_for_guild(guild_id, channel_id, klei_points):
     try:
         channel = client.get_channel(channel_id)
+        if not channel:
+            _logger.debug(
+                "features/klei_points: Failed to get channel with id of: "
+                + f"{channel_id} in guild: {guild_id}"
+            )
+            return
+
         sent_links = data.klei_links_get(guild_id)
         valid_sent_links = []
 

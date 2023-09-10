@@ -1,5 +1,11 @@
+from . import about
+from . import delete
+from . import embed
 from . import epic_games
 from . import gholametam
+from . import hafez
+from . import hekmat
+from . import help
 from . import klei_points
 from . import management
 from . import member_count
@@ -11,8 +17,14 @@ from . import youtube_notify
 
 # Enabled features:
 
+about.activate()
+delete.activate()
+embed.activate()
 epic_games.activate()
 gholametam.activate()
+hafez.activate()
+hekmat.activate()
+help.activate()
 klei_points.activate()
 management.activate()
 member_count.activate()

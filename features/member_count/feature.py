@@ -21,7 +21,7 @@ def activate():
     from . import task
 
 
-async def update_all_member_counts():
+async def update_member_count_for_all_guilds():
     if not _active:
         return False
 
@@ -33,15 +33,15 @@ async def update_all_member_counts():
         await _update_member_count_for_guild(guild_id)
 
 
-async def update_member_count_for_guild(target_guild_id: int):
+async def update_member_count_for_guild(guild_id: int):
     if not _active:
         return False
 
     subscriptions = data.get_subscriptions()
-    if not subscriptions.get(target_guild_id):
+    if not subscriptions.get(guild_id):
         return
 
-    await _update_member_count_for_guild(target_guild_id)
+    await _update_member_count_for_guild(guild_id)
 
 
 async def _update_member_count_for_guild(target_guild_id: int):
@@ -51,6 +51,13 @@ async def _update_member_count_for_guild(target_guild_id: int):
 
     try:
         member_count_channel = client.get_channel(member_count_channel_id)
+        if not member_count_channel:
+            _logger.debug(
+                "features/member_count: Failed to get channel with id of: "
+                + f"{member_count_channel_id} in guild: {target_guild_id}"
+            )
+            return
+        
         guild = member_count_channel.guild
         updated_name = "Total members: " + str(guild.member_count)
         if member_count_channel.name != updated_name:

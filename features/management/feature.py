@@ -1,6 +1,6 @@
-import data
 import logging
-from bot import client
+from . import admin
+from . import owner
 
 _logger = logging.getLogger("main")
 
@@ -18,3 +18,5 @@ def activate():
     global _active
     _active = True
     _logger.debug("features: Feature has been activated: 'management'")
+    admin.activate()
+    owner.activate()

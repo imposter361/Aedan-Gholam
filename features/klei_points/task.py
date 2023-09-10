@@ -1,5 +1,5 @@
 import logging
-from . import is_active, check_klei_points
+from . import is_active, check_klei_points_for_all_guilds
 from nextcord.ext import tasks
 
 _logger = logging.getLogger("main")
@@ -11,4 +11,4 @@ async def klei_points_task():
         return
 
     _logger.debug("features/klei_points: Running free Klei points task...")
-    await check_klei_points()
+    await check_klei_points_for_all_guilds()

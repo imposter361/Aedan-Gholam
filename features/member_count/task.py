@@ -1,5 +1,5 @@
 import logging
-from . import is_active, update_all_member_counts
+from . import is_active, update_member_count_for_all_guilds
 from nextcord.ext import tasks
 
 _logger = logging.getLogger("main")
@@ -11,4 +11,4 @@ async def member_count_task():
         return
 
     _logger.debug("features/member_count: Running member count updater task...")
-    await update_all_member_counts()
+    await update_member_count_for_all_guilds()

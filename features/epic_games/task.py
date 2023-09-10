@@ -1,5 +1,5 @@
 import logging
-from . import is_active, check_free_games
+from . import is_active, check_free_games_for_all_guilds
 from nextcord.ext import tasks
 
 _logger = logging.getLogger("main")
@@ -11,4 +11,4 @@ async def epic_games_task():
         return
 
     _logger.debug("features/epic_games: Running free Epic Games task...")
-    await check_free_games()
+    await check_free_games_for_all_guilds()

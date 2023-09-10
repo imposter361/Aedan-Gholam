@@ -568,7 +568,7 @@ def yt_notif_rule_add(
     yt_channel_id,
     yt_channel_name,
     discord_channel_id,
-    last_video_id,
+    last_video_id=None,
     custom_message=None,
 ):
     if not is_ready():

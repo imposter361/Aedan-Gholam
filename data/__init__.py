@@ -1,2 +1,6 @@
 from .data_interface import *
-from . import task
+
+if "_acive" not in dir():  # Run once
+    global _active
+    _active = True
+    from . import task
