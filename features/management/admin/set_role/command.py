@@ -44,11 +44,13 @@ async def set_role_emoji(
     message_link: str = SlashOption(name="message_link", required=True),
     emoji_name: str = SlashOption(
         name="emoji_name",
-        description="CaSe sEnSiTiVe!",
+        description='e.g.":emoji_name:"',
         required=True,
     ),
     role_name: str = SlashOption(
-        name="role_name", description="CaSe sEnSiTiVe!", required=False
+        name="role_name",
+        description='e.g."@role_name"',
+        required=False,
     ),
 ):
     try:
