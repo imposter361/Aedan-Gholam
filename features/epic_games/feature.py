@@ -110,7 +110,11 @@ async def _get_free_games_links():
 
                 end_date_str = end_date.strftime("%b %d, %Y")
                 game_name = game["title"]
-                game_link = f"https://launcher.store.epicgames.com/en-US/p/{slug}"
+
+                if game['offerType'] == "BUNDLE":
+                    game_link = f"https://launcher.store.epicgames.com/en-US/bundles/{slug}"
+                else:
+                    game_link = f"https://launcher.store.epicgames.com/en-US/p/{slug}"
 
                 free_games.append(
                     {"name": game_name, "end_date": end_date_str, "url": game_link}
