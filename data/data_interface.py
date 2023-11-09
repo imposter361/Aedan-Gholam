@@ -87,6 +87,68 @@ def configs_get(guild_id):
     return server_get(guild_id)
 
 
+def cs2_announcements_channel_id_get(guild_id):
+    if not is_ready():
+        return "Please try again later."
+
+    server = server_get(guild_id)
+    if not server:
+        return None
+    return server.get("cs2_announcements_channel_id")
+
+
+def cs2_announcements_channel_id_set(guild_id, channel_id):
+    if not is_ready():
+        return "Please try again later."
+
+    try:
+        server = server_get(guild_id)
+        if not server:
+            return "No server found with this id."
+
+        server["cs2_announcements_channel_id"] = channel_id
+        _save()
+        return channel_id
+    except Exception as e:
+        _logger.exception(
+            "data: Failed to set cs2_announcements_channel_id"
+            + f"channel id ({channel_id}) for guild ({guild_id})"
+        )
+        return f"Error happened: {str(e)}"
+
+
+def cs2_announcements_last_update_get(guild_id):
+    if not is_ready():
+        return "Please try again later."
+
+    server = server_get(guild_id)
+    if not server:
+        return None
+    links = server.get("cs2_announcements_last_update")
+    if links:
+        return links
+    return None
+
+
+def cs2_announcements_last_update_set(guild_id, date):
+    if not is_ready():
+        return "Please try again later."
+
+    try:
+        server = server_get(guild_id)
+        if not server:
+            return "No server found with this id."
+
+        server["cs2_announcements_last_update"] = date
+        _save()
+        return date
+    except Exception as e:
+        _logger.exception(
+            f"data: Failed to set cs2_announcements_last_update ({date}) for guild ({guild_id})"
+        )
+        return f"Error happened: {str(e)}"
+
+
 def dst_role_id_get(guild_id):
     if not is_ready():
         return "Please try again later."

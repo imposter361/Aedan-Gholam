@@ -1,4 +1,5 @@
 from . import about
+from . import cs2_announcements
 from . import delete
 from . import embed
 from . import epic_games
@@ -14,10 +15,10 @@ from . import steam_link
 from . import welcome_banner
 from . import youtube_notify
 
-
 # Enabled features:
 
 about.activate()
+cs2_announcements.activate()
 delete.activate()
 embed.activate()
 epic_games.activate()

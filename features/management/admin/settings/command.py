@@ -96,6 +96,7 @@ async def settings(
         name="setting",
         required=True,
         choices=[
+            "Set CS2 announcements channel id",
             "Set DST role id",
             "Set epic games channel id",
             "Set free game role id",
@@ -133,6 +134,66 @@ async def settings(
             return
 
         interaction_response = await interaction.send("Please wait...", ephemeral=True)
+        if setting == "Set CS2 announcements channel id":
+            try:
+                if id.lower() in ["none", "null", "0", "-"]:
+                    result = data.cs2_announcements_channel_id_set(
+                        interaction.guild_id, None
+                    )
+                    if result == None:
+                        _logger.info(
+                            "features/management: CS2 announcements channel id has been unset "
+                            + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                        )
+                        await interaction_response.edit(
+                            "CS2 announcements channel has been unset.",
+                        )
+                    else:
+                        await interaction_response.edit(str(result))
+                    return
+
+                channel_id = int(id)
+                channel = client.get_channel(channel_id)
+                if not channel:
+                    _logger.debug(
+                        "features/management: Failed to get channel with id of: "
+                        + f"{channel_id} in guild: {interaction.guild_id}"
+                    )
+                    await interaction_response.edit(
+                        "Could not access this Discord channel.",
+                    )
+                    return
+
+                if interaction.guild_id != channel.guild.id:
+                    _logger.debug(f"features/management: Channel id ({id}) is invalid.")
+                    await interaction_response.edit(
+                        "Invalid channel ID.",
+                    )
+                    return
+                result = data.cs2_announcements_channel_id_set(
+                    interaction.guild_id, channel_id
+                )
+                if result == channel_id:
+                    _logger.info(
+                        f"features/management: CS2 announcements channel id has been set to {id} "
+                        + f"in '{interaction.guild.name}' ({interaction.guild_id})"
+                    )
+                    await interaction_response.edit(
+                        "CS2 announcements channel has been set.",
+                    )
+                    # Update CS2 announcements for the first time
+                    await features.cs2_announcements.check_cs2_announcements_for_guild(
+                        interaction.guild_id
+                    )
+                else:
+                    await interaction_response.edit(str(result))
+            except:
+                _logger.exception(
+                    f"features/management: Failed to set CS2 announcements channel id ({id}) "
+                    + f"in guild ({interaction.guild_id})"
+                )
+                await interaction_response.edit("Operation failed.")
+
         if setting == "Set welcome channel id":
             try:
                 if id.lower() in ["none", "null", "0", "-"]:
