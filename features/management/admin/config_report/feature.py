@@ -105,6 +105,23 @@ def generate_refined_config_text(input, guild_id):
                 result = result + f"    {emoji_name} --> {role.name}\n"
             result = result + "\n"
 
+    if input.get("cs2_announcements_channel_id"):
+        cs2_announcements_channel = client.get_channel(input["cs2_announcements_channel_id"])
+        if cs2_announcements_channel:
+            result = (
+                result
+                + f"CS2 announcements channel: {cs2_announcements_channel.name} ({cs2_announcements_channel.id})\n"
+            )
+    
+    if input.get("cs2_role_id"):
+        cs2_role = nextcord.utils.get(guild.roles, id=input["cs2_role_id"])
+        if cs2_role:
+            result = (
+                result
+                + f"CS2 role: {cs2_role.name} ({cs2_role.id})\n"
+            )
+    result = result + "\n"
+
     if input.get("yt_notif_rules"):
         rule_number = 0
         for key in input["yt_notif_rules"].keys():
