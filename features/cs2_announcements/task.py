@@ -5,7 +5,7 @@ from nextcord.ext import tasks
 _logger = logging.getLogger("main")
 
 
-@tasks.loop(minutes=54)
+@tasks.loop(minutes=14)
 async def cs2_announcements_task():
     if not is_active():
         return

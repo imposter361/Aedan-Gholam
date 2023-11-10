@@ -1,5 +1,7 @@
 import data
+import json
 import logging
+import re
 from bot import client
 from bs4 import BeautifulSoup
 from features._shared.helper import aiohttp_get
@@ -27,7 +29,7 @@ async def check_cs2_announcements_for_all_guilds():
     if not _active:
         return False
 
-    last_announcement_date = None
+    last_announcement_time = None
     last_announcement_link = None
 
     subscriptions = data.get_subscriptions()
@@ -39,19 +41,28 @@ async def check_cs2_announcements_for_all_guilds():
         if not channel_id:
             continue
 
-        if not last_announcement_date:
+        if not last_announcement_time:
             (
-                last_announcement_date,
+                last_announcement_time,
                 last_announcement_link,
             ) = await _get_last_cs2_announcement()
-            if last_announcement_date == None:
+            if not last_announcement_time or not last_announcement_link:
                 _logger.warning(
-                    "features/cs2_announcements: No valid announcements link was found."
+                    "features/cs2_announcements: No valid CS2 announcement was found."
                 )
                 break
 
+        last_sent_announcement_time = (
+            data.cs2_announcements_last_sent_announcement_time_get(guild_id)
+        )
+        if (
+            last_sent_announcement_time
+            and last_sent_announcement_time >= last_announcement_time
+        ):
+            continue
+
         await _send_cs2_announcement_for_guild(
-            guild_id, channel_id, last_announcement_date, last_announcement_link
+            guild_id, channel_id, last_announcement_time, last_announcement_link
         )
 
 
@@ -68,79 +79,78 @@ async def check_cs2_announcements_for_guild(guild_id: int):
         return
 
     (
-        last_announcement_date,
+        last_announcement_time,
         last_announcement_link,
     ) = await _get_last_cs2_announcement()
+
+    if not last_announcement_time or not last_announcement_link:
+        return
+
+    last_sent_announcement_time = (
+        data.cs2_announcements_last_sent_announcement_time_get(guild_id)
+    )
+    if (
+        last_sent_announcement_time
+        and last_sent_announcement_time >= last_announcement_time
+    ):
+        return
+
     await _send_cs2_announcement_for_guild(
-        guild_id, channel_id, last_announcement_date, last_announcement_link
+        guild_id, channel_id, last_announcement_time, last_announcement_link
     )
 
 
 async def _get_last_cs2_announcement():
     _logger.debug("features/cs2_announcements: Getting last CS2 announcement...")
 
-    last_announcement_date = None
+    last_announcement_time = None
     last_announcement_link = None
-    url = "https://steamcommunity.com/games/CSGO/announcements/"
 
     try:
+        url = "https://steamcommunity.com/games/CSGO/announcements/"
         response = await aiohttp_get(url)
-        # parse the HTML content using BeautifulSoup
         soup = BeautifulSoup(response, "html.parser")
-        for element in soup.find_all("a"):
-            if "Release Notes for" in element.string:
-                print(element)
-    
-
-
+        element = soup.find("div", {"data-partnereventstore": re.compile(r".*")})
+        data = json.loads(element.attrs["data-partnereventstore"])
+        last_announcement_time = data[0]["announcement_body"]["posttime"]
+        announcement_gid = data[0]["announcement_body"]["gid"]
+        last_announcement_link = (
+            "https://steamcommunity.com/games/CSGO/announcements/detail/"
+            + announcement_gid
+        )
     except:
-        _logger.exception("features/cs2_announcements: Could not get CS2 announcements links.")
+        _logger.exception(
+            "features/cs2_announcements: Could not get last CS2 announcement."
+        )
 
-    return last_announcement_date, last_announcement_link
+    return last_announcement_time, last_announcement_link
 
 
-async def _send_cs2_announcement_for_guild(guild_id, channel_id, klei_points):
+async def _send_cs2_announcement_for_guild(
+    guild_id, channel_id, announcement_time, announcement_link
+):
     try:
-        channel = client.get_channel(channel_id)
-        if not channel:
+        discord_channel = client.get_channel(channel_id)
+        if not discord_channel:
             _logger.debug(
-                "features/klei_points: Failed to get channel with id of: "
+                "features/cs2_announcements: Failed to get channel with id of: "
                 + f"{channel_id} in guild: {guild_id}"
             )
             return
 
-        sent_links = data.klei_links_get(guild_id)
-        valid_sent_links = []
-
-        for klei_point in klei_points:
-            if klei_point["url"] in sent_links:
-                valid_sent_links.append(klei_point["url"])
-                continue
-
-            role_id = data.dst_role_id_get(guild_id)
-            message_header = "🇳 🇪 🇼  🥹  🇱 🇮 🇳 🇰\n+---------------------------------------------------------+\n"
-            if role_id:
-                message_header = f"🇳 🇪 🇼  🥹  🇱 🇮 🇳 🇰 <@&{role_id}>\n+---------------------------------------------------------+\n"
-            try:
-                await channel.send(
-                    message_header
-                    + "<:dst_icon:1101262983788769351> Open the link below :point_down::skin-tone-1: to claim **klei point** for **Don't starve together**\n"
-                    + f"**Date:** {klei_point['date']}\n**Points:** {klei_point['points']}\n**Spools:** {klei_point['spools']}\n**Link:** <{klei_point['url']}>\n"
-                    + "+---------------------------------------------------------+"
-                )
-                valid_sent_links.append(klei_point["url"])
-                sent_links.append(klei_point["url"])
-                data.klei_links_set(guild_id, sent_links)
-            except:
-                _logger.exception(
-                    f"features/klei_points: Failed to send klei points ({klei_point}) "
-                    + f"to the respective channel ({channel_id}) at guild ({guild_id})"
-                )
-
-        # Cleanup expired links (only keep valid sent links in the data storage)
-        data.klei_links_set(guild_id, valid_sent_links)
+        message = f"A new [**CS2 announcement**]({announcement_link}) has published!"
+        await discord_channel.send(message)
+        _logger.debug(
+            f"features/cs2_announcements: Sent a CS2 announcement. "
+            + f"announcement_link: '{announcement_link}' announcement_time: '{announcement_time}' "
+            + f" channel: '{discord_channel.name}' ({discord_channel.id}) "
+            + f" guild: '{discord_channel.guild.name}' ({discord_channel.guild.id})"
+        )
+        data.cs2_announcements_last_sent_announcement_time_set(
+            guild_id, announcement_time
+        )
     except:
         _logger.exception(
-            f"features/klei_points: Failed to send klei points ({klei_points}) "
+            f"features/cs2_announcements: Failed to send CS2 announcement ({announcement_link}) "
             + f"to the respective channel ({channel_id}) at guild ({guild_id})"
         )

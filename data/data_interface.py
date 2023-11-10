@@ -117,20 +117,20 @@ def cs2_announcements_channel_id_set(guild_id, channel_id):
         return f"Error happened: {str(e)}"
 
 
-def cs2_announcements_last_update_get(guild_id):
+def cs2_announcements_last_sent_announcement_time_get(guild_id):
     if not is_ready():
         return "Please try again later."
 
     server = server_get(guild_id)
     if not server:
         return None
-    date = server.get("cs2_announcements_last_update")
-    if date:
-        return date
+    time = server.get("cs2_announcements_last_sent_announcement_time")
+    if time:
+        return time
     return None
 
 
-def cs2_announcements_last_update_set(guild_id, date):
+def cs2_announcements_last_sent_announcement_time_set(guild_id, time):
     if not is_ready():
         return "Please try again later."
 
@@ -139,12 +139,12 @@ def cs2_announcements_last_update_set(guild_id, date):
         if not server:
             return "No server found with this id."
 
-        server["cs2_announcements_last_update"] = date
+        server["cs2_announcements_last_sent_announcement_time"] = time
         _save()
-        return date
+        return time
     except Exception as e:
         _logger.exception(
-            f"data: Failed to set CS2 announcements last update ({date}) for guild ({guild_id})"
+            f"data: Failed to set the last sent CS2 announcement time ({time}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
 

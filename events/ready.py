@@ -21,7 +21,7 @@ async def on_ready():
 
     # Start tasks:
     backup_data_task.start()
-    cs2_announcements_task()
+    cs2_announcements_task.start()
     epic_games_task.start()
     klei_points_task.start()
     member_count_task.start()
