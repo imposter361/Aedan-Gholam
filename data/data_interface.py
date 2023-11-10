@@ -149,6 +149,35 @@ def cs2_announcements_last_sent_announcement_time_set(guild_id, time):
         return f"Error happened: {str(e)}"
 
 
+def cs2_role_id_get(guild_id):
+    if not is_ready():
+        return "Please try again later."
+
+    server = server_get(guild_id)
+    if not server:
+        return None
+    return server.get("cs2_role_id")
+
+
+def cs2_role_id_set(guild_id, role_id):
+    if not is_ready():
+        return "Please try again later."
+
+    try:
+        server = server_get(guild_id)
+        if not server:
+            return "No server found with this id."
+
+        server["cs2_role_id"] = role_id
+        _save()
+        return role_id
+    except Exception as e:
+        _logger.exception(
+            f"data: Failed to set CS2 role id ({role_id}) for guild ({guild_id})"
+        )
+        return f"Error happened: {str(e)}"
+
+
 def dst_role_id_get(guild_id):
     if not is_ready():
         return "Please try again later."

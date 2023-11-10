@@ -139,7 +139,11 @@ async def _send_cs2_announcement_for_guild(
             return
 
         message = f"A new [**CS2 announcement**]({announcement_link}) has published!"
-        await discord_channel.send(message)
+        role_id = data.cs2_role_id_get(guild_id)
+        role_mention = ""
+        if role_id:
+            role_mention = f"<@&{role_id}>\n"
+        await discord_channel.send(f"{message} {role_mention}")
         _logger.debug(
             f"features/cs2_announcements: Sent a CS2 announcement. "
             + f"announcement_link: '{announcement_link}' announcement_time: '{announcement_time}' "
