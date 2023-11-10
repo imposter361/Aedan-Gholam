@@ -111,8 +111,8 @@ def cs2_announcements_channel_id_set(guild_id, channel_id):
         return channel_id
     except Exception as e:
         _logger.exception(
-            "data: Failed to set cs2_announcements_channel_id"
-            + f"channel id ({channel_id}) for guild ({guild_id})"
+            "data: Failed to set CS2 announcements channel id "
+            + f"({channel_id}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
 
@@ -124,9 +124,9 @@ def cs2_announcements_last_update_get(guild_id):
     server = server_get(guild_id)
     if not server:
         return None
-    links = server.get("cs2_announcements_last_update")
-    if links:
-        return links
+    date = server.get("cs2_announcements_last_update")
+    if date:
+        return date
     return None
 
 
@@ -144,7 +144,7 @@ def cs2_announcements_last_update_set(guild_id, date):
         return date
     except Exception as e:
         _logger.exception(
-            f"data: Failed to set cs2_announcements_last_update ({date}) for guild ({guild_id})"
+            f"data: Failed to set CS2 announcements last update ({date}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
 
@@ -202,8 +202,8 @@ def epic_games_channel_id_set(guild_id, channel_id):
         return channel_id
     except Exception as e:
         _logger.exception(
-            "data: Failed to set epic_games_channel_id"
-            + f"channel id ({channel_id}) for guild ({guild_id})"
+            "data: Failed to set Epic Games channel id "
+            + f"({channel_id}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
 
@@ -293,8 +293,8 @@ def klei_links_channel_id_set(guild_id, channel_id):
         return channel_id
     except Exception as e:
         _logger.exception(
-            "data: Failed to set klei_links_channel_id"
-            + f"channel id ({channel_id}) for guild ({guild_id})"
+            "data: Failed to set Klei links channel id "
+            + f"({channel_id}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
 
@@ -326,7 +326,7 @@ def klei_links_set(guild_id, links):
         return links
     except Exception as e:
         _logger.exception(
-            f"data: Failed to set klei links ({links}) for guild ({guild_id})"
+            f"data: Failed to set Klei links ({links}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
 
@@ -552,7 +552,7 @@ def welcome_channel_id_set(guild_id, channel_id):
         return channel_id
     except Exception as e:
         _logger.exception(
-            "data: Failed to set welcome_channel_id "
+            "data: Failed to set welcome channel id "
             + f"({channel_id}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
@@ -582,7 +582,7 @@ def welcome_message_set(guild_id, message):
         return message
     except Exception as e:
         _logger.exception(
-            "data: Failed to set welcome_message "
+            "data: Failed to set welcome message "
             + f"({message}) for guild ({guild_id})"
         )
         return f"Error happened: {str(e)}"
