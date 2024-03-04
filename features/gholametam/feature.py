@@ -23,17 +23,17 @@ def activate():
 
 
 responses = [
-    f"Yes sir! v{VERSION}",
-    f"Jooooon?! v{VERSION}",
-    f"ما الأمر؟! v{VERSION}",
-    f"Gholametam v{VERSION}",
-    f"Command me! v{VERSION}",
-    f"Amri basheh? v{VERSION}",
-    f"أنا بخدمتکم! v{VERSION}",
-    f"Dar khedmatam v{VERSION}",
-    f"Kheyli nokarim v{VERSION}",
-    f"Kheyli chakeram v{VERSION}",
-    f"در خدمت‌گزاری حاضرم! v{VERSION}",
+    f"Yes sir!",
+    f"Jooooon?!",
+    f"ما الأمر؟!",
+    f"Gholametam",
+    f"Command me!",
+    f"Amri basheh?",
+    f"أنا بخدمتکم!",
+    f"Dar khedmatam",
+    f"Kheyli nokarim",
+    f"Kheyli chakeram",
+    f"در خدمت‌گزاری حاضرم!",
 ]
 
 
@@ -48,7 +48,7 @@ async def gholametam(message: Message):
     if "gholam" in lower_message or "غلام" in lower_message:
         if message.author != client.user:
             index = random.randrange(0, len(responses))
-            response = responses[index]
+            response = responses[index] + f" V {VERSION}"
             await message.reply(response)
             return True
     return False
