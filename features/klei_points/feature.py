@@ -69,57 +69,40 @@ async def check_klei_points_for_guild(guild_id: int):
 async def _get_klei_points():
     _logger.debug("features/klei_points: Getting free Klei points list...")
     klei_points = []
-    # get links just for the first time
     url = "https://steamcommunity.com/sharedfiles/filedetails/?id=2308653652&tscn=1639750749"
-
     try:
         response = await aiohttp_get(url)
-        # parse the HTML content using BeautifulSoup
-        soup = BeautifulSoup(response, "html.parser")
-        row_selector = "div.bb_table_tr"
-        row_elements = soup.select(row_selector)
-
-        if not row_elements:
-            _logger.warning(
-                "features/klei_points: Web request did not have the expected result format."
-            )
-            return klei_points
-
-        try:
-            for row_element in row_elements:
-                if "Outdated" in str(row_element.contents[1]):
-                    continue
-                try:
-                    klei_points.append(
-                        {
-                            "url": (
-                                str(row_element.contents[1])
-                                .split("?url=")[1]
-                                .split('"')[0]
-                            ),
-                            "date": (
-                                str(row_element.contents[3])
-                                .split("<b>")[1]
-                                .split("</b>")[0]
-                            ),
-                            "points": (
-                                str(row_element.contents[7]).split(">")[1].split("<")[0]
-                            ),
-                            "spools": (
-                                str(row_element.contents[9]).split(">")[1].split("<")[0]
-                            ),
-                        }
-                    )
-                except:
-                    continue
-
-        except:
-            _logger.exception(
-                "features/klei_points: Could not process free klei points links."
-            )
-
     except:
         _logger.exception("features/klei_points: Could not get free klei points links.")
+        return []
+
+    try:
+        # parse the HTML content using BeautifulSoup
+        soup = BeautifulSoup(response, "html.parser")
+        table_selector = "div.bb_table"
+        row_selector = "div.bb_table_tr"
+        cell_selector = "div.bb_table_td"
+        table = soup.select(table_selector)[0]  # get the first table on the page
+        rows = table.select(row_selector)
+
+        for row in rows:
+            cells = row.select(cell_selector)
+            if len(cells) == 0:
+                continue
+            klei_points.append(
+                {
+                    "url": (cells[0].select("a")[0].text),
+                    "date": (cells[1].select("b")[0].text),
+                    "points": (cells[3].text),
+                    "spools": (cells[4].text),
+                }
+            )
+    except:
+        _logger.exception(
+            "features/klei_points: Could not process free klei points links. "
+            + "Maybe source format has changed."
+        )
+        return []
 
     return klei_points
 
@@ -134,6 +117,7 @@ async def _send_klei_points_for_guild(guild_id, channel_id, klei_points):
             )
             return
 
+        role_id = data.dst_role_id_get(guild_id)
         sent_links = data.klei_links_get(guild_id)
         valid_sent_links = []
 
@@ -142,7 +126,6 @@ async def _send_klei_points_for_guild(guild_id, channel_id, klei_points):
                 valid_sent_links.append(klei_point["url"])
                 continue
 
-            role_id = data.dst_role_id_get(guild_id)
             message_header = "🇳 🇪 🇼  🥹  🇱 🇮 🇳 🇰\n+---------------------------------------------------------+\n"
             if role_id:
                 message_header = f"🇳 🇪 🇼  🥹  🇱 🇮 🇳 🇰 <@&{role_id}>\n+---------------------------------------------------------+\n"
