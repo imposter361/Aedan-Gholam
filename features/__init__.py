@@ -1,4 +1,5 @@
 from . import about
+from . import ayeh
 from . import cs2_announcements
 from . import delete
 from . import embed
@@ -18,6 +19,7 @@ from . import youtube_notify
 # Enabled features:
 
 about.activate()
+ayeh.activate()
 cs2_announcements.activate()
 delete.activate()
 embed.activate()
