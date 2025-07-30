@@ -1,7 +1,6 @@
-import json
+import aiohttp
 import logging
 import re
-from features._shared.helper import aiohttp_get
 
 _logger = logging.getLogger("main")
 
@@ -24,24 +23,28 @@ def activate():
 async def get_hekmat_text(number: int):
     result = None
     try:
-        url = f"https://alimaktab.ir/json/wisdom/?n={number}"
-        response = await aiohttp_get(url)
-        response_json = json.loads(str(response, encoding="utf-8"))
+        url = f"https://alimaktab.ir/wp-json/content/v1/wisdom?n={number}"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                if resp.status != 200:
+                    raise Exception()
+                response_json = await resp.json()
 
         arabic = response_json["main"]
-        farsi = response_json["ansarian"]
+        farsi = response_json["translations"]["ansarian"]
         hekmat = "حکمت " + str(number) + ": " + arabic + "\n\n" + farsi
-        hekmat = hekmat.replace("[", "").replace("]", "")
+        new_string = hekmat.replace("[", "").replace("]", "")
 
-        def remove_html(text):
-            clean = re.compile("<.*?>")
-            return re.sub(clean, "", text)
-
-        hekmat = remove_html(hekmat)
-        hekmat = hekmat.replace("&raquo;", "»")
-        hekmat = hekmat.replace("&laquo;", "«")
-        result = hekmat
+        clean_text = remove_html(new_string)
+        clean_text = clean_text.replace("&raquo;", "»")
+        clean_text = clean_text.replace("&laquo;", "«")
+        result = clean_text
     except:
         _logger.exception("features/hekmat: Failed to get a hekmat.")
 
     return result
+
+
+def remove_html(text):
+    clean = re.compile("<.*?>")
+    return re.sub(clean, "", text)
