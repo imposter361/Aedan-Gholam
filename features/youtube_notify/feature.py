@@ -6,7 +6,7 @@ from youtubesearchpython import Playlist, playlist_from_channel_id
 _logger = logging.getLogger("main")
 
 
-if "_acive" not in dir():  # Run once
+if "_active" not in dir():  # Run once
     global _active
     _active = False
 

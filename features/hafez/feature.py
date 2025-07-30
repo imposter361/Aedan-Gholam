@@ -4,7 +4,7 @@ from features._shared.helper import aiohttp_get
 _logger = logging.getLogger("main")
 
 
-if "_acive" not in dir():  # Run once
+if "_active" not in dir():  # Run once
     global _active
     _active = False
 

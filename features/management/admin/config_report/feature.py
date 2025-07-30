@@ -6,7 +6,7 @@ from datetime import datetime
 _logger = logging.getLogger("main")
 
 
-if "_acive" not in dir():  # Run once
+if "_active" not in dir():  # Run once
     global _active
     _active = False
 
