@@ -2,7 +2,7 @@ import logging
 from .feature import is_active
 from bot import client
 from features._shared.helper import handle_command_exception
-from nextcord import Interaction, Permissions
+from nextcord import Interaction, Permissions, InteractionContextType
 
 _logger = logging.getLogger("main")
 
@@ -11,7 +11,7 @@ _logger = logging.getLogger("main")
     name="help",
     description="Display help message",
     default_member_permissions=Permissions(administrator=True),
-    dm_permission=False,
+    contexts=[InteractionContextType.guild, InteractionContextType.private_channel],
 )
 async def help(interaction: Interaction):
     try:

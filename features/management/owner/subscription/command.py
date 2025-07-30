@@ -3,7 +3,7 @@ import logging
 from .feature import is_active
 from features._shared.helper import handle_command_exception
 from bot import client, ADMINS, HOME_GUILDS
-from nextcord import Interaction, Permissions, SlashOption
+from nextcord import Interaction, Permissions, SlashOption, InteractionContextType
 
 _logger = logging.getLogger("main")
 
@@ -13,7 +13,7 @@ _logger = logging.getLogger("main")
     description="Grant permission to a new discord server.",
     default_member_permissions=Permissions(administrator=True),
     guild_ids=HOME_GUILDS,
-    dm_permission=False,
+    contexts=[InteractionContextType.guild]
 )
 async def add_server(interaction: Interaction, id: str = SlashOption(required=True)):
     try:
@@ -71,7 +71,7 @@ async def add_server(interaction: Interaction, id: str = SlashOption(required=Tr
     description="Edit permissions of a discord server.",
     default_member_permissions=Permissions(administrator=True),
     guild_ids=HOME_GUILDS,
-    dm_permission=False,
+    contexts=[InteractionContextType.guild]
 )
 async def edit_server(
     interaction: Interaction,
@@ -134,7 +134,7 @@ async def edit_server(
     description="Remove permission from a discord server.",
     default_member_permissions=Permissions(administrator=True),
     guild_ids=HOME_GUILDS,
-    dm_permission=False,
+    contexts=[InteractionContextType.guild]
 )
 async def remove_server(interaction: Interaction, id: str = SlashOption(required=True)):
     try:

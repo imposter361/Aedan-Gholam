@@ -5,7 +5,7 @@ import nextcord
 from .feature import is_active
 from features._shared.helper import handle_command_exception
 from bot import client
-from nextcord import Interaction, Permissions, SlashOption
+from nextcord import Interaction, Permissions, SlashOption, InteractionContextType
 
 _logger = logging.getLogger("main")
 
@@ -37,7 +37,7 @@ def _process_discord_message_link(link: str):
     name="set_role_emoji",
     description="Choose an emoji to assign a role",
     default_member_permissions=Permissions(administrator=True),
-    dm_permission=False,
+    contexts=[InteractionContextType.guild]
 )
 async def set_role_emoji(
     interaction: Interaction,
@@ -192,7 +192,7 @@ async def set_role_emoji(
     name="remove_role_message",
     description="Unmark a message as a 'set role by reaction' message",
     default_member_permissions=Permissions(administrator=True),
-    dm_permission=False,
+    contexts=[InteractionContextType.guild]
 )
 async def remove_role_message(
     interaction: Interaction,

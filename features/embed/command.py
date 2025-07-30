@@ -3,7 +3,13 @@ import webcolors
 from .feature import is_active
 from bot import client
 from features._shared.helper import handle_command_exception
-from nextcord import Interaction, SlashOption, Permissions, Embed
+from nextcord import (
+    Interaction,
+    SlashOption,
+    Permissions,
+    Embed,
+    InteractionContextType,
+)
 
 _logger = logging.getLogger("main")
 
@@ -12,7 +18,7 @@ _logger = logging.getLogger("main")
     name="embed",
     description=" Send an embed message",
     default_member_permissions=Permissions(administrator=True),
-    dm_permission=False,
+    contexts=[InteractionContextType.guild, InteractionContextType.private_channel],
 )
 async def embed(
     interaction: Interaction,

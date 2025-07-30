@@ -5,7 +5,7 @@ import pytube
 from .feature import is_active
 from features._shared.helper import handle_command_exception
 from bot import client
-from nextcord import Interaction, Permissions, SlashOption
+from nextcord import Interaction, Permissions, SlashOption, InteractionContextType
 
 _logger = logging.getLogger("main")
 
@@ -14,7 +14,7 @@ _logger = logging.getLogger("main")
     name="youtube",
     description="Send new youtube videos in a channel.",
     default_member_permissions=Permissions(administrator=True),
-    dm_permission=False,
+    contexts=[InteractionContextType.guild]
 )
 async def youtube_notification_set(
     interaction: Interaction,
@@ -134,7 +134,7 @@ async def youtube_notification_set(
     name="youtube_remove",
     description="Remove a previously set notification rule.",
     default_member_permissions=Permissions(administrator=True),
-    dm_permission=False,
+    contexts=[InteractionContextType.guild]
 )
 async def youtube_notification_remove(
     interaction: Interaction,

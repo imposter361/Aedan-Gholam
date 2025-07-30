@@ -6,7 +6,7 @@ from .feature import is_active
 from bot import client
 from datetime import datetime
 from features._shared.helper import handle_command_exception
-from nextcord import Interaction, Permissions, File
+from nextcord import Interaction, Permissions, File, InteractionContextType
 
 _logger = logging.getLogger("main")
 
@@ -15,7 +15,7 @@ _logger = logging.getLogger("main")
     name="get_config",
     description="See your server configs",
     default_member_permissions=Permissions(administrator=True),
-    dm_permission=False,
+    contexts=[InteractionContextType.guild]
 )
 async def configs_get(
     interaction: Interaction,

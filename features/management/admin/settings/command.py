@@ -5,7 +5,7 @@ import nextcord
 from .feature import is_active
 from features._shared.helper import handle_command_exception
 from bot import client
-from nextcord import Interaction, Permissions, SlashOption
+from nextcord import Interaction, Permissions, SlashOption, InteractionContextType
 
 _logger = logging.getLogger("main")
 
@@ -14,7 +14,7 @@ _logger = logging.getLogger("main")
     name="customize",
     description="customize bot settings.",
     default_member_permissions=Permissions(administrator=True),
-    dm_permission=False,
+    contexts=[InteractionContextType.guild]
 )
 async def customize(
     interaction: Interaction,
@@ -88,7 +88,7 @@ async def customize(
     name="settings",
     description="Change bot settings.",
     default_member_permissions=Permissions(administrator=True),
-    dm_permission=False,
+    contexts=[InteractionContextType.guild]
 )
 async def settings(
     interaction: Interaction,
